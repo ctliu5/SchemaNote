@@ -27,7 +27,7 @@
     </script>
 }
 <h2>Details</h2>
-@if (ViewData["ErrorMessage"] != null)
+@if (TempData["ErrorMessage"] != null)
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }

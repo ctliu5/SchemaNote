@@ -31,7 +31,7 @@ namespace SchemaNote.Controllers
             {
                 if (string.IsNullOrEmpty(ConnectionString))
                 {
-                    ViewData["ErrorMessage"] = "Your connection string is missing!";
+                    TempData["ErrorMessage"] = "Your connection string is missing!";
                     return View("Index");
                 }
                 UserModel userModel = new UserModel();
@@ -52,7 +52,7 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                ViewData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = "Your connection string is missing!";
                 return View("Index");
             }
             #endregion
@@ -66,7 +66,7 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                ViewData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = "Your connection string is missing!";
                 return View("Index");
             }
             #endregion
@@ -91,7 +91,7 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                ViewData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = "Your connection string is missing!";
                 return View("Index");
             }
             #endregion

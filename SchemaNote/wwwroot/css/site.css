@@ -1,4 +1,16 @@
-﻿.table {
+﻿.tabDetail_left td {
+    word-break: break-all;
+}
+
+.tabDetail_right td {
+    word-break: break-all;
+}
+
+.subTable td {
+    word-break: break-all;
+}
+
+.table {
     margin-bottom: 0;
 }
 
@@ -67,11 +79,13 @@
 .subTable > tbody > tr > td:nth-child(7), .subTable > thead > tr > th:nth-child(7) {
     max-width: 250px
 }
+
 .tabName_Cht {
     width: 60%;
     display: inline
 }
-.NoteField{
-    color:royalblue;
-    font:bold;
+
+.NoteField {
+    color: royalblue;
+    font: bold;
 }
