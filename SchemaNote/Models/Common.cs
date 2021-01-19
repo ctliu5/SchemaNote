@@ -7,8 +7,8 @@ namespace SchemaNote.Models
         public const string CurrentVersion = "Version: 0.1.2";
         public const string DefaultValue = "null";
         public const string ConnString = "Connection String";
-        public const string Name_zh = "中文名稱";
-        public const string Remark_zh = "備註";
+        public const string PropDesc = "欄位說明";
+        public const string RropRemark = "備註";
         public const string ConnStringMissing = "Your connection string is missing!";
         public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
         public const int StrMaxLen = 4000;

@@ -19,7 +19,9 @@ function initialOption() {
     var i = 0;
     var choose = document.getElementById('choose');
     choose.addEventListener("change", SetIndex, false);
-    for (var cName in Overview) {
+    //for (var cName in Overview) {
+    for (var j = 0, len = Overview.length; j < len; j++) {
+        var cName = Overview[j];
         if (++i == 1)
             CurrentIndex = cName;
         if (Overview.hasOwnProperty(cName)) {
@@ -49,7 +51,9 @@ function testIterator() {
         }
         console.log(func.name + " spend time:" + (Date.now() - d));
     }
-    for (var cName in Overview) {
+    //for (var cName in Overview) {
+    for (var j = 0, len = Overview.length; j < len; j++) {
+        var cName = Overview[j];
         if (Overview.hasOwnProperty(cName)) {
             test(Iterator_jQuery, cName);// 4th ot 3nd
             test(Iterator_js_querySelector, cName);// 3nd or 4th
@@ -68,10 +72,10 @@ function Iterator_jQuery() {
     var htmlCollection = $('.accordion');
     if (compareStr) {
         var flag;
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             flag = true;
             $(htmlCollection[i]).find(className).each(function () {
-                let text = $(this).text();
+                var text = $(this).text();
                 if (text) {
                     //counting++;
                     if (CompareMethod(text.trim().toUpperCase(), compareStr)) {
@@ -88,7 +92,7 @@ function Iterator_jQuery() {
             }
         }
     } else {
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             $(htmlCollection[i]).css('display', 'initial');
         }
     }
@@ -103,10 +107,12 @@ function Iterator_js_querySelector() {
     var htmlCollection = document.querySelectorAll('.accordion');
     if (compareStr) {
         var flag;
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             flag = true;
             var eles = htmlCollection[i].querySelectorAll(className);
-            for (let ele of eles) {
+            //for (var ele of eles) {
+            for (var j = 0, len = eles.length; j < len; j++) {
+                var ele = eles[j];
                 if (ele.textContent) {
                     //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
@@ -124,7 +130,7 @@ function Iterator_js_querySelector() {
             }
         }
     } else {
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             htmlCollection[i].style.cssText = 'display:initial;';
         }
     }
@@ -138,10 +144,11 @@ function Iterator_js_ClassName() {
     var htmlCollection = document.getElementsByClassName('accordion');
     if (compareStr) {
         var flag;
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             flag = true;
             var eles = htmlCollection[i].getElementsByClassName(CurrentIndex);
-            for (let ele of eles) {
+            //for (var ele of eles) {
+            for (var j = 0, len = eles.length; j < len; j++) {
                 if (ele.textContent) {
                     //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
@@ -159,7 +166,7 @@ function Iterator_js_ClassName() {
             }
         }
     } else {
-        for (var i = 0; i < htmlCollection.length; i++) {
+        for (var i = 0, length = htmlCollection.length; i < length; i++) {
             htmlCollection[i].style.cssText = 'display:initial;';
         }
     }

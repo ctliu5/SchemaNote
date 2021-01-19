@@ -11,13 +11,13 @@ namespace SchemaNote.ViewModels
 
         #region MS_Description
         string _MS_Description;
-        [Display(Name = Common.Name_zh)]
+        [Display(Name = Common.PropDesc)]
         public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 
         #region REMARK
         string _REMARK;
-        [Display(Name = Common.Remark_zh)]
+        [Display(Name = Common.RropRemark)]
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
         #endregion
 

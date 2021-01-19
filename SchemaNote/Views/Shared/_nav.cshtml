@@ -15,10 +15,12 @@
                 <form asp-controller="Home" asp-action="Overview" method="post">
                     <div class="form-group">
                         <label asp-for="ConnectionString" class="control-label"></label>
-                        <input asp-for="ConnectionString" class="form-control"/>
+                        <input asp-for="ConnectionString" class="form-control" />
                         <span asp-validation-for="ConnectionString" class="text-danger"></span>
                     </div>
                     <button type="submit" class="btn btn-default">確認</button>
+                    <button style="color: darkgray; background-color: lightgray;" type="button" class="btn" onclick="$('#ConnectionString').val('Server=.;Database=AdventureWorks;Trusted_Connection=True')">自動填寫ConnectionString</button>
+                    <button style="color: transparent; background-color: transparent;" type="button" class="btn" onclick="$('#ConnectionString').val('Server=linkliu.hopto.org;Initial Catalog=AdventureWorks;User ID=sa;Password=|P0o?I8u&Y6t%R')">自動填寫ConnectionString</button>
                 </form>
             </div>
         </div>
