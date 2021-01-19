@@ -40,6 +40,7 @@ namespace SchemaNote.ViewModels
 
     public class ColumnDetail : Column
     {
+        public int SortNum { get; set; }
         public List<Index> Indexes { get; set; }
     }
 

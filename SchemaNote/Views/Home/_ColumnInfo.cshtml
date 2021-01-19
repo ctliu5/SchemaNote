@@ -7,12 +7,13 @@
 <tr>
     <td rowspan="@(HasIndex ? "2": "1")">
         @Html.DisplayFor(modelItem => modelItem.NAME)
-        <input name="@("[" + Model.COLUMN_ID + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
+        <input name="@("[" + Model.SortNum + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
     </td>
     <td class="NoteField"
         data-field="@Common.MS_Desc"
         data-content="@Model.MS_Description"
         data-column_id="@Model.COLUMN_ID"
+        data-sortnum="@Model.SortNum"
         data-class="form-control"
         rowspan="@(HasIndex ? "2": "1")">
         @if (Model.MS_Description == Common.DefaultValue)
@@ -43,6 +44,7 @@
         data-field="@Common.Remark"
         data-content="@Model.REMARK"
         data-column_id="@Model.COLUMN_ID"
+        data-sortnum="@Model.SortNum"
         data-class="form-control">
         @if (Model.REMARK == Common.DefaultValue)
         {

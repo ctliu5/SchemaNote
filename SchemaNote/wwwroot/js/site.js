@@ -14,7 +14,7 @@ function SetMethod() {
 }
 
 function initialOption() {
-    Iterator = Iterator_jQuery;
+    Iterator = Iterator_js_JsonObj;
     $('[data-toggle="tooltip"]').tooltip();
     var i = 0;
     var choose = document.getElementById('choose');
@@ -75,7 +75,7 @@ function Iterator_jQuery() {
                 if (text) {
                     //counting++;
                     if (CompareMethod(text.trim().toUpperCase(), compareStr)) {
-                        $(htmlCollection[i]).css('display', 'initial');
+                        $(htmlCollection[i]).css('display', 'block');
                         flag = false;
                         return false;
                     }
@@ -89,7 +89,7 @@ function Iterator_jQuery() {
         }
     } else {
         for (var i = 0, length = htmlCollection.length; i < length; i++) {
-            $(htmlCollection[i]).css('display', 'initial');
+            $(htmlCollection[i]).css('display', 'block');
         }
     }
     //console.log(counting);
@@ -112,7 +112,7 @@ function Iterator_js_querySelector() {
                 if (ele.textContent) {
                     //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
-                        htmlCollection[i].style.cssText = 'display:initial;';
+                        htmlCollection[i].style.cssText = 'display:block;';
                         flag = false;
                         break;
                     }
@@ -127,7 +127,7 @@ function Iterator_js_querySelector() {
         }
     } else {
         for (var i = 0, length = htmlCollection.length; i < length; i++) {
-            htmlCollection[i].style.cssText = 'display:initial;';
+            htmlCollection[i].style.cssText = 'display:block;';
         }
     }
     //console.log(counting);
@@ -148,7 +148,7 @@ function Iterator_js_ClassName() {
                 if (ele.textContent) {
                     //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
-                        htmlCollection[i].style.cssText = 'display:initial;';
+                        htmlCollection[i].style.cssText = 'display:block;';
                         flag = false;
                         break;
                     }
@@ -163,7 +163,7 @@ function Iterator_js_ClassName() {
         }
     } else {
         for (var i = 0, length = htmlCollection.length; i < length; i++) {
-            htmlCollection[i].style.cssText = 'display:initial;';
+            htmlCollection[i].style.cssText = 'display:block;';
         }
     }
     //console.log(counting);
@@ -183,7 +183,7 @@ function Iterator_js_JsonObj() {
                     if (o[i]) {
                         //counting++;
                         if (CompareMethod(o[i], compareStr)) {
-                            document.getElementById(key).style.cssText = 'display:initial;';
+                            document.getElementById(key).style.cssText = 'display:block;';
                             flag = false;
                         }
                     } else {
@@ -199,7 +199,7 @@ function Iterator_js_JsonObj() {
     } else {
         ForeachObj(Overview[CurrentIndex].json,
             function (obj, key) {
-                document.getElementById(key).style.cssText = 'display:initial;';
+                document.getElementById(key).style.cssText = 'display:block;';
             }
         );
     }
@@ -216,9 +216,26 @@ function ForeachObj(obj, func) {
     }
 }
 
+function EmptyString(DefaultValue) {
+    // Change empty string into default value!
+    /*
+    var htmlCollection = document.getElementsByClassName('NoteController');
+    if (htmlCollection.length > 0) {
+        var arr = Array.prototype.slice.call(htmlCollection);
+        arr.forEach(
+            function (item) {
+                if (item.value === "")
+                    item.value = DefaultValue;
+            }
+        )
+    }
+    */
+}
+
 function changeElement(e) {
     this.removeEventListener("dblclick", changeElement, false);
-    var columnID = this.dataset.column_id;
+    //var columnID = this.dataset.column_id;
+    var sortNum = this.dataset.sortnum;
     var field = this.dataset.field;
     var EleType = '';
     switch (field) {
@@ -231,7 +248,8 @@ function changeElement(e) {
     }
 
     var content = document.createElement(EleType);
-    content.name = (columnID > 0 ? '[' + columnID + '].' : '[0].') + field;
+    //content.name = (columnID > 0 ? '[' + columnID + '].' : '[0].') + field;
+    content.name = (sortNum > 0 ? '[' + sortNum + '].' : '[0].') + field;
     content.value = this.dataset.content;
     content.setAttribute('class', this.dataset.class + ' NoteController');
     if (EleType === "textarea")

@@ -203,6 +203,7 @@ namespace SchemaNote.Models
             var pObj = props.Where(p => p.MAJOR_ID == tbl.OBJECT_ID);
             var pT = pObj.Where(p => p.MINOR_ID == 0);
             var iObj = indexes.Where(i => i.OBJECT_ID == tbl.OBJECT_ID);
+            int SortNum = 0;
             Flag.OBJ = new DetailsViewModel()
             {
                 OBJECT_ID = tbl.OBJECT_ID,
@@ -219,6 +220,7 @@ namespace SchemaNote.Models
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
                     return new ColumnDetail()
                     {
+                        SortNum = ++SortNum,
                         OBJECT_ID = c.OBJECT_ID,
                         COLUMN_ID = c.COLUMN_ID,
                         NAME = c.NAME,
