@@ -66,12 +66,22 @@
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
 
-<div class="form-inline">
-    <div class="form-group">
-        <select id="choose" class="form-control"></select>
-        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
+    <div class="form-inline search">
+        <div class="form-group form-group-lg">
+            <label for="choose">搜尋項目</label>
+            <select id="choose" class="form-control"></select>
+        </div>
+        <div class="form-group form-group-lg">
+            <label for="switch">搜索方式</label>
+            <select id="switch" class="form-control">
+                <option value="fuzzy" selected>模糊搜索</option>
+                <option value="exact">精確搜索</option>
+            </select>
+        </div>
+        <div class="form-group form-group-lg">
+            <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
+        </div>
     </div>
-</div>
 <br />
 @foreach (var item in Model.Tables)
 {

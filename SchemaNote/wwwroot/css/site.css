@@ -124,3 +124,6 @@
         .indexes > td > table > tbody > tr > td:nth-child(1), .indexes > td > table > thead > tr > th:nth-child(1) {
             border-width: 1px 0px 0px 0px;
         }
+.search > .form-group-lg{
+    margin-right:10px;
+}
