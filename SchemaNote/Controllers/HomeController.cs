@@ -11,10 +11,12 @@ namespace SchemaNote.Controllers
     public class HomeController : Controller
     {
         private readonly ISessionWrapper _sessionWapper;
+        private readonly DB_tool _db_tool;
 
         public HomeController(ISessionWrapper sessionWapper)
         {
             _sessionWapper = sessionWapper;
+            _db_tool = DB_tool.Dapper;
         }
 
         [HttpGet]
@@ -38,7 +40,7 @@ namespace SchemaNote.Controllers
                 userModel.SetMiddlewareValue(ConnectionString);
                 _sessionWapper.User = userModel;
 
-                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString);
+                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
                 if (Flag.ResultType != ExceResultType.Success)
                 {
                     TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
@@ -64,7 +66,7 @@ namespace SchemaNote.Controllers
             }
             #endregion
 
-            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString);
+            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
             if (Flag.ResultType != ExceResultType.Success)
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
@@ -89,7 +91,7 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Index");
             }
 
-            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, (int)id);
+            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, (int)id, _db_tool);
             if (Flag.ResultType != ExceResultType.Success)
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
@@ -121,8 +123,8 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Details", id);
             }
 
-            DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model);
-            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id);
+            DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
+            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id, _db_tool);
 
             if (Flag.ResultType != ExceResultType.Success)
             {

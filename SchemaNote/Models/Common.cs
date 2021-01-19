@@ -46,4 +46,11 @@ namespace SchemaNote.Models
         update,
         drop,
     }
+
+    public enum DB_tool
+    {
+        ADO_dot_NET,
+        Dapper,
+        linq2db
+    }
 }

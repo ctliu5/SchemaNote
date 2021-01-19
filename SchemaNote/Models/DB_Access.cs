@@ -1,5 +1,5 @@
-﻿using SchemaNote.DB_Tools.Models;
-using SchemaNote.Models.DataTransferObject;
+﻿using SchemaNote.Models.DataTransferObject;
+using SchemaNote.Models.DB_Tools;
 using SchemaNote.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace SchemaNote.Models
 {
     public static class DB_Access
     {
-        internal static DTO_Flag<OverviewViewModel> GetTables_Columns(string ConnectionString)
+        internal static DTO_Flag<OverviewViewModel> GetTables_Columns(string ConnectionString, DB_tool db_Tool)
         {
             var Flag = new DTO_Flag<OverviewViewModel>(MethodBase.GetCurrentMethod().Name);
 
@@ -19,13 +19,26 @@ namespace SchemaNote.Models
             List<DTO_Table> tbls = new List<DTO_Table>();
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
-            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
-
             try
             {
-                ADO.GetColumns(ref cols);
-                ADO.GetTables(ref tbls);
-                ADO.GetExtended_prop(ref props);
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        dapper.GetColumns(ref cols);
+                        dapper.GetTables(ref tbls);
+                        dapper.GetExtended_prop(ref props);
+                        break;
+                    case DB_tool.linq2db:
+                        //todo
+                        break;
+                    default:
+                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO.GetColumns(ref cols);
+                        ADO.GetTables(ref tbls);
+                        ADO.GetExtended_prop(ref props);
+                        break;
+                }
             }
             catch (SqlException ex)
             {
@@ -79,33 +92,65 @@ namespace SchemaNote.Models
             return Flag;
         }
 
-        internal static DTO_Flag<DetailsViewModel> GetTable_Columns(string ConnectionString, int _OBJECT_ID)
+        internal static DTO_Flag<DetailsViewModel> GetTable_Columns(string ConnectionString, int _OBJECT_ID, DB_tool db_Tool)
         {
             var Flag = new DTO_Flag<DetailsViewModel>(MethodBase.GetCurrentMethod().Name);
 
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
             List<DTO_Index> indexes = new List<DTO_Index>();
-
-            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
-
-            var Flag_col = ADO.GetColumnsByOBJECT_ID(_OBJECT_ID);
-            if (Flag_col.ResultType != ExceResultType.Success)
-            {
-                Flag_col.Transfer(ref Flag);
-                return Flag;
-            }
-
-            var Flag_tbl = ADO.GetTablesByOBJECT_ID(_OBJECT_ID);
-            if (Flag_tbl.ResultType != ExceResultType.Success)
-            {
-                Flag_tbl.Transfer(ref Flag);
-                return Flag;
-            }
+            DTO_Table tbl = new DTO_Table();
+            List<DTO_Column> cols = new List<DTO_Column>();
 
             try
             {
-                ADO.GetExtended_prop(ref props);
-                ADO.GetIndexes(ref indexes);
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        var Flag_a_col = dapper.GetColumnsByOBJECT_ID(_OBJECT_ID);
+                        if (Flag_a_col.ResultType != ExceResultType.Success)
+                        {
+                            Flag_a_col.Transfer(ref Flag);
+                            return Flag;
+                        }
+
+                        var Flag_a_tbl = dapper.GetTablesByOBJECT_ID(_OBJECT_ID);
+                        if (Flag_a_tbl.ResultType != ExceResultType.Success)
+                        {
+                            Flag_a_tbl.Transfer(ref Flag);
+                            return Flag;
+                        }
+
+                        dapper.GetExtended_prop(ref props);
+                        dapper.GetIndexes(ref indexes);
+                        tbl = Flag_a_tbl.OBJ.FirstOrDefault();
+                        cols = Flag_a_col.OBJ;
+                        break;
+                    case DB_tool.linq2db:
+                        //todo
+                        break;
+                    default:
+                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        var Flag_b_col = ADO.GetColumnsByOBJECT_ID(_OBJECT_ID);
+                        if (Flag_b_col.ResultType != ExceResultType.Success)
+                        {
+                            Flag_b_col.Transfer(ref Flag);
+                            return Flag;
+                        }
+
+                        var Flag_b_tbl = ADO.GetTablesByOBJECT_ID(_OBJECT_ID);
+                        if (Flag_b_tbl.ResultType != ExceResultType.Success)
+                        {
+                            Flag_b_tbl.Transfer(ref Flag);
+                            return Flag;
+                        }
+
+                        ADO.GetExtended_prop(ref props);
+                        ADO.GetIndexes(ref indexes);
+                        tbl = Flag_b_tbl.OBJ.FirstOrDefault();
+                        cols = Flag_b_col.OBJ;
+                        break;
+                }
             }
             catch (SqlException ex)
             {
@@ -117,9 +162,6 @@ namespace SchemaNote.Models
                 Flag.SetError(ex);
                 return Flag;
             }
-
-
-            var tbl = Flag_tbl.OBJ.FirstOrDefault();
 
             var pObj = props.Where(p => p.MAJOR_ID == tbl.OBJECT_ID);
             var pT = pObj.Where(p => p.MINOR_ID == 0);
@@ -135,7 +177,7 @@ namespace SchemaNote.Models
                 QTY = tbl.QTY,
                 MS_Description = pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
                 REMARK = pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
-                Columns = Flag_col.OBJ.Select(c =>
+                Columns = cols.Select(c =>
                 {
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
                     return new ColumnDetail()
@@ -168,7 +210,7 @@ namespace SchemaNote.Models
             return Flag;
         }
 
-        internal static DTO_Flag<int> SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model)
+        internal static DTO_Flag<int> SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model, DB_tool db_Tool)
         {
             var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
 
@@ -176,7 +218,21 @@ namespace SchemaNote.Models
             var props = new List<DTO_Extended_prop>();
             try
             {
-                new ADO_dot_NET(ConnectionString).GetExtended_prop(ref props);
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        dapper.GetExtended_prop(ref props);
+                        return dapper.SaveProperties(id, Categorized(model, props.Where(p => p.MAJOR_ID == id).ToList()));
+                    case DB_tool.linq2db:
+                        //todo
+                        return ObjFlag;
+                    default:
+                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO.GetExtended_prop(ref props);
+                        return ADO.SaveProperties(id, Categorized(model, props.Where(p => p.MAJOR_ID == id).ToList()));
+                }
+
             }
             catch (SqlException ex)
             {
@@ -189,10 +245,18 @@ namespace SchemaNote.Models
                 return ObjFlag;
             }
 
-            var curr_props = props.Where(p => p.MAJOR_ID == id).ToList();
             #endregion
 
-            #region 整理出要新刪修的屬性
+        }
+
+        /// <summary>
+        /// 整理出要新刪修的屬性
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="curr_props"></param>
+        /// <returns></returns>
+        static List<DTO_prop> Categorized(ICollection<VM_Property> model, List<DTO_Extended_prop> curr_props)
+        {
             List<DTO_prop> dto_prop = new List<DTO_prop>();
 
             foreach (VM_Property vm in model)
@@ -257,10 +321,8 @@ namespace SchemaNote.Models
                     Properties.Add(p); continue;
                 }
             }
-            #endregion
 
-            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
-            return ADO.SaveProperties(id, Properties);
+            return Properties;
         }
     }
 }

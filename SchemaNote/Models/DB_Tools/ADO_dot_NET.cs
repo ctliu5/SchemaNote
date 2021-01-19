@@ -1,5 +1,4 @@
-﻿using SchemaNote.Models;
-using SchemaNote.Models.DataTransferObject;
+﻿using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.Extensions;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Transactions;
 
-namespace SchemaNote.DB_Tools.Models
+namespace SchemaNote.Models.DB_Tools
 {
     /// <summary>
     /// <see cref="https://stackoverflow.com/questions/4439409/open-close-sqlconnection-or-keep-open"/>
@@ -35,17 +34,10 @@ namespace SchemaNote.DB_Tools.Models
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumns, conn))
                 {
-                    comm.Connection = conn;
-
-                    #region GetColumns
-                    comm.CommandText = SQLScripts.GetColumns;
-
                     cols = ExecSqlDataReader<DTO_Column>(comm);
-                    #endregion
                 }
-                conn.Close();
             }
         }
 
@@ -55,17 +47,10 @@ namespace SchemaNote.DB_Tools.Models
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTables, conn))
                 {
-                    comm.Connection = conn;
-
-                    #region GetTables
-                    comm.CommandText = SQLScripts.GetTables;
-
                     tbls = ExecSqlDataReader<DTO_Table>(comm);
-                    #endregion
                 }
-                conn.Close();
             }
         }
 
@@ -75,17 +60,10 @@ namespace SchemaNote.DB_Tools.Models
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetExtended_prop, conn))
                 {
-                    comm.Connection = conn;
-
-                    #region GetExtended_prop
-                    comm.CommandText = SQLScripts.GetExtended_prop;
-
                     props = ExecSqlDataReader<DTO_Extended_prop>(comm);
-                    #endregion
                 }
-                conn.Close();
             }
         }
 
@@ -95,17 +73,10 @@ namespace SchemaNote.DB_Tools.Models
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetIndexes, conn))
                 {
-                    comm.Connection = conn;
-
-                    #region GetIndexes
-                    comm.CommandText = SQLScripts.GetIndexes;
-
                     indexes = ExecSqlDataReader<DTO_Index>(comm);
-                    #endregion
                 }
-                conn.Close();
             }
         }
 
@@ -119,22 +90,15 @@ namespace SchemaNote.DB_Tools.Models
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection(ConnectionString);
             try
             {
-                conn.ConnectionString = ConnectionString;
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumnsByObject_id, conn))
                 {
-                    comm.Connection = conn;
                     comm.Parameters.Add(para);
-
-                    #region GetColumns By OBJECT_ID
-                    comm.CommandText = SQLScripts.GetColumnsByObject_id;
-
                     ObjFlag.OBJ = ExecSqlDataReader<DTO_Column>(comm);
-                    #endregion
                 }
                 if (ObjFlag.OBJ.Count < 1)
                 {
@@ -169,22 +133,15 @@ namespace SchemaNote.DB_Tools.Models
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection(ConnectionString);
             try
             {
-                conn.ConnectionString = ConnectionString;
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand())
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTablesByObject_id, conn))
                 {
-                    comm.Connection = conn;
                     comm.Parameters.Add(para);
-
-                    #region GetTables By OBJECT_ID
-                    comm.CommandText = SQLScripts.GetTablesByObject_id;
-
                     ObjFlag.OBJ = ExecSqlDataReader<DTO_Table>(comm);
-                    #endregion
                 }
                 if (ObjFlag.OBJ.Count < 1)
                 {
@@ -225,12 +182,11 @@ namespace SchemaNote.DB_Tools.Models
                 TYPE = "",
                 NewLine = Environment.NewLine;
 
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection(ConnectionString);
             SqlCommand comm = new SqlCommand();
 
             try
             {
-                conn.ConnectionString = ConnectionString;
                 comm.Connection = conn;
                 comm.Parameters.Add(para_OBJECT_ID);
                 conn.Open();
@@ -246,7 +202,6 @@ namespace SchemaNote.DB_Tools.Models
                         TYPE = dr["TYPE"].ToString().Trim();
                     }
                 }
-                #endregion
 
                 if (string.IsNullOrEmpty(OBJECT_NAME))
                 {
@@ -273,6 +228,7 @@ namespace SchemaNote.DB_Tools.Models
                         ObjFlag.ResultType |= ExceResultType.Failed;
                         return ObjFlag;
                 }
+                #endregion
 
                 #region Add/Update/Drop Prop
                 SqlParameter[] paras = new SqlParameter[]
@@ -323,7 +279,7 @@ namespace SchemaNote.DB_Tools.Models
                                 },
                                 new SqlParameter()
                                 {
-                                    ParameterName = "@PROP_VALUE",
+                                    ParameterName = "PROP_VALUE",
                                     SqlDbType = System.Data.SqlDbType.Variant,
                                     Value = prop.VALUE
                                 },
@@ -355,7 +311,7 @@ namespace SchemaNote.DB_Tools.Models
                                 },
                                 new SqlParameter()
                                 {
-                                    ParameterName = "@PROP_VALUE",
+                                    ParameterName = "PROP_VALUE",
                                     SqlDbType = System.Data.SqlDbType.Variant,
                                     Value = prop.VALUE
                                 },
