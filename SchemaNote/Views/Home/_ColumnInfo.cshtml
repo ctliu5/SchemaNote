@@ -6,12 +6,12 @@
         <input name="@("[" + Model.COLUMN_ID + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
     </td>
     <td class="NoteField"
-        data-field="NAME_CHT"
-        data-content="@Model.NAME_CHT"
+        data-field="@Common.MS_Desc"
+        data-content="@Model.MS_Description"
         data-column_id="@Model.COLUMN_ID"
         data-class="form-control">
-        @Html.DisplayFor(n => Model.NAME_CHT)
-        @Html.ValidationMessageFor(model => model.NAME_CHT, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].NAME_CHT" })
+        @Html.DisplayFor(n => Model.MS_Description)
+        @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
     </td>
     <td>
         @Html.DisplayFor(modelItem => modelItem.TYPE)
@@ -26,7 +26,7 @@
         @Html.DisplayFor(modelItem => modelItem.DEFUALT)
     </td>
     <td class="NoteField"
-        data-field="REMARK"
+        data-field="@Common.Remark"
         data-content="@Model.REMARK"
         data-column_id="@Model.COLUMN_ID"
         data-class="form-control">

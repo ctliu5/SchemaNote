@@ -7,11 +7,13 @@ namespace SchemaNote.Models
         public const string CurrentVersion = "Version: 0.1.0";
         public const string DefaultValue = "(空白)";
         public const string ConnString = "Connection String";
-        public const string NAME_CHT = "中文名稱";
-        public const string REMARK = "備註";
+        public const string Name_zh = "中文名稱";
+        public const string Remark_zh = "備註";
         public const string ConnStringMissing = "Your connection string is missing!";
         public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
         public const int StrMaxLen = 4000;
+        public const string MS_Desc = "MS_Description";
+        public const string Remark = "REMARK";
     }
 
     public enum IndexType

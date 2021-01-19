@@ -9,15 +9,15 @@ namespace SchemaNote.ViewModels
     {
         public List<ColumnDetail> Columns { get; set; } = new List<ColumnDetail>();
 
-        #region NAME_CHT
-        string _NAME_CHT;
-        [Display(Name = Common.NAME_CHT)]
-        public string NAME_CHT { get { return string.IsNullOrEmpty(_NAME_CHT) ? Common.DefaultValue : _NAME_CHT; } set { _NAME_CHT = value; } }
+        #region MS_Description
+        string _MS_Description;
+        [Display(Name = Common.Name_zh)]
+        public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 
         #region REMARK
         string _REMARK;
-        [Display(Name = Common.REMARK)]
+        [Display(Name = Common.Remark_zh)]
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
         #endregion
 

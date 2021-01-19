@@ -5,7 +5,7 @@ namespace SchemaNote.ViewModels
 {
     public interface IProperties
     {
-        string NAME_CHT { get; set; }
+        string MS_Description { get; set; }
         string REMARK { get; set; }
     }
 

@@ -41,12 +41,12 @@
             @Html.DisplayFor(n => Model.NAME)
         </stron>
         <sapn class="NoteField"
-              data-field="NAME_CHT"
-              data-content="@Model.NAME_CHT"
+              data-field="@Common.MS_Desc"
+              data-content="@Model.MS_Description"
               data-column_id="0"
-              data-class="form-control tabName_Cht">
-            @Html.DisplayFor(n => Model.NAME_CHT)
-            @Html.ValidationMessageFor(model => model.NAME_CHT, null, new { data_valmsg_for = "[0].NAME_CHT" })
+              data-class="form-control tabMS_Description">
+            @Html.DisplayFor(n => Model.MS_Description)
+            @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[0].MS_Description" })
         </sapn>
         <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
     </div>
@@ -100,7 +100,7 @@
                 @Html.DisplayNameFor(model => Model.REMARK)
             </div>
             <div class="NoteField"
-                 data-field="REMARK"
+                 data-field="@Common.Remark"
                  data-content="@Model.REMARK"
                  data-column_id="0"
                  data-class="form-control">

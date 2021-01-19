@@ -36,8 +36,8 @@ namespace SchemaNote.Models
                         CREATE_DATE = t.CREATE_DATE,
                         MODIFY_DATE = t.MODIFY_DATE,
                         QTY = t.QTY,
-                        NAME_CHT = pT.Where(p => p.NAME == "NAME_CHT").FirstOrDefault()?.VALUE.ToString(),
-                        REMARK = pT.Where(p => p.NAME == "REMARK").FirstOrDefault()?.VALUE.ToString(),
+                        MS_Description = pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
+                        REMARK = pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
                         Columns = cols.Where(c => c.OBJECT_ID == t.OBJECT_ID).Select(c =>
                         {
                             var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -51,8 +51,8 @@ namespace SchemaNote.Models
                                 IS_PK = c.IS_PK,
                                 DISALLOW_NULL = c.DISALLOW_NULL,
                                 DEFUALT = c.DEFUALT,
-                                NAME_CHT = pC.Where(p => p.NAME == "NAME_CHT").FirstOrDefault()?.VALUE.ToString(),
-                                REMARK = pC.Where(p => p.NAME == "REMARK").FirstOrDefault()?.VALUE.ToString(),
+                                MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
+                                REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
                             };
                         }).ToList()
                     };
@@ -101,8 +101,8 @@ namespace SchemaNote.Models
                 CREATE_DATE = tbl.CREATE_DATE,
                 MODIFY_DATE = tbl.MODIFY_DATE,
                 QTY = tbl.QTY,
-                NAME_CHT = pT.Where(p => p.NAME == "NAME_CHT").FirstOrDefault()?.VALUE.ToString(),
-                REMARK = pT.Where(p => p.NAME == "REMARK").FirstOrDefault()?.VALUE.ToString(),
+                MS_Description = pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
+                REMARK = pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
                 Columns = Flag_col.OBJ.Select(c =>
                 {
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -116,8 +116,8 @@ namespace SchemaNote.Models
                         IS_PK = c.IS_PK,
                         DISALLOW_NULL = c.DISALLOW_NULL,
                         DEFUALT = c.DEFUALT,
-                        NAME_CHT = pC.Where(p => p.NAME == "NAME_CHT").FirstOrDefault()?.VALUE.ToString(),
-                        REMARK = pC.Where(p => p.NAME == "REMARK").FirstOrDefault()?.VALUE.ToString(),
+                        MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
+                        REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
                         Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new Index()
                         {
                             OBJECT_ID = i.OBJECT_ID,
@@ -149,13 +149,13 @@ namespace SchemaNote.Models
 
             foreach (VM_Property vm in model)
             {
-                if (vm.NAME_CHT != null)
+                if (vm.MS_Description != null)
                     dto_prop.Add(
                     new DTO_prop
                     {
                         COLUMN_ID = vm.COLUMN_ID,
-                        NAME = "NAME_CHT",
-                        VALUE = vm.NAME_CHT,
+                        NAME = Common.MS_Desc,
+                        VALUE = vm.MS_Description,
                     });
 
                 if (vm.REMARK != null)
@@ -163,7 +163,7 @@ namespace SchemaNote.Models
                     new DTO_prop
                     {
                         COLUMN_ID = vm.COLUMN_ID,
-                        NAME = "REMARK",
+                        NAME = Common.Remark,
                         VALUE = vm.REMARK,
                     });
             }
