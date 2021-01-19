@@ -9,6 +9,7 @@ namespace SchemaNote.ViewModels
     {
         public long ADO_dot_NET { get; set; }
         public long Dapper { get; set; }
+        public long ADO_dot_NET2 { get; set; }
 
         public List<Table> Tables { get; set; } = new List<Table>();
         public Dictionary<string, string> TableNameJson {

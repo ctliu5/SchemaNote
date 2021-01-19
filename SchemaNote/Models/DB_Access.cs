@@ -21,19 +21,19 @@ namespace SchemaNote.Models
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
             Stopwatch sw = new Stopwatch();
-            long ADO_dot_NET = 0, Dapper = 0;
+            long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0;
 
             try
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
-                    ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
-                    dapper.GetColumns(ref cols);
-                    dapper.GetTables(ref tbls);
-                    dapper.GetExtended_prop(ref props);
+                    ADO_dot_NET ADO2 = new ADO_dot_NET(ConnectionString);
+                    ADO2.GetColumns2(ref cols);
+                    ADO2.GetTables2(ref tbls);
+                    ADO2.GetExtended_prop2(ref props);
                     sw.Stop();
-                    Dapper += sw.ElapsedMilliseconds;
+                    ADO_dot_NET2 += sw.ElapsedMilliseconds;
                     sw.Reset();
 
                     sw.Start();
@@ -43,6 +43,15 @@ namespace SchemaNote.Models
                     ADO.GetExtended_prop(ref props);
                     sw.Stop();
                     ADO_dot_NET += sw.ElapsedMilliseconds;
+                    sw.Reset();
+
+                    sw.Start();
+                    ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                    dapper.GetColumns(ref cols);
+                    dapper.GetTables(ref tbls);
+                    dapper.GetExtended_prop(ref props);
+                    sw.Stop();
+                    Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
                 }
 
@@ -114,6 +123,7 @@ namespace SchemaNote.Models
 
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
             Flag.OBJ.Dapper = Dapper;
+            Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
 
             return Flag;
         }

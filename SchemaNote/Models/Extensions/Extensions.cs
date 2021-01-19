@@ -209,7 +209,6 @@ namespace SchemaNote.Models.Extensions
         {
             PropertyInfo[] propInfos = typeof(T).GetProperties();
             List<T> DTOs = new List<T>();
-            if (!dr.HasRows) return DTOs;
             int FieldCount = dr.FieldCount;
             List<MappingSetting<T>> MappingRules = new List<MappingSetting<T>>();
             for (int i = 0; i < FieldCount; i++)
@@ -238,6 +237,37 @@ namespace SchemaNote.Models.Extensions
                 DTOs.Add(DTO);
             }
             return DTOs;
+        }
+
+        public static IEnumerable<T> ReadAll2<T>(this SqlDataReader dr) where T : new()
+        {
+            PropertyInfo[] propInfos = typeof(T).GetProperties();
+            int FieldCount = dr.FieldCount;
+            List<MappingSetting<T>> MappingRules = new List<MappingSetting<T>>();
+            for (int i = 0; i < FieldCount; i++)
+            {
+                foreach (PropertyInfo propInfo in propInfos)
+                {
+                    if (propInfo.Name == dr.GetName(i))
+                    {
+                        MappingRules.Add(new MappingSetting<T>(propInfo, dr.GetFieldType(i), i));
+                        break;
+                    }
+                }
+            }
+
+            while (dr.Read())
+            {
+                var DTO = new T();
+
+                //有對應到的欄位，嘗試指派
+                foreach (MappingSetting<T> mapRule in MappingRules)
+                {
+                    mapRule.Assign(DTO, dr);
+                }
+                //沒對應到的欄位，自然略過，使用預設值
+                yield return DTO;
+            }
         }
 
         public static void SetObject<T>(this ISession session, string key, T value)

@@ -3,6 +3,7 @@ using SchemaNote.Models.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Reflection;
 using System.Transactions;
 
@@ -24,7 +25,10 @@ namespace SchemaNote.Models.DB_Tools
         {
             using (SqlDataReader dr = comm.ExecuteReader())
             {
-                return dr.ReadAll<T>();
+                if (dr.HasRows)
+                    return dr.ReadAll<T>();
+                else
+                    return new List<T>();
             }
         }
 
@@ -371,6 +375,56 @@ namespace SchemaNote.Models.DB_Tools
                 conn.Dispose();
             }
             return ObjFlag;
+        }
+
+        public virtual List<T> ExecSqlDataReader2<T>(SqlCommand comm) where T : new()
+        {
+            using (SqlDataReader dr = comm.ExecuteReader())
+            {
+                if (dr.HasRows)
+                    return dr.ReadAll2<T>().ToList();
+                else
+                    return new List<T>();
+            }
+        }
+
+        internal void GetColumns2(ref List<DTO_Column> cols)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumns, conn))
+                {
+                    cols = ExecSqlDataReader2<DTO_Column>(comm);
+                }
+            }
+        }
+
+        internal void GetTables2(ref List<DTO_Table> tbls)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTables, conn))
+                {
+                    tbls = ExecSqlDataReader2<DTO_Table>(comm);
+                }
+            }
+        }
+
+        internal void GetExtended_prop2(ref List<DTO_Extended_prop> props)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetExtended_prop, conn))
+                {
+                    props = ExecSqlDataReader2<DTO_Extended_prop>(comm);
+                }
+            }
         }
     }
 }
