@@ -86,5 +86,15 @@ namespace SchemaNote.Models
                 return GetScript("SchemaNote.sql.dropextendedproperty.sql");
             }
         }
+        public static string GetObject_Extended_prop {
+            get {
+                return GetScript("SchemaNote.sql.getObject_Extended_prop.sql");
+            }
+        }
+        public static string SavingScript_Extended_prop {
+            get {
+                return GetScript("SchemaNote.sql.savingScript_Extended_prop.sql");
+            }
+        }
     }
 }

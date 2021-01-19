@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace SchemaNote.Models
 {
@@ -21,7 +22,9 @@ namespace SchemaNote.Models
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
             Stopwatch sw = new Stopwatch();
+            /* 測試效能
             long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0;
+            */
 
             try
             {
@@ -354,6 +357,61 @@ namespace SchemaNote.Models
             }
 
             return Properties;
+        }
+
+        internal static DTO_Flag<StringBuilder> ExportPropertiesScript(string ConnectionString, DB_tool db_Tool)
+        {
+            var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod().Name);
+
+            List<DTO_Object_prop> object_props = new List<DTO_Object_prop>();
+            string scriptTemp = SQLScripts.SavingScript_Extended_prop;
+            StringBuilder stringBuilder = new StringBuilder();
+
+            #region 匯出擴充屬性資料
+            try
+            {
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        dapper.ExportProperties(ref object_props);
+                        break;
+                    default:
+                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO.ExportProperties(ref object_props);
+                        break;
+                }
+                if (object_props.Count < 1)
+                {
+                    ObjFlag.ErrorMessages.Append("找不到擴充屬性");
+                    ObjFlag.ResultType |= ExceResultType.Failed;
+                    return ObjFlag;
+                }
+                foreach (var op in object_props)
+                {
+                    stringBuilder.Append(
+                    string.Format(scriptTemp,
+                        op.OBJECT_ID,
+                        op.COLUMN_ID,
+                        op.PROP_NAME,
+                        op.PROP_VALUE
+                        ));
+                }
+                ObjFlag.OBJ = stringBuilder;
+            }
+            catch (SqlException ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
+            catch (Exception ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
+            return ObjFlag;
+            #endregion
+
         }
     }
 }

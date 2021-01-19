@@ -75,6 +75,27 @@ namespace SchemaNote.Controllers
             return View(Flag.OBJ);
         }
 
+        [HttpPost]
+        public ActionResult ExportExtendedPropScript()
+        {
+            #region check Connection
+            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            #endregion
+
+            DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Overview");
+            }
+            return Content(Flag.OBJ.ToString());
+        }
+
         [HttpGet]
         public ActionResult Details(int? id)
         {

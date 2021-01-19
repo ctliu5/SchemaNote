@@ -1,7 +1,7 @@
-DECLARE @id int = @OBJECT_ID,
-        @col_id int = @COLUMN_ID,
-        @name sysname = @PROP_NAME,
-        @value sql_variant = @PROP_VALUE,
+DECLARE @id int = {0}, /*@OBJECT_ID*/
+        @col_id int = {1}, /*@COLUMN_ID*/
+        @name sysname = '{2}', /*@PROP_NAME*/
+        @value sql_variant = '{3}', /*@PROP_VALUE*/
         @level0name sysname,
         @level1type sysname,
         @level1name sysname,
@@ -10,9 +10,9 @@ DECLARE @id int = @OBJECT_ID,
         @propQty int = 0;
 
 SELECT
-  @level0name = s.[name], --SCHEMA_NAME
-  @level1name = o.[name], --OBJECT_NAME
-  @level1type = o.[type]  --TYPE
+  @level0name = s.[name], /*SCHEMA_NAME*/
+  @level1name = o.[name], /*OBJECT_NAME*/
+  @level1type = o.[type]  /*TYPE*/
 FROM sys.objects AS o
 INNER JOIN sys.schemas AS s
   ON o.[schema_id] = s.[schema_id]
@@ -92,4 +92,4 @@ SET @level1type = CASE WHEN @level1type = 'U' THEN 'TABLE'
     END
   END
 END
-GO
+GO;

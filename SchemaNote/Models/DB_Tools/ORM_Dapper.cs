@@ -243,5 +243,14 @@ namespace SchemaNote.Models.DB_Tools
             }
             return ObjFlag;
         }
+
+        internal void ExportProperties(ref List<DTO_Object_prop> object_props)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+                object_props = conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop).ToList();
+            }
+        }
     }
 }

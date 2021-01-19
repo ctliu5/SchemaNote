@@ -53,6 +53,20 @@
         *@
         //初始化下拉選單
         window.onload = initialOption;
+        //匯出擴充屬性Script
+        function ExportExtendedPropScript() {
+            $.ajax({
+                url: "/Home/ExportExtendedPropScript",
+                type: "POST",
+                dataType: "script",
+                contentType:"application/x-www-form-urlencoded; charset=UTF-8",
+                success: function (data, textStatus, jqXHR) {
+                    alert(data);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                } 
+            })
+        }
     </script>
 }
 <h1>Overview</h1>
@@ -66,22 +80,25 @@
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
 
-    <div class="form-inline search">
-        <div class="form-group form-group-lg">
-            <label for="choose">搜尋項目</label>
-            <select id="choose" class="form-control"></select>
-        </div>
-        <div class="form-group form-group-lg">
-            <label for="switch">搜索方式</label>
-            <select id="switch" class="form-control">
-                <option value="fuzzy" selected>模糊搜索</option>
-                <option value="exact">精確搜索</option>
-            </select>
-        </div>
-        <div class="form-group form-group-lg">
-            <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
-        </div>
+<div class="form-inline search">
+    <div class="form-group form-group-lg">
+        <label for="choose">搜尋項目</label>
+        <select id="choose" class="form-control"></select>
     </div>
+    <div class="form-group form-group-lg">
+        <label for="switch">搜索方式</label>
+        <select id="switch" class="form-control">
+            <option value="fuzzy" selected>模糊搜索</option>
+            <option value="exact">精確搜索</option>
+        </select>
+    </div>
+    <div class="form-group form-group-lg">
+        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
+    </div>
+    <div class="form-group form-group-lg">
+        <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
+    </div>
+</div>
 <br />
 @foreach (var item in Model.Tables)
 {
