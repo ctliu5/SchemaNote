@@ -19,7 +19,6 @@ namespace SchemaNote.Models.DB_Tools
             ConnectionString = _ConnectionString;
         }
 
-
         internal void GetColumns(ref List<DTO_Column> cols)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))

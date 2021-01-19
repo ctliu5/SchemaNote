@@ -29,9 +29,6 @@ namespace SchemaNote.Models
                         dapper.GetTables(ref tbls);
                         dapper.GetExtended_prop(ref props);
                         break;
-                    case DB_tool.linq2db:
-                        //todo
-                        break;
                     default:
                         ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
                         ADO.GetColumns(ref cols);
@@ -125,9 +122,6 @@ namespace SchemaNote.Models
                         dapper.GetIndexes(ref indexes);
                         tbl = Flag_a_tbl.OBJ.FirstOrDefault();
                         cols = Flag_a_col.OBJ;
-                        break;
-                    case DB_tool.linq2db:
-                        //todo
                         break;
                     default:
                         ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
@@ -224,9 +218,6 @@ namespace SchemaNote.Models
                         ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
                         dapper.GetExtended_prop(ref props);
                         return dapper.SaveProperties(id, Categorized(model, props.Where(p => p.MAJOR_ID == id).ToList()));
-                    case DB_tool.linq2db:
-                        //todo
-                        return ObjFlag;
                     default:
                         ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
                         ADO.GetExtended_prop(ref props);

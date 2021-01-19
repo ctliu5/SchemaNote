@@ -28,7 +28,7 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
 
-        public void GetColumns(ref List<DTO_Column> cols)
+        internal void GetColumns(ref List<DTO_Column> cols)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
@@ -41,7 +41,7 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
 
-        public void GetTables(ref List<DTO_Table> tbls)
+        internal void GetTables(ref List<DTO_Table> tbls)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
@@ -54,7 +54,7 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
 
-        public void GetExtended_prop(ref List<DTO_Extended_prop> props)
+        internal void GetExtended_prop(ref List<DTO_Extended_prop> props)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
@@ -67,7 +67,7 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
 
-        public void GetIndexes(ref List<DTO_Index> indexes)
+        internal void GetIndexes(ref List<DTO_Index> indexes)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
@@ -80,7 +80,7 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
 
-        public DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
+        internal DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
         {
             var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod().Name);
             SqlParameter para = new SqlParameter()
@@ -123,7 +123,7 @@ namespace SchemaNote.Models.DB_Tools
             return ObjFlag;
         }
 
-        public DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
+        internal DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
         {
             var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod().Name);
             SqlParameter para = new SqlParameter()
@@ -166,7 +166,7 @@ namespace SchemaNote.Models.DB_Tools
             return ObjFlag;
         }
 
-        public DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
+        internal DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
         {
             var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
             SqlParameter para_OBJECT_ID = new SqlParameter()

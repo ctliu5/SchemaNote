@@ -51,6 +51,5 @@ namespace SchemaNote.Models
     {
         ADO_dot_NET,
         Dapper,
-        linq2db
     }
 }
