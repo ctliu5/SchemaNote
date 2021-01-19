@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿//#define SSL
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-
+#if SSL
+#else
+using System.Net;
+#endif
 namespace SchemaNote
 {
     public class Program
@@ -20,10 +16,13 @@ namespace SchemaNote
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+#if SSL
+#else
                 .UseKestrel(option =>
                 {
                     option.Listen(IPAddress.Loopback, 8010);
                 })
+#endif
                 .UseStartup<Startup>();
     }
 }

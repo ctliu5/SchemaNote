@@ -1,4 +1,14 @@
-﻿.tabDetail_left td {
+﻿@media (min-width: 1440px) {
+    .container {
+        width: 1400px;
+    }
+}
+@media (min-width: 1696px) {
+    .container {
+        width: 1646px;
+    }
+}
+.tabDetail_left td {
     word-break: break-all;
 }
 

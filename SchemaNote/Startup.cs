@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿//#define SSL
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,11 @@ namespace SchemaNote
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+#if SSL
+                options.CheckConsentNeeded = context => true;
+#else
                 options.CheckConsentNeeded = context => false;
+#endif
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
@@ -33,11 +38,14 @@ namespace SchemaNote
 
             services.AddSession(options =>
             {
+#if SSL
                 //限制只有在 HTTPS 連線的情況下，才允許使用 Session。如此一來變成加密連線，就不容易被攔截。
-                //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+#else
                 //允許在 HTTP 連線的情況下，也使用 Session。建議只在受保護的網路內使用
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+#endif
+
 
                 //沒必要將 Server 或網站技術的資訊爆露在外面，所以預設 Session 名稱 .AspNetCore.Session 可以改掉。
                 options.Cookie.Name = "SchemaNote";
@@ -65,8 +73,10 @@ namespace SchemaNote
                 app.UseHsts();
             }
 
+#if SSL
             //將Http重新定向Https
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
+#endif
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
