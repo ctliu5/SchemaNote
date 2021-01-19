@@ -5,7 +5,6 @@
     ViewData["Title"] = "Overview";
     var t = Model.Tables.FirstOrDefault() ?? new Table();
     int i = 0;
-    string OnlyForTable = Common.OnlyForTable;
 }
 
 @section Scripts
@@ -22,9 +21,10 @@
                 }
                 console.log(name + " spend time:" + (Date.now() - d));
             }
-            test(Iterator_jQuery, 'Iterator_jQuery');// 290~450 ms (Faster in FireFox)
-            test(Iterator_js_ClassName, 'Iterator_js_ClassName');// 190~220 ms (Faster in Chrome)
-            test(Iterator_js_JsonObj, 'Iterator_js_JsonObj');// 95~125 ms (Faster in Chrome)
+            test(Iterator_jQuery, 'Iterator_jQuery');// 4th
+            test(Iterator_js_ClassName, 'Iterator_js_ClassName');// 3rd
+            test(Iterator_js_querySelector, 'Iterator_js_querySelector');// 2nd
+            test(Iterator_js_JsonObj, 'Iterator_js_JsonObj');// 1st
         })();
         *@
     </script>
@@ -51,16 +51,9 @@
                         @Html.DisplayFor(modelItem => item.NAME)
                     </strong>
                 </span>
-                @if (item.TYPE == "U")
-                {
-                    <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                        @Html.DisplayFor(modelItem => item.NAME_CHT)
-                    </a>
-                }
-                else
-                {
-                    <span class="text-muted">@OnlyForTable</span>
-                }
+                <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                    @Html.DisplayFor(modelItem => item.NAME_CHT)
+                </a>
             </div>
             <div id="@Html.Raw("collapse"+i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
                 <table class="tabDetail_left">
@@ -112,16 +105,9 @@
                         @Html.DisplayNameFor(model => t.REMARK)
                     </div>
                     <div>
-                        @if (item.TYPE == "U")
-                        {
-                            <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                                @Html.DisplayFor(modelItem => item.REMARK)
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="text-muted">@OnlyForTable</span>
-                        }
+                        <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                            @Html.DisplayFor(modelItem => item.REMARK)
+                        </a>
                     </div>
                 </div>
             </div>

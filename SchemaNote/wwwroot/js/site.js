@@ -1,11 +1,12 @@
 ﻿var Overview = {};
-//todo 英文大小寫皆可
+
 function Iterator_jQuery(compareStr) {
+    compareStr = compareStr.toUpperCase();
     var htmlCollection = $('.accordion');
     if (compareStr) {
         for (var i = 0; i < htmlCollection.length; i++) {
             var ele = $(htmlCollection[i]).find('.TableName');
-            if (ele.text().trim().indexOf(compareStr) > -1) {
+            if (ele.text().trim().toUpperCase().indexOf(compareStr) > -1) {
                 $(htmlCollection[i]).css('display','initial');
             } else {
                 $(htmlCollection[i]).css('display','none');
@@ -19,11 +20,31 @@ function Iterator_jQuery(compareStr) {
 }
 
 function Iterator_js_ClassName(compareStr) {
+    compareStr = compareStr.toUpperCase();
     var htmlCollection = document.getElementsByClassName('accordion');
     if (compareStr) {
         for (var i = 0; i < htmlCollection.length; i++) {
             var ele = htmlCollection[i].getElementsByClassName('TableName')[0];
-            if (ele.textContent.trim().indexOf(compareStr) > -1) {
+            if (ele.textContent.trim().toUpperCase().indexOf(compareStr) > -1) {
+                htmlCollection[i].style.cssText = 'display:initial;';
+            } else {
+                htmlCollection[i].style.cssText = 'display:none;';
+            }
+        }
+    } else {
+        for (var i = 0; i < htmlCollection.length; i++) {
+            htmlCollection[i].style.cssText = 'display:initial;';
+        }
+    }
+}
+
+function Iterator_js_querySelector(compareStr) {
+    compareStr = compareStr.toUpperCase();
+    var htmlCollection = document.querySelectorAll('.accordion');
+    if (compareStr) {
+        for (var i = 0; i < htmlCollection.length; i++) {
+            var ele = htmlCollection[i].querySelector('.TableName');
+            if (ele.textContent.trim().toUpperCase().indexOf(compareStr) > -1) {
                 htmlCollection[i].style.cssText = 'display:initial;';
             } else {
                 htmlCollection[i].style.cssText = 'display:none;';
@@ -37,6 +58,7 @@ function Iterator_js_ClassName(compareStr) {
 }
 
 function Iterator_js_JsonObj(compareStr) {
+    compareStr = compareStr.toUpperCase();
     if (compareStr) {
         ForeachObj(Overview,
             function (obj, key) {

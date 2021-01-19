@@ -220,6 +220,7 @@ namespace SchemaNote.DB_Tools.Models
             string
                 SCHEMA_NAME = "",
                 OBJECT_NAME = "",
+                TYPE = "",
                 NewLine = Environment.NewLine;
 
             SqlConnection conn = new SqlConnection(ConnectionString);
@@ -239,6 +240,7 @@ namespace SchemaNote.DB_Tools.Models
                     {
                         OBJECT_NAME = dr["OBJECT_NAME"].ToString();
                         SCHEMA_NAME = dr["SCHEMA_NAME"].ToString();
+                        TYPE = dr["TYPE"].ToString().Trim();
                     }
                 }
                 #endregion
@@ -255,6 +257,19 @@ namespace SchemaNote.DB_Tools.Models
                     ObjFlag.ResultType |= ExceResultType.Failed;
                     return ObjFlag;
                 }
+                switch (TYPE)
+                {
+                    case "U":
+                        TYPE = "TABLE";
+                        break;
+                    case "V":
+                        TYPE = "VIEW";
+                        break;
+                    default:
+                        ObjFlag.ErrorMessages.Append("找不到TYPE，（OBJECT_ID為：" + _OBJECT_ID + "）");
+                        ObjFlag.ResultType |= ExceResultType.Failed;
+                        return ObjFlag;
+                }
 
                 #region Add/Update/Drop Prop
                 SqlParameter[] paras = new SqlParameter[]
@@ -270,6 +285,12 @@ namespace SchemaNote.DB_Tools.Models
                         ParameterName = "OBJECT_NAME",
                         SqlDbType = System.Data.SqlDbType.NVarChar,
                         Value = OBJECT_NAME
+                    },
+                    new SqlParameter()
+                    {
+                        ParameterName = "TYPE",
+                        SqlDbType = System.Data.SqlDbType.Char,
+                        Value = TYPE
                     },
                     para_OBJECT_ID
                 };

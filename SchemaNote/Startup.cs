@@ -34,7 +34,11 @@ namespace SchemaNote
             services.AddSession(options =>
             {
                 //限制只有在 HTTPS 連線的情況下，才允許使用 Session。如此一來變成加密連線，就不容易被攔截。
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
+                //允許在 HTTP 連線的情況下，也使用 Session。建議只在受保護的網路內使用
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
                 //沒必要將 Server 或網站技術的資訊爆露在外面，所以預設 Session 名稱 .AspNetCore.Session 可以改掉。
                 options.Cookie.Name = "SchemaNote";
                 //修改合理的 Session 到期時間。預設是 20 分鐘沒有跟 Server 互動的 Request，就會將 Session 變成過期狀態。
@@ -61,7 +65,9 @@ namespace SchemaNote
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //將Http重新定向Https
+            //app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseSession();

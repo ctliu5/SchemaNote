@@ -15,7 +15,7 @@ namespace SchemaNote.ViewModels
                 Tables.ForEach(t =>
                 {
                     i++;
-                    d.Add(t.NAME, "accordion" + i);
+                    d.Add(t.NAME.ToUpper(), "accordion" + i);
                 });
                 return d;
             }

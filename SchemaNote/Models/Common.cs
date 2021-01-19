@@ -8,7 +8,6 @@ namespace SchemaNote.Models
         public const string ConnString = "Connection String";
         public const string NAME_CHT = "中文名稱";
         public const string REMARK = "備註";
-        public const string OnlyForTable = "-僅能設定於資料表-";
     }
 
     [Flags]

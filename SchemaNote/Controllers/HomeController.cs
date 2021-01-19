@@ -105,11 +105,6 @@ namespace SchemaNote.Controllers
             DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model);
             DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id);
 
-            #region test
-            Flag.ResultType |= ExceResultType.Exception;
-            Flag.ErrorMessages.Append("Test");
-            #endregion
-
             if (Flag.ResultType != ExceResultType.Success)
             {
                 if (Flag_prop.ResultType != ExceResultType.Success)
@@ -127,6 +122,11 @@ namespace SchemaNote.Controllers
                 ViewData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
             }
             return View(Flag.OBJ);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
