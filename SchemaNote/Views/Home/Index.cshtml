@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+<h2>@ViewData["Title"]</h2>
+@if (ViewData["Message"] != null)
+{
+    <h3>@ViewData["Message"]</h3>
+}
+@if (ViewData["ErrorMessage"] != null)
+{
+    <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
+}

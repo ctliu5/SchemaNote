@@ -1,0 +1,36 @@
+﻿@using SchemaNote.ViewModels;
+@model ColumnDetail
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.NAME)
+        <input name="@("[" + Model.COLUMN_ID + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
+    </td>
+    <td class="NoteField"
+        data-field="NAME_CHT"
+        data-content="@Model.NAME_CHT"
+        data-column_id="@Model.COLUMN_ID"
+        data-class="form-control">
+        @Html.DisplayFor(n => Model.NAME_CHT)
+        <span asp-validation-for="NAME_CHT" class="text-danger"></span>
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.TYPE)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.IS_PK)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.DISALLOW_NULL)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.DEFUALT)
+    </td>
+    <td class="NoteField"
+        data-field="REMARK"
+        data-content="@Model.REMARK"
+        data-column_id="@Model.COLUMN_ID"
+        data-class="form-control">
+        @Html.DisplayFor(n => Model.REMARK)
+        <span asp-validation-for="REMARK" class="text-danger"></span>
+    </td>
+</tr>

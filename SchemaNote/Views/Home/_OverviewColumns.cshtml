@@ -1,0 +1,78 @@
+﻿@using SchemaNote.ViewModels;
+@model IEnumerable<Column>
+@{
+    var c = Model.FirstOrDefault() ?? new Column();
+    bool IsTable = ViewData["TYPE"].Equals("U");
+    string OnlyForTable = Common.OnlyForTable;
+}
+<thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => c.NAME)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.NAME_CHT)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.TYPE)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.IS_PK)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.DISALLOW_NULL)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.DEFUALT)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.REMARK)
+        </th>
+    </tr>
+</thead>
+<tbody>
+    @foreach (Column col in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => col.NAME)
+            </td>
+            <td>
+                @if (IsTable)
+                {
+                    <a class="text-info" asp-action="Details" asp-route-id="@col.OBJECT_ID">
+                        @Html.DisplayFor(modelItem => col.NAME_CHT)
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">@OnlyForTable</span>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.TYPE)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.IS_PK)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.DISALLOW_NULL)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.DEFUALT)
+            </td>
+            <td>
+                @if (IsTable)
+                {
+                    <a class="text-info" asp-action="Details" asp-route-id="@col.OBJECT_ID">
+                        @Html.DisplayFor(modelItem => col.REMARK)
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">@OnlyForTable</span>
+                }
+            </td>
+        </tr>
+    }
+</tbody>

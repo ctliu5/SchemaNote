@@ -1,0 +1,136 @@
+﻿@using SchemaNote.ViewModels;
+@model OverviewViewModel
+
+@{
+    ViewData["Title"] = "Overview";
+    var t = Model.Tables.FirstOrDefault() ?? new Table();
+    int i = 0;
+    string OnlyForTable = Common.OnlyForTable;
+}
+
+@section Scripts
+    {
+    <script>
+        Overview = @Html.Raw(Json.Serialize(Model.TablesJson));
+        @*
+        //效能比較
+        (function () {
+            function test(func, name) {
+                var d = Date.now();
+                for (var i = 1000; i > 0; i--) {
+                    func('TBL');
+                }
+                console.log(name + " spend time:" + (Date.now() - d));
+            }
+            test(Iterator_jQuery, 'Iterator_jQuery');// 290~450 ms (Faster in FireFox)
+            test(Iterator_js_ClassName, 'Iterator_js_ClassName');// 190~220 ms (Faster in Chrome)
+            test(Iterator_js_JsonObj, 'Iterator_js_JsonObj');// 95~125 ms (Faster in Chrome)
+        })();
+        *@
+    </script>
+}
+<h1>Overview</h1>
+@if (TempData["ErrorMessage"] != null)
+{
+    <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
+}
+
+<p class="form-horizontal">
+    <label class="control-label">Search</label>
+    <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(this.value)" placeholder="Enter table name...">
+</p>
+@foreach (var item in Model.Tables)
+{
+    i++;
+    <div class="panel-group accordion" id="@Html.Raw("accordion"+i)" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default ">
+            <div class="panel-heading" role="tab">
+                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw("accordion"+i)" href="#@Html.Raw("collapse"+i)" aria-expanded="false" aria-controls="@Html.Raw("collapse"+i)">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                    <strong id="TableName" class="TableName">
+                        @Html.DisplayFor(modelItem => item.NAME)
+                    </strong>
+                </span>
+                @if (item.TYPE == "U")
+                {
+                    <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                        @Html.DisplayFor(modelItem => item.NAME_CHT)
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">@OnlyForTable</span>
+                }
+            </div>
+            <div id="@Html.Raw("collapse"+i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
+                <table class="tabDetail_left">
+                    <tbody>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.SCHEMA_NAME)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SCHEMA_NAME)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.CREATE_DATE)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CREATE_DATE)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.MODIFY_DATE)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.MODIFY_DATE)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.TYPE_NAME)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TYPE_NAME)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.QTY)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.QTY)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="tabDetail_right">
+                    <div>
+                        @Html.DisplayNameFor(model => t.REMARK)
+                    </div>
+                    <div>
+                        @if (item.TYPE == "U")
+                        {
+                            <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                                @Html.DisplayFor(modelItem => item.REMARK)
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">@OnlyForTable</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered table-hover subTable" border="1">
+                <partial name="_OverviewColumns" model="item.Columns" view-data="@{new ViewDataDictionary(ViewData){{ "TYPE", item.TYPE }}}" />
+                @*  ↓↓↓equal↓↓↓↓
+                    @{await Html.RenderPartialAsync("_OverviewColumns", item.Columns);}
+                *@
+            </table>
+        </div>
+    </div>
+}

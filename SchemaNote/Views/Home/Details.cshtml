@@ -1,0 +1,118 @@
+﻿@using SchemaNote.ViewModels;
+@model DetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+@section Scripts
+    {
+    <script>
+        /*
+        https://developer.mozilla.org/en-US/docs/Glossary/IIFE
+        IIFE vs window.onload vs jQuery $(document).ready
+        https://stackoverflow.com/questions/9899372/pure-javascript-equivalent-of-jquerys-ready-how-to-call-a-function-when-t
+        */
+        (function () {
+            var htmlCollection = document.getElementsByClassName("NoteField");
+            if (htmlCollection.length > 0) {
+                var arr = Array.prototype.slice.call(htmlCollection);
+                arr.forEach(
+                    function (item) {
+                        item.addEventListener("dblclick", changeElement);
+                    }
+                )
+            }
+        })();
+    </script>
+}
+<h2>Details</h2>
+@if (ViewData["ErrorMessage"] != null)
+{
+    <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
+}
+<p>
+    <a asp-action="Overview" class="btn btn-default"><strong>&lt; </strong>Back to overview</a>
+</p>
+<form asp-action="Details" onsubmit="EmptyString('@Common.DefaultValue')" method="post" class="panel panel-default">
+    <input name="[0].COLUMN_ID" value="0" style="display:none;" />
+    <div class="panel-heading">
+        <stron class="TableName">
+            @Html.DisplayFor(n => Model.NAME)
+        </stron>
+        <sapn class="NoteField"
+              data-field="NAME_CHT"
+              data-content="@Model.NAME_CHT"
+              data-column_id="0"
+              data-class="form-control tabName_Cht">
+            @Html.DisplayFor(n => Model.NAME_CHT)
+            <span asp-validation-for="NAME_CHT" class="text-danger"></span>
+        </sapn>
+        <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
+    </div>
+    <div class="panel-body">
+        <table class="tabDetail_left">
+            <tbody>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.SCHEMA_NAME)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.SCHEMA_NAME)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.CREATE_DATE)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.CREATE_DATE)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.MODIFY_DATE)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.MODIFY_DATE)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.TYPE_NAME)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.TYPE_NAME)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.QTY)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.QTY)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="tabDetail_right">
+            <div>
+                @Html.DisplayNameFor(model => Model.REMARK)
+            </div>
+            <div class="NoteField"
+                 data-field="REMARK"
+                 data-content="@Model.REMARK"
+                 data-column_id="0"
+                 data-class="form-control">
+                @Html.DisplayFor(n => Model.REMARK)
+                <span asp-validation-for="REMARK" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <table class="table table-bordered table-hover table-responsive subTable">
+        <partial name="_DetailColumns" model="Model.Columns" />
+        @*  ↓↓↓equal↓↓↓↓
+            @{await Html.RenderPartialAsync("_DetailColumns", Model.Columns);}
+        *@
+    </table>
+</form>
