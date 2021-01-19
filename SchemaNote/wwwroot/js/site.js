@@ -2,6 +2,24 @@
 
 function SetIndex() { CurrentIndex = this.value; }
 
+function initialOption() {
+    $('[data-toggle="tooltip"]').tooltip();
+    var chooseUl = document.getElementById('choose');
+    chooseUl.addEventListener("change", SetIndex, false);
+    var i = 0;
+    for (var cName in Overview) {
+        if (++i == 1)
+            CurrentIndex = cName;
+        if (Overview.hasOwnProperty(cName)) {
+            var option = document.createElement('option');
+            var textnode = document.createTextNode(Overview[cName].name_cht);
+            option.appendChild(textnode);
+            option.setAttribute("value", cName);
+            chooseUl.appendChild(option);
+        }
+    };
+};
+
 function Iterator_jQuery(compareStr, className) {
     className = '.' + className;
     compareStr = compareStr.toUpperCase();
@@ -61,10 +79,10 @@ function Iterator_js_ClassName(compareStr, className) {
     }
 }
 
-function Iterator_js_JsonObj(compareStr, index) {
+function Iterator_js_JsonObj(compareStr) {
     compareStr = compareStr.toUpperCase();
     if (compareStr) {
-        ForeachObj(Overview[index].json,
+        ForeachObj(Overview[CurrentIndex].json,
             function (obj, key) {
                 if (obj[key].indexOf(compareStr) > -1) {
                     document.getElementById(key).style.cssText = 'display:initial;';
@@ -74,7 +92,7 @@ function Iterator_js_JsonObj(compareStr, index) {
             }
         );
     } else {
-        ForeachObj(Overview[index].json,
+        ForeachObj(Overview[CurrentIndex].json,
             function (obj, key) {
                 document.getElementById(key).style.cssText = 'display:initial;';
             }

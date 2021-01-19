@@ -16,7 +16,7 @@ namespace SchemaNote.Controllers
         public HomeController(ISessionWrapper sessionWapper)
         {
             _sessionWapper = sessionWapper;
-            _db_tool = DB_tool.Dapper;
+            _db_tool = DB_tool.ADO_dot_NET;
         }
 
         [HttpGet]

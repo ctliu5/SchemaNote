@@ -28,6 +28,9 @@
                 json: @Html.Raw(Json.Serialize(Model.RemarkJson))
             },
         };
+    </script>
+
+    <script>
         @*
         //效能比較
         (function () {
@@ -48,25 +51,8 @@
             }
         })();
         *@
-        //初始化tooltip功能
-        (function () {
-            $('[data-toggle="tooltip"]').tooltip();
-            var chooseUl = document.getElementById('choose');
-            var i = 0;
-            for (var cName in Overview) {
-                if (++i == 1)
-                    CurrentIndex = cName;
-                if (Overview.hasOwnProperty(cName)) {
-                    var option = document.createElement('option');
-                    var textnode = document.createTextNode(Overview[cName].name_cht);
-                    option.appendChild(textnode);
-                    option.setAttribute("value", cName);
-                    option.addEventListener("click", SetIndex);
-                    chooseUl.appendChild(option);
-                }
-            };
-            $('.dropdown-toggle').dropdown();
-        })();
+        //初始化下拉選單
+        window.onload = initialOption;
     </script>
 }
 <h1>Overview</h1>
@@ -78,7 +64,7 @@
 <div class="form-inline">
     <div class="form-group">
         <select id="choose" class="form-control"></select>
-        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj((typeof this.value === 'string' ? this.value.trim() : ''), CurrentIndex)" placeholder="Enter key words..." />
+        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
     </div>
 </div>
 <br />
