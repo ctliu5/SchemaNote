@@ -14,6 +14,18 @@ namespace SchemaNote.Models
         public const int StrMaxLen = 4000;
     }
 
+    public enum IndexType
+    {
+        堆積,
+        叢集,
+        非叢集,
+        XML,
+        空間,
+        叢集資料行存放區索引,
+        非叢集資料行存放區索引,
+        非叢集雜湊索引,
+    }
+
     [Flags]
     public enum ExceResultType
     {

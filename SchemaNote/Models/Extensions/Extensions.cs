@@ -27,17 +27,21 @@ namespace SchemaNote.Models.Extensions
                     if (propInfo == null) continue;
 
                     Type t = propInfo.PropertyType;
-                    if (dataQTY == 0 && dr.GetFieldType(i) != t)
+
+                    if (t.IsEnum)
+                    {
+                        if (!dr.IsDBNull(i) && int.TryParse(dr[i].ToString(), out int e))
+                            propInfo.SetValue(DTO, Enum.ToObject(t, e), null);
+                        else
+                            throw new EvaluateException("SqlData資料！無法轉為列舉型別。");
+                    }
+                    else if (dataQTY == 0 && dr.GetFieldType(i) != t)
                     {
                         throw new EvaluateException("DTO無法接受對應的SqlData資料！因為型別不一致。");
                     }
-                    if (t == typeof(DateTime))
+                    else if (t == typeof(DateTime))
                     {
                         propInfo.SetValue(DTO, dr.GetDateTime(i), null);
-                    }
-                    else if (t == typeof(decimal))
-                    {
-                        propInfo.SetValue(DTO, dr.GetDecimal(i), null);
                     }
                     else if (t == typeof(int))
                     {
@@ -47,13 +51,21 @@ namespace SchemaNote.Models.Extensions
                     {
                         propInfo.SetValue(DTO, dr.GetDouble(i), null);
                     }
+                    else if (t == typeof(long))
+                    {
+                        propInfo.SetValue(DTO, dr.GetInt64(i), null);
+                    }
+                    else if (t == typeof(decimal))
+                    {
+                        propInfo.SetValue(DTO, dr.GetDecimal(i), null);
+                    }
                     else if (t == typeof(string))
                     {
                         propInfo.SetValue(DTO, dr.GetString(i)?.Trim(), null);
                     }
-                    else if (t == typeof(long))
+                    else if (t == typeof(byte))
                     {
-                        propInfo.SetValue(DTO, dr.GetInt64(i), null);
+                        propInfo.SetValue(DTO, dr.GetByte(i), null);
                     }
                     else if (t == typeof(short))
                     {
@@ -67,7 +79,6 @@ namespace SchemaNote.Models.Extensions
                     {
                         propInfo.SetValue(DTO, dr[i], null);
                     }
-
                 }
                 DTOs.Add(DTO);
                 dataQTY++;

@@ -48,27 +48,7 @@ namespace SchemaNote.ViewModels
         [Display(Name = "索引類型")]
         public string TYPE_NAME {
             get {
-                switch (TYPE)
-                {
-                    case 0:
-                        return "堆積";
-                    case 1:
-                        return "叢集";
-                    case 2:
-                        return "非叢集";
-                    case 3:
-                        return "XML";
-                    case 4:
-                        return "空間";
-                    case 5:
-                        return "叢集資料行存放區索引";
-                    case 6:
-                        return "非叢集資料行存放區索引";
-                    case 7:
-                        return "非叢集雜湊索引";
-                    default:
-                        return "（無法辨識類型）";
-                }
+                return TYPE.ToString();
             }
         }
     }

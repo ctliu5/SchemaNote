@@ -21,7 +21,7 @@ namespace SchemaNote.Models.DataTransferObject
         public int COLUMN_ID { get; set; }
 
         [Display(Name = "索引類型")]
-        public byte TYPE { get; set; }
+        public IndexType TYPE { get; set; }
 
         [Display(Name = "類型描述")]
         public string TYPE_DESC { get; set; }
