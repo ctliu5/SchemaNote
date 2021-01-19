@@ -376,54 +376,21 @@ namespace SchemaNote.Models.DB_Tools
             }
             return ObjFlag;
         }
+    }
+    public class ADO_dot_NET2 : ADO_dot_NET
+    {
+        public ADO_dot_NET2(string _ConnectionString) : base(_ConnectionString)
+        {
+        }
 
-        public virtual List<T> ExecSqlDataReader2<T>(SqlCommand comm) where T : new()
+        public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
         {
             using (SqlDataReader dr = comm.ExecuteReader())
             {
                 if (dr.HasRows)
-                    return dr.ReadAll2<T>().ToList();
+                    return dr.ReadAll2<T>();
                 else
                     return new List<T>();
-            }
-        }
-
-        internal void GetColumns2(ref List<DTO_Column> cols)
-        {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumns, conn))
-                {
-                    cols = ExecSqlDataReader2<DTO_Column>(comm);
-                }
-            }
-        }
-
-        internal void GetTables2(ref List<DTO_Table> tbls)
-        {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTables, conn))
-                {
-                    tbls = ExecSqlDataReader2<DTO_Table>(comm);
-                }
-            }
-        }
-
-        internal void GetExtended_prop2(ref List<DTO_Extended_prop> props)
-        {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetExtended_prop, conn))
-                {
-                    props = ExecSqlDataReader2<DTO_Extended_prop>(comm);
-                }
             }
         }
     }

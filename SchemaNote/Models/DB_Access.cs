@@ -25,13 +25,29 @@ namespace SchemaNote.Models
 
             try
             {
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        dapper.GetColumns(ref cols);
+                        dapper.GetTables(ref tbls);
+                        dapper.GetExtended_prop(ref props);
+                        break;
+                    default:
+                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO.GetColumns(ref cols);
+                        ADO.GetTables(ref tbls);
+                        ADO.GetExtended_prop(ref props);
+                        break;
+                }
+
                 for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
-                    ADO_dot_NET ADO2 = new ADO_dot_NET(ConnectionString);
-                    ADO2.GetColumns2(ref cols);
-                    ADO2.GetTables2(ref tbls);
-                    ADO2.GetExtended_prop2(ref props);
+                    ADO_dot_NET2 ADO2 = new ADO_dot_NET2(ConnectionString);
+                    ADO2.GetColumns(ref cols);
+                    ADO2.GetTables(ref tbls);
+                    ADO2.GetExtended_prop(ref props);
                     sw.Stop();
                     ADO_dot_NET2 += sw.ElapsedMilliseconds;
                     sw.Reset();
@@ -53,22 +69,6 @@ namespace SchemaNote.Models
                     sw.Stop();
                     Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
-                }
-
-                switch (db_Tool)
-                {
-                    case DB_tool.Dapper:
-                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
-                        dapper.GetColumns(ref cols);
-                        dapper.GetTables(ref tbls);
-                        dapper.GetExtended_prop(ref props);
-                        break;
-                    default:
-                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
-                        ADO.GetColumns(ref cols);
-                        ADO.GetTables(ref tbls);
-                        ADO.GetExtended_prop(ref props);
-                        break;
                 }
             }
             catch (SqlException ex)
