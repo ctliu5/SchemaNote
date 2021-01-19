@@ -1,6 +1,6 @@
 ﻿function fuzzy(txt, compareStr) { return txt.indexOf(compareStr) > -1; }
 function exact(txt, compareStr) { return txt === compareStr; }
-var Overview = {}, CurrentIndex, CompareMethod = fuzzy, Iterator, SearchTextBox = document.getElementById('SearchTextBox');
+var Overview = {}, CurrentIndex, CompareMethod = fuzzy, Iterator, SearchTextBox = document.getElementById('SearchTextBox')/*, counting*/;
 function SetIndex() {
     CurrentIndex = this.value; Iterator();
 }
@@ -34,9 +34,34 @@ function initialOption() {
     myswitch.addEventListener("change", SetMethod, false);
     var SearchTextBox = document.getElementById('SearchTextBox');
     SearchTextBox.addEventListener("keyup", Iterator, false);
+
+    //效能比較
+    /*testIterator();*/
 };
 
+function testIterator() {
+    SearchTextBox.value = 'TBL';
+    function test(func, cName) {
+        var d = Date.now();
+        CurrentIndex = cName;
+        for (var i = 300; i > 0; i--) {
+            func();
+        }
+        console.log(func.name + " spend time:" + (Date.now() - d));
+    }
+    for (var cName in Overview) {
+        if (Overview.hasOwnProperty(cName)) {
+            test(Iterator_jQuery, cName);// 4th ot 3nd
+            test(Iterator_js_querySelector, cName);// 3nd or 4th
+            test(Iterator_js_ClassName, cName);// 2rd
+            test(Iterator_js_JsonObj, cName);// 1st
+            console.log('================================');
+        }
+    }
+}
+
 function Iterator_jQuery() {
+    //counting = 0;
     var compareStr = typeof SearchTextBox.value === 'string' ? SearchTextBox.value.trim() : '';
     var className = '.' + CurrentIndex;
     compareStr = compareStr.toUpperCase();
@@ -48,6 +73,7 @@ function Iterator_jQuery() {
             $(htmlCollection[i]).find(className).each(function () {
                 let text = $(this).text();
                 if (text) {
+                    //counting++;
                     if (CompareMethod(text.trim().toUpperCase(), compareStr)) {
                         $(htmlCollection[i]).css('display', 'initial');
                         flag = false;
@@ -66,9 +92,11 @@ function Iterator_jQuery() {
             $(htmlCollection[i]).css('display', 'initial');
         }
     }
+    //console.log(counting);
 }
 
 function Iterator_js_querySelector() {
+    //counting = 0;
     var compareStr = typeof SearchTextBox.value === 'string' ? SearchTextBox.value.trim() : '';
     var className = '.' + CurrentIndex;
     compareStr = compareStr.toUpperCase();
@@ -80,6 +108,7 @@ function Iterator_js_querySelector() {
             var eles = htmlCollection[i].querySelectorAll(className);
             for (let ele of eles) {
                 if (ele.textContent) {
+                    //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
                         htmlCollection[i].style.cssText = 'display:initial;';
                         flag = false;
@@ -99,9 +128,11 @@ function Iterator_js_querySelector() {
             htmlCollection[i].style.cssText = 'display:initial;';
         }
     }
+    //console.log(counting);
 }
 
 function Iterator_js_ClassName() {
+    //counting = 0;
     var compareStr = typeof SearchTextBox.value === 'string' ? SearchTextBox.value.trim() : '';
     compareStr = compareStr.toUpperCase();
     var htmlCollection = document.getElementsByClassName('accordion');
@@ -112,6 +143,7 @@ function Iterator_js_ClassName() {
             var eles = htmlCollection[i].getElementsByClassName(CurrentIndex);
             for (let ele of eles) {
                 if (ele.textContent) {
+                    //counting++;
                     if (CompareMethod(ele.textContent.trim().toUpperCase(), compareStr)) {
                         htmlCollection[i].style.cssText = 'display:initial;';
                         flag = false;
@@ -131,17 +163,32 @@ function Iterator_js_ClassName() {
             htmlCollection[i].style.cssText = 'display:initial;';
         }
     }
+    //console.log(counting);
 }
 
 function Iterator_js_JsonObj() {
+    //counting = 0;
     var compareStr = typeof SearchTextBox.value === 'string' ? SearchTextBox.value.trim() : '';
     compareStr = compareStr.toUpperCase();
     if (compareStr) {
+        var flag;
         ForeachObj(Overview[CurrentIndex].json,
             function (obj, key) {
-                if (CompareMethod(obj[key], compareStr)) {
-                    document.getElementById(key).style.cssText = 'display:initial;';
-                } else {
+                flag = true;
+                var o = obj[key];
+                for (var i = 0, len = o.length; flag && i < len; i++) {
+                    if (o[i]) {
+                        //counting++;
+                        if (CompareMethod(o[i], compareStr)) {
+                            document.getElementById(key).style.cssText = 'display:initial;';
+                            flag = false;
+                        }
+                    } else {
+                        console.log(o);
+                        console.log(o[i]);
+                    }
+                }
+                if (flag) {
                     document.getElementById(key).style.cssText = 'display:none;';
                 }
             }
@@ -153,6 +200,7 @@ function Iterator_js_JsonObj() {
             }
         );
     }
+    //console.log(counting);
 }
 
 function ForeachObj(obj, func) {

@@ -12,56 +12,71 @@ namespace SchemaNote.ViewModels
         public long ADO_dot_NET2 { get; set; }
 
         public List<Table> Tables { get; set; } = new List<Table>();
-        public Dictionary<string, string> TableNameJson {
+        public Dictionary<string, List<string>> TableNameJson {
             get {
-                var d = new Dictionary<string, string>();
+                var d = new Dictionary<string, List<string>>();
                 int i = 0;
                 Tables.ForEach(t =>
                 {
                     i++;
-                    d.Add(Common.accordion + i, t.NAME.ToUpper());
+                    d.Add(Common.accordion + i, new List<string>() { t.NAME.ToUpper() });
                 });
                 return d;
             }
         }
-        public Dictionary<string, string> ColumnNameJson {
+        public Dictionary<string, List<string>> ColumnNameJson {
             get {
-                var d = new Dictionary<string, string>();
+                var d = new Dictionary<string, List<string>>();
                 int i = 0;
                 Tables.ForEach(t =>
                 {
                     i++;
-                    string Column = string.Empty;
-                    t.Columns.ForEach(c => Column += c.NAME.ToUpper());
-                    d.Add(Common.accordion + i, Column);
+                    var l = new List<string>();
+                    t.Columns.ForEach(c =>
+                    {
+                        l.Add(c.NAME.ToUpper());
+                    });
+                    d.Add(Common.accordion + i, l);
                 });
                 return d;
             }
         }
-        public Dictionary<string, string> DescriptionJson {
+        public Dictionary<string, List<string>> DescriptionJson {
             get {
-                var d = new Dictionary<string, string>();
+                var d = new Dictionary<string, List<string>>();
                 int i = 0;
                 Tables.ForEach(t =>
                 {
                     i++;
-                    string Description = string.Empty;
-                    t.Columns.ForEach(c => Description += c.MS_Description.ToUpper());
-                    d.Add(Common.accordion + i, t.MS_Description.ToUpper() + Description);
+                    var l = new List<string>
+                    {
+                        t.MS_Description.ToUpper()
+                    };
+                    t.Columns.ForEach(c =>
+                    {
+                        l.Add(c.MS_Description.ToUpper());
+                    });
+                    d.Add(Common.accordion + i, l);
                 });
                 return d;
             }
         }
-        public Dictionary<string, string> RemarkJson {
+        public Dictionary<string, List<string>> RemarkJson {
             get {
-                var d = new Dictionary<string, string>();
+                var d = new Dictionary<string, List<string>>();
                 int i = 0;
                 Tables.ForEach(t =>
                 {
                     i++;
-                    string Remark = string.Empty;
-                    t.Columns.ForEach(c => Remark += c.REMARK.ToUpper());
-                    d.Add(Common.accordion + i, t.REMARK.ToUpper() + Remark);
+                    var l = new List<string>()
+                    {
+                        t.REMARK.ToUpper()
+                    };
+                    t.Columns.ForEach(c =>
+                    {
+                        l.Add(c.REMARK.ToUpper());
+                    });
+                    d.Add(Common.accordion + i, l);
                 });
                 return d;
             }

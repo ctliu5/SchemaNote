@@ -30,27 +30,7 @@
         };
     </script>
 
-    <script>
-        //效能比較
-        (function () {
-            function test(func, cName) {
-                var d = Date.now();
-                CurrentIndex = cName;
-                for (var i = 300; i > 0; i--) {
-                    func('TBL');
-                }
-                console.log(func.name + " spend time:" + (Date.now() - d));
-            }
-            for (var cName in Overview) {
-                if (Overview.hasOwnProperty(cName)) {
-                    test(Iterator_jQuery, cName);// 4th ot 3nd
-                    test(Iterator_js_querySelector, cName);// 3nd or 4th
-                    test(Iterator_js_ClassName, cName);// 2rd
-                    test(Iterator_js_JsonObj, cName);// 1st
-                    console.log('================================');
-                }
-            }
-        })();
+    <script>        
         //初始化下拉選單
         window.onload = initialOption;
     </script>
