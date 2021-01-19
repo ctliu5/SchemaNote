@@ -1,7 +1,7 @@
 ﻿@using SchemaNote.ViewModels;
 @model IEnumerable<Column>
 @{
-    var c = Model.FirstOrDefault() ?? new Column();
+    Column c = new Column();
 }
 <thead>
     <tr>

@@ -13,14 +13,14 @@ namespace SchemaNote.Models.DB_Tools
     /// </summary>
     public class ADO_dot_NET
     {
-        string ConnectionString { get; set; }
+        protected string ConnectionString { get; set; }
 
         public ADO_dot_NET(string _ConnectionString)
         {
             ConnectionString = _ConnectionString;
         }
 
-        List<T> ExecSqlDataReader<T>(SqlCommand comm) where T : new()
+        public virtual List<T> ExecSqlDataReader<T>(SqlCommand comm) where T : new()
         {
             using (SqlDataReader dr = comm.ExecuteReader())
             {

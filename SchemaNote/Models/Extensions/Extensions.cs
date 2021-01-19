@@ -4,93 +4,240 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace SchemaNote.Models.Extensions
 {
     public static class Extensions
     {
+        class MappingSetting<T>
+        {
+            internal MappingSetting(PropertyInfo propInfo, Type dataType, int index)
+            {
+                PropInfo = propInfo;
+                PropType = PropInfo.PropertyType;
+                DataType = dataType;
+                Index = index;
+
+                if (PropType == DataType)
+                {
+                    if (DataType.IsValueType)
+                    {
+                        if (PropType == typeof(bool))
+                        {
+                            Assign = Assign_bool;
+                        }
+                        else if (PropType == typeof(char))
+                        {
+                            Assign = Assign_char;
+                        }
+                        else if (PropType == typeof(byte))
+                        {
+                            Assign = Assign_byte;
+                        }
+                        else if (PropType == typeof(short))
+                        {
+                            Assign = Assign_short;
+                        }
+                        else if (PropType == typeof(int))
+                        {
+                            Assign = Assign_int;
+                        }
+                        else if (PropType == typeof(long))
+                        {
+                            Assign = Assign_long;
+                        }
+                        else if (PropType == typeof(float))
+                        {
+                            Assign = Assign_float;
+                        }
+                        else if (PropType == typeof(double))
+                        {
+                            Assign = Assign_double;
+                        }
+                        else if (PropType == typeof(decimal))
+                        {
+                            Assign = Assign_decimal;
+                        }
+                    }
+                    else
+                    {
+                        if (PropType == typeof(string))
+                        {
+                            Assign = Assign_String;
+                        }
+                        else if (PropType == typeof(DateTime))
+                        {
+                            Assign = Assign_DateTime;
+                        }
+                        else if (PropType == typeof(DateTimeOffset))
+                        {
+                            Assign = Assign_DateTimeOffset;
+                        }
+                        else if (PropType == typeof(TimeSpan))
+                        {
+                            Assign = Assign_TimeSpan;
+                        }
+                        else
+                        {
+                            Assign = Assign_SameType;
+                        }
+                    }
+                }
+                else if (DataType.IsValueType)
+                {
+                    if (PropType.IsEnum)
+                    {
+                        Assign = Assign_forEnum;
+                    }
+                    else if (PropType.IsValueType)
+                    {
+                        bool CanAccommodate;
+                        unsafe
+                        {
+                            CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
+                        }
+                        if (CanAccommodate)
+                        {
+                            Assign = Assign_ValueType;
+                        }
+                        else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                    }
+                }
+                else
+                {
+                    Assign = Assign_DifferentType;
+                }
+            }
+
+            readonly PropertyInfo PropInfo;
+            readonly Type PropType;
+            readonly Type DataType;
+            readonly int Index;
+            internal Action<T, SqlDataReader> Assign { get; set; }
+
+            void Assign_bool(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetBoolean(Index));
+            }
+            void Assign_char(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetChar(Index));
+            }
+            void Assign_byte(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetByte(Index));
+            }
+            void Assign_short(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetInt16(Index));
+            }
+            void Assign_int(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetInt32(Index));
+            }
+            void Assign_long(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetInt64(Index));
+            }
+            void Assign_float(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetFloat(Index));
+            }
+            void Assign_double(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetDouble(Index));
+            }
+            void Assign_decimal(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetDecimal(Index));
+            }
+
+            void Assign_String(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetString(Index).Trim());
+            }
+            void Assign_DateTime(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetDateTime(Index));
+            }
+            void Assign_DateTimeOffset(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
+            }
+            void Assign_TimeSpan(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
+            }
+            void Assign_SameType(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, dr[Index]);
+            }
+
+            void Assign_forEnum(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
+            }
+            void Assign_ValueType(T dto, SqlDataReader dr)
+            {
+                if (!dr.IsDBNull(Index))
+                    PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
+            }
+            void Assign_DifferentType(T dto, SqlDataReader dr)
+            {
+                //do nothing.
+            }
+        }
+
         public static List<T> ReadAll<T>(this SqlDataReader dr) where T : new()
         {
             PropertyInfo[] propInfos = typeof(T).GetProperties();
             List<T> DTOs = new List<T>();
-            int FieldCount = dr.FieldCount, dataQTY = 0;
-            if (propInfos.Length != FieldCount) throw new EvaluateException("SqlData與指定的DTO物件無法對應欄位！欄位數量不一致。");
+            if (!dr.HasRows) return DTOs;
+            int FieldCount = dr.FieldCount;
+            List<MappingSetting<T>> MappingRules = new List<MappingSetting<T>>();
+            for (int i = 0; i < FieldCount; i++)
+            {
+                foreach (PropertyInfo propInfo in propInfos)
+                {
+                    if (propInfo.Name == dr.GetName(i))
+                    {
+                        MappingRules.Add(new MappingSetting<T>(propInfo, dr.GetFieldType(i), i));
+                        break;
+                    }
+                }
+            }
+
             while (dr.Read())
             {
                 var DTO = new T();
-                for (int i = 0; i < FieldCount; i++)
+
+                //有對應到的欄位，嘗試指派
+                foreach (MappingSetting<T> mapRule in MappingRules)
                 {
-                    PropertyInfo propInfo = propInfos.Where(n => n.Name == dr.GetName(i)).FirstOrDefault();
-                    //sqlData欄位，沒有收錄到DTO中，則略過。
-                    if (propInfo == null) continue;
-
-                    Type t = propInfo.PropertyType;
-
-                    if (t.IsEnum)
-                    {
-                        if (!dr.IsDBNull(i) && int.TryParse(dr[i].ToString(), out int e))
-                            propInfo.SetValue(DTO, Enum.ToObject(t, e), null);
-                        else
-                            throw new EvaluateException("SqlData資料！無法轉為列舉型別。");
-                    }
-                    else if (dataQTY == 0 && dr.GetFieldType(i) != t)
-                    {
-                        throw new EvaluateException("DTO無法接受對應的SqlData資料！因為型別不一致。");
-                    }
-                    else if (t == typeof(DateTime))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetDateTime(i), null);
-                    }
-                    else if (t == typeof(int))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetInt32(i), null);
-                    }
-                    else if (t == typeof(double))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetDouble(i), null);
-                    }
-                    else if (t == typeof(long))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetInt64(i), null);
-                    }
-                    else if (t == typeof(decimal))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetDecimal(i), null);
-                    }
-                    else if (t == typeof(string))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetString(i)?.Trim(), null);
-                    }
-                    else if (t == typeof(byte))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetByte(i), null);
-                    }
-                    else if (t == typeof(short))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetInt16(i), null);
-                    }
-                    else if (t == typeof(DateTimeOffset))
-                    {
-                        if (!dr.IsDBNull(i))
-                            propInfo.SetValue(DTO, dr.GetDateTimeOffset(i), null);
-                    }
-                    else if (!dr.IsDBNull(i))
-                    {
-                        propInfo.SetValue(DTO, dr[i], null);
-                    }
+                    mapRule.Assign(DTO, dr);
                 }
+                //沒對應到的欄位，自然略過，使用預設值
+
                 DTOs.Add(DTO);
-                dataQTY++;
             }
             return DTOs;
         }

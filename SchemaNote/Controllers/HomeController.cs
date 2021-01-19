@@ -19,7 +19,7 @@ namespace SchemaNote.Controllers
             _db_tool = DB_tool.ADO_dot_NET;
         }
 
-        public IActionResult Test(int times = 50)
+        public IActionResult Test(int times = 100)
         {
             #region check Connection
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
@@ -30,23 +30,26 @@ namespace SchemaNote.Controllers
             }
             #endregion
 
-            Stopwatch sw = Stopwatch.StartNew();
+            long ADO_dot_NET = 0, ADO_dot_NET_old = 0, ADO_dot_NET_old2 = 0, Dapper = 0;
+
+            Stopwatch sw = new Stopwatch();
+
             for (int i = 0; i < times; i++)
             {
-                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, DB_tool.Dapper);
-            }
-            sw.Stop();
-            ViewData["Dapper"] = (long)sw.ElapsedMilliseconds;
+                sw.Start();
+                DB_Access.GetTables_Columns(ConnectionString, DB_tool.ADO_dot_NET);
+                sw.Stop();
+                ADO_dot_NET += sw.ElapsedMilliseconds;
+                sw.Reset();
 
-            sw.Reset();
-
-            sw.Start();
-            for (int i = 0; i < times; i++)
-            {
-                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, DB_tool.ADO_dot_NET);
+                sw.Start();
+                DB_Access.GetTables_Columns(ConnectionString, DB_tool.Dapper);
+                sw.Stop();
+                Dapper += sw.ElapsedMilliseconds;
+                sw.Reset();
             }
-            sw.Stop();
-            ViewData["ADO_dot_NET"] = (long)sw.ElapsedMilliseconds;
+            ViewData["ADO_dot_NET"] = ADO_dot_NET;
+            ViewData["Dapper"] = Dapper;
 
             return View();
         }
@@ -66,7 +69,7 @@ namespace SchemaNote.Controllers
                 if (string.IsNullOrEmpty(ConnectionString))
                 {
                     TempData["ErrorMessage"] = Common.ConnStringMissing;
-                    return View("Index");
+                    return RedirectToAction("Index");
                 }
                 UserModel userModel = new UserModel();
                 userModel.SetMiddlewareValue(ConnectionString);
@@ -76,7 +79,7 @@ namespace SchemaNote.Controllers
                 if (Flag.ResultType != ExceResultType.Success)
                 {
                     TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                    return RedirectToAction("Overview");
+                    return RedirectToAction("Index");
                 }
                 return View(Flag.OBJ);
             }
@@ -94,7 +97,7 @@ namespace SchemaNote.Controllers
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
-                return View("Index");
+                return RedirectToAction("Index");
             }
             #endregion
 
@@ -102,7 +105,7 @@ namespace SchemaNote.Controllers
             if (Flag.ResultType != ExceResultType.Success)
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
+                return View();
             }
             return View(Flag.OBJ);
         }
@@ -115,7 +118,7 @@ namespace SchemaNote.Controllers
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
-                return View("Index");
+                return RedirectToAction("Index");
             }
             #endregion
             else if (id == null)
@@ -141,18 +144,18 @@ namespace SchemaNote.Controllers
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
-                return View("Index");
+                return RedirectToAction("Index");
             }
             #endregion
             else if (model.Count == 0)
             {
                 //沒有要新刪修的項目
-                return RedirectToAction("Details", id);
+                return Details(id);
             }
             else if (!ModelState.IsValid)
             {
                 TempData["ErrorMessage"] = Common.ValidationMsg;
-                return RedirectToAction("Details", id);
+                return Details(id);
             }
 
             DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
