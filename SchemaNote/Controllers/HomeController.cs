@@ -19,6 +19,38 @@ namespace SchemaNote.Controllers
             _db_tool = DB_tool.ADO_dot_NET;
         }
 
+        public IActionResult Test(int times = 50)
+        {
+            #region check Connection
+            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                return View("Index");
+            }
+            #endregion
+
+            Stopwatch sw = Stopwatch.StartNew();
+            for (int i = 0; i < times; i++)
+            {
+                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, DB_tool.Dapper);
+            }
+            sw.Stop();
+            ViewData["Dapper"] = (long)sw.ElapsedMilliseconds;
+
+            sw.Reset();
+
+            sw.Start();
+            for (int i = 0; i < times; i++)
+            {
+                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, DB_tool.ADO_dot_NET);
+            }
+            sw.Stop();
+            ViewData["ADO_dot_NET"] = (long)sw.ElapsedMilliseconds;
+
+            return View();
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
