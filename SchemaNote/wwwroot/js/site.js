@@ -19,9 +19,7 @@ function initialOption() {
     var i = 0;
     var choose = document.getElementById('choose');
     choose.addEventListener("change", SetIndex, false);
-    //for (var cName in Overview) {
-    for (var j = 0, len = Overview.length; j < len; j++) {
-        var cName = Overview[j];
+    for (var cName in Overview) {
         if (++i == 1)
             CurrentIndex = cName;
         if (Overview.hasOwnProperty(cName)) {
@@ -51,9 +49,7 @@ function testIterator() {
         }
         console.log(func.name + " spend time:" + (Date.now() - d));
     }
-    //for (var cName in Overview) {
-    for (var j = 0, len = Overview.length; j < len; j++) {
-        var cName = Overview[j];
+    for (var cName in Overview) {
         if (Overview.hasOwnProperty(cName)) {
             test(Iterator_jQuery, cName);// 4th ot 3nd
             test(Iterator_js_querySelector, cName);// 3nd or 4th
