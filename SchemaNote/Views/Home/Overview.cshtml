@@ -31,13 +31,13 @@
     </script>
 
     <script>
-        @*
         //效能比較
         (function () {
-            function test(func, className) {
+            function test(func, cName) {
                 var d = Date.now();
+                CurrentIndex = cName;
                 for (var i = 300; i > 0; i--) {
-                    func('TBL', className);
+                    func('TBL');
                 }
                 console.log(func.name + " spend time:" + (Date.now() - d));
             }
@@ -47,10 +47,10 @@
                     test(Iterator_js_querySelector, cName);// 3nd or 4th
                     test(Iterator_js_ClassName, cName);// 2rd
                     test(Iterator_js_JsonObj, cName);// 1st
+                    console.log('================================');
                 }
             }
         })();
-        *@
         //初始化下拉選單
         window.onload = initialOption;
     </script>
@@ -79,7 +79,7 @@
         </select>
     </div>
     <div class="form-group form-group-lg">
-        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(typeof this.value === 'string' ? this.value.trim() : '')" placeholder="Enter key words..." />
+        <input id="SearchTextBox" type="text" class="form-control" placeholder="Enter key words..." />
     </div>
     <div class="form-group form-group-lg">
         <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
