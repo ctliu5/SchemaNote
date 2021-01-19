@@ -22,7 +22,7 @@ namespace SchemaNote
             WebHost.CreateDefaultBuilder(args)
                 .UseKestrel(option =>
                 {
-                    option.Listen(IPAddress.Loopback, 5000);
+                    option.Listen(IPAddress.Loopback, 8010);
                 })
                 .UseStartup<Startup>();
     }

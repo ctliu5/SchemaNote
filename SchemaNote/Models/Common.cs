@@ -4,6 +4,7 @@ namespace SchemaNote.Models
 {
     public static class Common
     {
+        public const string CurrentVersion = "Version: 0.1.0";
         public const string DefaultValue = "(空白)";
         public const string ConnString = "Connection String";
         public const string NAME_CHT = "中文名稱";

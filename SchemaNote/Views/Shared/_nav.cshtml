@@ -5,9 +5,9 @@
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="collapseListGroupHeading">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" href="#collapseListGroup" aria-expanded="false" aria-controls="collapseListGroup">
-                    Connect
-                </a>
+                <span class="collapsed" role="button" data-toggle="collapse" href="#collapseListGroup" aria-expanded="false" aria-controls="collapseListGroup">
+                    Let's Connect
+                </span>
             </h4>
         </div>
         <div id="collapseListGroup" class="panel-collapse collapse" role="tabpanel" aria-labelledby="collapseListGroupHeading" aria-expanded="false" style="height: 0px;">
@@ -15,7 +15,7 @@
                 <form asp-controller="Home" asp-action="Overview" method="post">
                     <div class="form-group">
                         <label asp-for="ConnectionString" class="control-label"></label>
-                        <input asp-for="ConnectionString" class="form-control" placeholder="Connection String" />
+                        <input asp-for="ConnectionString" class="form-control"/>
                         <span asp-validation-for="ConnectionString" class="text-danger"></span>
                     </div>
                     <button type="submit" class="btn btn-default">確認</button>

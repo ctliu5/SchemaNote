@@ -2,11 +2,32 @@
     ViewData["Title"] = "Index";
 }
 <h2>@ViewData["Title"]</h2>
-@if (ViewData["Message"] != null)
-{
-    <h3>@ViewData["Message"]</h3>
-}
 @if (ViewData["ErrorMessage"] != null)
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
+
+<hr />
+<br />
+<ul>
+    <li>
+        <strong>工具介紹</strong>
+        <p>「SchemaNote」（以下簡稱本平台）是針對SQL Server，檢視、添加物件的自定義註記，之平台</p>
+        <br />
+    </li>
+    <li>
+        <strong>原理說明</strong>
+        <p>本平台註記原理在於利用資料庫物件的<mark title="Extended Property"><a title="前往擴充屬性官方說明" href="https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/extended-properties-catalog-views-sys-extended-properties">擴充屬性</a></mark></p>
+        <br />
+    </li>
+    <li>
+        <strong>注意事項</strong>
+        <ul>
+            <li>建議使用SQL Server版本2008(含)以上，版本2005以下可使用另一套開源工具<a title="前往DDC官方說明" href="https://archive.codeplex.com/?p=datadictionary">DDC</a></li>
+            <li>目前只支援資料表(Table)、檢視表(View)這兩種物件</li>
+            <li>本平台僅異動擴充屬性，不能控制其他資料庫物件、結構</li>
+            <li>版本號，有"_ssl"字尾表示為支援SSL協定</li>
+            <li>不支援SSL的版本，請於受保護的網路環境使用</li>
+        </ul>
+    </li>
+</ul>

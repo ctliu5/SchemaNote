@@ -20,7 +20,6 @@ namespace SchemaNote.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            ViewData["Message"] = "Enter your connection string.";
             return View();
         }
 
