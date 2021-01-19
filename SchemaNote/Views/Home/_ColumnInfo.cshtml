@@ -1,7 +1,11 @@
 ﻿@using SchemaNote.ViewModels;
 @model ColumnDetail
+@{
+    bool HasIndex = Model.Indexes.Count > 0;
+    Index ind = new Index();
+}
 <tr>
-    <td>
+    <td rowspan="@(HasIndex ? "2": "1")">
         @Html.DisplayFor(modelItem => modelItem.NAME)
         <input name="@("[" + Model.COLUMN_ID + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
     </td>
@@ -9,11 +13,12 @@
         data-field="@Common.MS_Desc"
         data-content="@Model.MS_Description"
         data-column_id="@Model.COLUMN_ID"
-        data-class="form-control">
+        data-class="form-control"
+        rowspan="@(HasIndex ? "2": "1")">
         @Html.DisplayFor(n => Model.MS_Description)
         @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
     </td>
-    <td>
+    <td rowspan="@(HasIndex ? "2": "1")">
         @Html.DisplayFor(modelItem => modelItem.TYPE)
     </td>
     <td>
@@ -34,3 +39,48 @@
         @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[" + Model.REMARK + "].REMARK" })
     </td>
 </tr>
+@if (HasIndex)
+{
+    <tr class="indexes">
+        <td colspan="4">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(modelItem => ind.IS_UNIQUE)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(modelItem => ind.TYPE_NAME)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(modelItem => ind.NAME)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(modelItem => ind.FILL_FACTOR)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Index index in Model.Indexes)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => index.IS_UNIQUE)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => index.TYPE_NAME)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => index.NAME)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => index.FILL_FACTOR)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </td>
+    </tr>
+}
+

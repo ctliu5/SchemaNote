@@ -2,7 +2,6 @@
 @model IEnumerable<ColumnDetail>
 @{
     var c = Model.FirstOrDefault() ?? new ColumnDetail();
-    Index ind = new Index();
 }
 <thead>
     <tr>
@@ -33,49 +32,5 @@
     @foreach (ColumnDetail col in Model)
     {
         <partial name="_ColumnInfo" model="col" />
-        @if (col.Indexes.Count > 0)
-        {
-            <tr>
-                <td colspan="7">
-                    <table class="table table-bordered" style="background-color:#f5f5f5;max-width:660px;float:right;">
-                        <thead>
-                            <tr>
-                                <td>
-                                    @Html.DisplayNameFor(modelItem => ind.IS_UNIQUE)
-                                </td>
-                                <td>
-                                    @Html.DisplayNameFor(modelItem => ind.TYPE_NAME)
-                                </td>
-                                <td>
-                                    @Html.DisplayNameFor(modelItem => ind.NAME)
-                                </td>
-                                <td>
-                                    @Html.DisplayNameFor(modelItem => ind.FILL_FACTOR)
-                                </td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (Index index in col.Indexes)
-                            {
-                                <tr>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => index.IS_UNIQUE)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => index.TYPE_NAME)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => index.NAME)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => index.FILL_FACTOR)
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        }
     }
 </tbody>

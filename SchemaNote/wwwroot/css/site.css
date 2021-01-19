@@ -3,11 +3,13 @@
         width: 1400px;
     }
 }
+
 @media (min-width: 1696px) {
     .container {
         width: 1646px;
     }
 }
+
 .tabDetail_left td {
     word-break: break-all;
 }
@@ -35,7 +37,7 @@
 
 .count {
     font-size: 1.3em;
-    float:right;
+    float: right;
 }
 
 .tabDetail {
@@ -104,3 +106,21 @@
     color: royalblue;
     font: bold;
 }
+
+.indexes > td {
+    padding: 0 !important;
+}
+
+    .indexes > td > table {
+        background-color: #f5f5f5 !important;
+    }
+
+        .indexes > td > table > tbody > tr > td, .indexes > td > table > thead > tr > th {
+            border-style: solid;
+            border-width: 1px 0px 0px 1px;
+            border-color: #ddd;
+        }
+
+        .indexes > td > table > tbody > tr > td:nth-child(1), .indexes > td > table > thead > tr > th:nth-child(1) {
+            border-width: 1px 0px 0px 0px;
+        }

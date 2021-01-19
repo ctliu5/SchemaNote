@@ -64,7 +64,7 @@ function Iterator_js_ClassName(compareStr, className) {
 function Iterator_js_JsonObj(compareStr, index) {
     compareStr = compareStr.toUpperCase();
     if (compareStr) {
-        ForeachObj(Overview[index].j,
+        ForeachObj(Overview[index].json,
             function (obj, key) {
                 if (obj[key].indexOf(compareStr) > -1) {
                     document.getElementById(key).style.cssText = 'display:initial;';
@@ -74,7 +74,7 @@ function Iterator_js_JsonObj(compareStr, index) {
             }
         );
     } else {
-        ForeachObj(Overview[index].j,
+        ForeachObj(Overview[index].json,
             function (obj, key) {
                 document.getElementById(key).style.cssText = 'display:initial;';
             }

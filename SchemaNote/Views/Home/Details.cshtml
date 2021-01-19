@@ -46,8 +46,8 @@
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
 <div>
-    <a asp-action="Overview" class="btn btn-default"><strong>&lt; </strong>Back to overview</a>
-    <button id="EditAll" type="button" class="btn btn-default" onclick="EditAll();">轉為編輯</button>
+    <a asp-action="Overview" class="btn btn-default"><strong>&lt; </strong>Overview</a>
+    <button id="EditAll" type="button" class="btn btn-info" onclick="EditAll();">編輯全部</button>
 </div>
 <br />
 <form asp-action="Details" onsubmit="EmptyString('@Common.DefaultValue')" method="post" class="panel panel-default">
