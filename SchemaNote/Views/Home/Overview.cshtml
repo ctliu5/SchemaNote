@@ -10,23 +10,63 @@
 @section Scripts
     {
     <script>
-        Overview = @Html.Raw(Json.Serialize(Model.TablesJson));
+        Overview = {
+            'objName': {
+                name_cht: "物件名稱",
+                j: @Html.Raw(Json.Serialize(Model.TableNameJson))
+            },
+            'colName': {
+                name_cht: "欄位名稱",
+                j: @Html.Raw(Json.Serialize(Model.ColumnNameJson))
+            },
+            'description': {
+                name_cht: "中文名稱",
+                j: @Html.Raw(Json.Serialize(Model.DescriptionJson))
+            },
+            'remark': {
+                name_cht: "備註",
+                j: @Html.Raw(Json.Serialize(Model.RemarkJson))
+            },
+        };
         @*
         //效能比較
         (function () {
-            function test(func, name) {
+            function test(func, className) {
                 var d = Date.now();
-                for (var i = 1000; i > 0; i--) {
-                    func('TBL');
+                for (var i = 300; i > 0; i--) {
+                    func('TBL', className);
                 }
-                console.log(name + " spend time:" + (Date.now() - d));
+                console.log(func.name + " spend time:" + (Date.now() - d));
             }
-            test(Iterator_jQuery, 'Iterator_jQuery');// 4th
-            test(Iterator_js_ClassName, 'Iterator_js_ClassName');// 3rd
-            test(Iterator_js_querySelector, 'Iterator_js_querySelector');// 2nd
-            test(Iterator_js_JsonObj, 'Iterator_js_JsonObj');// 1st
+            for (var cName in Overview) {
+                if (Overview.hasOwnProperty(cName)) {
+                    test(Iterator_jQuery, cName);// 4th ot 3nd
+                    test(Iterator_js_querySelector, cName);// 3nd or 4th
+                    test(Iterator_js_ClassName, cName);// 2rd
+                    test(Iterator_js_JsonObj, cName);// 1st
+                }
+            }
         })();
         *@
+        //初始化tooltip功能
+        (function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            var chooseUl = document.getElementById('choose');
+            var i = 0;
+            for (var cName in Overview) {
+                if (++i == 1)
+                    CurrentIndex = cName;
+                if (Overview.hasOwnProperty(cName)) {
+                    var option = document.createElement('option');
+                    var textnode = document.createTextNode(Overview[cName].name_cht);
+                    option.appendChild(textnode);
+                    option.setAttribute("value", cName);
+                    option.addEventListener("click", SetIndex);
+                    chooseUl.appendChild(option);
+                }
+            };
+            $('.dropdown-toggle').dropdown();
+        })();
     </script>
 }
 <h1>Overview</h1>
@@ -35,29 +75,43 @@
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
 
-<p class="form-horizontal">
-    <label class="control-label">Search</label>
-    <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj(this.value)" placeholder="Enter table name...">
-</p>
+<div class="form-inline">
+    <div class="form-group">
+        <select id="choose" class="form-control"></select>
+        <input type="text" class="form-control" onkeyup="Iterator_js_JsonObj((typeof this.value === 'string' ? this.value.trim() : ''), CurrentIndex)" placeholder="Enter key words..." />
+    </div>
+</div>
+<br />
 @foreach (var item in Model.Tables)
 {
     i++;
-    <div class="panel-group accordion" id="@Html.Raw("accordion"+i)" role="tablist" aria-multiselectable="true">
+    <div class="panel-group accordion" id="@Html.Raw(Common.accordion+i)" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default ">
             <div class="panel-heading" role="tab">
-                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw("accordion"+i)" href="#@Html.Raw("collapse"+i)" aria-expanded="false" aria-controls="@Html.Raw("collapse"+i)">
+                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw(Common.accordion+i)" href="#@Html.Raw("collapse"+i)" aria-expanded="false" aria-controls="@Html.Raw("collapse"+i)">
                     <span class="caret"></span>
-                    <strong id="TableName" class="TableName">
+                    <strong class="objName">
                         @Html.DisplayFor(modelItem => item.NAME)
                     </strong>
                 </span>
-                <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                <a class="description text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
                     @Html.DisplayFor(modelItem => item.MS_Description)
                 </a>
+                <span class="count" data-toggle="tooltip" data-placement="top" title="@Common.CountTip">
+                    @Html.DisplayNameFor(model => t.QTY):<strong class="text-info">@Html.DisplayFor(modelItem => item.QTY)</strong>
+                </span>
             </div>
             <div id="@Html.Raw("collapse"+i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
                 <table class="tabDetail_left">
                     <tbody>
+                        <tr>
+                            <td>
+                                @Html.DisplayNameFor(model => t.TYPE_NAME)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TYPE_NAME)
+                            </td>
+                        </tr>
                         <tr>
                             <td>
                                 @Html.DisplayNameFor(model => t.SCHEMA_NAME)
@@ -82,22 +136,6 @@
                                 @Html.DisplayFor(modelItem => item.MODIFY_DATE)
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.TYPE_NAME)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.TYPE_NAME)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.QTY)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.QTY)
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
                 <div class="tabDetail_right">
@@ -105,7 +143,7 @@
                         @Html.DisplayNameFor(model => t.REMARK)
                     </div>
                     <div>
-                        <a class="text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                        <a class="remark text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
                             @Html.DisplayFor(modelItem => item.REMARK)
                         </a>
                     </div>

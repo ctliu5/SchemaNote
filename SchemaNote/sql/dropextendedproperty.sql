@@ -7,9 +7,9 @@ DECLARE @id INT= @OBJECT_ID
       , @level2name SYSNAME
 	  , @qty INT = 0;
 
-SELECT @level2name = c.[name], @qty = COUNT(column_id) OVER(PARTITION BY object_id) 
+SELECT @level2name = c.[name], @qty = COUNT(column_id) OVER(PARTITION BY [object_id]) 
 FROM sys.columns AS c
-WHERE object_id = @id
+WHERE [object_id] = @id
       AND column_id = @col_id;
 
 IF(@qty > 0)

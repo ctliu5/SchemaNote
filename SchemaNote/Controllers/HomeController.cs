@@ -37,7 +37,14 @@ namespace SchemaNote.Controllers
                 UserModel userModel = new UserModel();
                 userModel.SetMiddlewareValue(ConnectionString);
                 _sessionWapper.User = userModel;
-                return View(DB_Access.GetTables_Columns(ConnectionString));
+
+                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString);
+                if (Flag.ResultType != ExceResultType.Success)
+                {
+                    TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                    return RedirectToAction("Overview");
+                }
+                return View(Flag.OBJ);
             }
             else
             {
@@ -56,7 +63,14 @@ namespace SchemaNote.Controllers
                 return View("Index");
             }
             #endregion
-            return View(DB_Access.GetTables_Columns(ConnectionString));
+
+            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Overview");
+            }
+            return View(Flag.OBJ);
         }
 
         [HttpGet]

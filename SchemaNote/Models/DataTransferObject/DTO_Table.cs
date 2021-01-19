@@ -22,7 +22,7 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "物件修改日期")]
         public string MODIFY_DATE { get; set; }
 
-        [Display(Name = "參考筆數")]
+        [Display(Name = "筆數")]
         public long QTY { get; set; }
     }
 }

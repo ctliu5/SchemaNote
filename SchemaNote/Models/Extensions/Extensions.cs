@@ -41,39 +41,48 @@ namespace SchemaNote.Models.Extensions
                     }
                     else if (t == typeof(DateTime))
                     {
-                        propInfo.SetValue(DTO, dr.GetDateTime(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetDateTime(i), null);
                     }
                     else if (t == typeof(int))
                     {
-                        propInfo.SetValue(DTO, dr.GetInt32(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetInt32(i), null);
                     }
                     else if (t == typeof(double))
                     {
-                        propInfo.SetValue(DTO, dr.GetDouble(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetDouble(i), null);
                     }
                     else if (t == typeof(long))
                     {
-                        propInfo.SetValue(DTO, dr.GetInt64(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetInt64(i), null);
                     }
                     else if (t == typeof(decimal))
                     {
-                        propInfo.SetValue(DTO, dr.GetDecimal(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetDecimal(i), null);
                     }
                     else if (t == typeof(string))
                     {
-                        propInfo.SetValue(DTO, dr.GetString(i)?.Trim(), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetString(i)?.Trim(), null);
                     }
                     else if (t == typeof(byte))
                     {
-                        propInfo.SetValue(DTO, dr.GetByte(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetByte(i), null);
                     }
                     else if (t == typeof(short))
                     {
-                        propInfo.SetValue(DTO, dr.GetInt16(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetInt16(i), null);
                     }
                     else if (t == typeof(DateTimeOffset))
                     {
-                        propInfo.SetValue(DTO, dr.GetDateTimeOffset(i), null);
+                        if (!dr.IsDBNull(i))
+                            propInfo.SetValue(DTO, dr.GetDateTimeOffset(i), null);
                     }
                     else if (!dr.IsDBNull(i))
                     {

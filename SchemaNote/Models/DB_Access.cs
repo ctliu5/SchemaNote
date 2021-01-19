@@ -1,7 +1,9 @@
 ﻿using SchemaNote.DB_Tools.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 
@@ -9,19 +11,35 @@ namespace SchemaNote.Models
 {
     public static class DB_Access
     {
-        internal static OverviewViewModel GetTables_Columns(string ConnectionString)
+        internal static DTO_Flag<OverviewViewModel> GetTables_Columns(string ConnectionString)
         {
+            var Flag = new DTO_Flag<OverviewViewModel>(MethodBase.GetCurrentMethod().Name);
+
             List<DTO_Column> cols = new List<DTO_Column>();
             List<DTO_Table> tbls = new List<DTO_Table>();
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
             ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
 
-            ADO.GetColumns(ref cols);
-            ADO.GetTables(ref tbls);
-            ADO.GetExtended_prop(ref props);
+            try
+            {
+                ADO.GetColumns(ref cols);
+                ADO.GetTables(ref tbls);
+                ADO.GetExtended_prop(ref props);
+            }
+            catch (SqlException ex)
+            {
+                Flag.SetError(ex);
+                return Flag;
+            }
+            catch (Exception ex)
+            {
+                Flag.SetError(ex);
+                return Flag;
+            }
 
-            var obj = new OverviewViewModel
+
+            Flag.OBJ = new OverviewViewModel
             {
                 Tables = tbls.Select(t =>
                 {
@@ -58,7 +76,7 @@ namespace SchemaNote.Models
                     };
                 }).ToList()
             };
-            return obj;
+            return Flag;
         }
 
         internal static DTO_Flag<DetailsViewModel> GetTable_Columns(string ConnectionString, int _OBJECT_ID)
@@ -84,8 +102,22 @@ namespace SchemaNote.Models
                 return Flag;
             }
 
-            ADO.GetExtended_prop(ref props);
-            ADO.GetIndexes(ref indexes);
+            try
+            {
+                ADO.GetExtended_prop(ref props);
+                ADO.GetIndexes(ref indexes);
+            }
+            catch (SqlException ex)
+            {
+                Flag.SetError(ex);
+                return Flag;
+            }
+            catch (Exception ex)
+            {
+                Flag.SetError(ex);
+                return Flag;
+            }
+
 
             var tbl = Flag_tbl.OBJ.FirstOrDefault();
 
@@ -138,9 +170,25 @@ namespace SchemaNote.Models
 
         internal static DTO_Flag<int> SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model)
         {
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
+
             #region 取得物件的所有自訂屬性
             var props = new List<DTO_Extended_prop>();
-            new ADO_dot_NET(ConnectionString).GetExtended_prop(ref props);
+            try
+            {
+                new ADO_dot_NET(ConnectionString).GetExtended_prop(ref props);
+            }
+            catch (SqlException ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
+            catch (Exception ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
+
             var curr_props = props.Where(p => p.MAJOR_ID == id).ToList();
             #endregion
 

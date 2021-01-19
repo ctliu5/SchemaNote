@@ -28,9 +28,14 @@
     margin-bottom: 0;
 }
 
-.TableName {
+.objName {
     font-size: 1.3em;
     padding-right: 10px;
+}
+
+.count {
+    font-size: 1.3em;
+    float:right;
 }
 
 .tabDetail {

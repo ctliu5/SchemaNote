@@ -8,14 +8,56 @@ namespace SchemaNote.ViewModels
     public class OverviewViewModel : IConnString
     {
         public List<Table> Tables { get; set; } = new List<Table>();
-        public Dictionary<string, string> TablesJson {
+        public Dictionary<string, string> TableNameJson {
             get {
                 var d = new Dictionary<string, string>();
                 int i = 0;
                 Tables.ForEach(t =>
                 {
                     i++;
-                    d.Add(t.NAME.ToUpper(), "accordion" + i);
+                    d.Add(Common.accordion + i, t.NAME.ToUpper());
+                });
+                return d;
+            }
+        }
+        public Dictionary<string, string> ColumnNameJson {
+            get {
+                var d = new Dictionary<string, string>();
+                int i = 0;
+                Tables.ForEach(t =>
+                {
+                    i++;
+                    string Column = string.Empty;
+                    t.Columns.ForEach(c => Column += c.NAME.ToUpper());
+                    d.Add(Common.accordion + i, Column);
+                });
+                return d;
+            }
+        }
+        public Dictionary<string, string> DescriptionJson {
+            get {
+                var d = new Dictionary<string, string>();
+                int i = 0;
+                Tables.ForEach(t =>
+                {
+                    i++;
+                    string Description = string.Empty;
+                    t.Columns.ForEach(c => Description += c.MS_Description.ToUpper());
+                    d.Add(Common.accordion + i, t.MS_Description.ToUpper() + Description);
+                });
+                return d;
+            }
+        }
+        public Dictionary<string, string> RemarkJson {
+            get {
+                var d = new Dictionary<string, string>();
+                int i = 0;
+                Tables.ForEach(t =>
+                {
+                    i++;
+                    string Remark = string.Empty;
+                    t.Columns.ForEach(c => Remark += c.REMARK.ToUpper());
+                    d.Add(Common.accordion + i, t.REMARK.ToUpper() + Remark);
                 });
                 return d;
             }

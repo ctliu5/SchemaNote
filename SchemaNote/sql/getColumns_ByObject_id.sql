@@ -17,18 +17,18 @@ WITH sys_columns
                         ELSE ODBCSCALE(c.[system_type_id], c.[scale])
                       END AS INT)     AS NUMERIC_SCALE
            FROM sys.columns AS c
-           JOIN   sys.objects AS o ON c.object_id = o.object_id
-                                      AND c.object_id = @id
-          WHERE o.type IN('U', 'V')),
+           JOIN   sys.objects AS o ON c.[object_id] = o.[object_id]
+                                      AND c.[object_id] = @id
+          WHERE o.[type] IN('U', 'V')),
      columns_info
-     AS (   SELECT c.object_id                                         AS [OBJECT_ID]
-                   ,COLUMNPROPERTY(c.object_id, c.NAME, 'ColumnId')    AS [COLUMN_ID]
-                   ,c.NAME /*QUOTENAME(c.NAME)*/                       AS [NAME]
-                   ,ISNULL(ty.NAME, '')                                AS [TYPE_NAME]
+     AS (   SELECT c.[object_id]                                         AS [OBJECT_ID]
+                   ,COLUMNPROPERTY(c.[object_id], c.[name], 'ColumnId')  AS [COLUMN_ID]
+                   ,c.[name] /*QUOTENAME(c.[name])*/                   AS [NAME]
+                   ,ISNULL(ty.[name], '')                                AS [TYPE_NAME]
                    ,CASE
-                      WHEN ty.NAME IN('decimal', 'numeric') THEN '(' + CAST(NUMERIC_PRECISION AS VARCHAR(5)) + ',' + CAST(NUMERIC_SCALE AS VARCHAR(5)) + ')'
-                      WHEN COLUMNPROPERTY(c.object_id, c.NAME, 'charmaxlen') = -1 THEN 'max'
-                      WHEN ISNULL(COLUMNPROPERTY(c.object_id, c.NAME, 'charmaxlen'), '') <> '' THEN '(' + CAST(COLUMNPROPERTY(c.object_id, c.NAME, 'charmaxlen') AS NVARCHAR(10)) + ')'
+                      WHEN ty.[name] IN('decimal', 'numeric') THEN '(' + CAST(NUMERIC_PRECISION AS VARCHAR(5)) + ',' + CAST(NUMERIC_SCALE AS VARCHAR(5)) + ')'
+                      WHEN COLUMNPROPERTY(c.[object_id], c.[name], 'charmaxlen') = -1 THEN 'max'
+                      WHEN ISNULL(COLUMNPROPERTY(c.[object_id], c.[name], 'charmaxlen'), '') <> '' THEN '(' + CAST(COLUMNPROPERTY(c.[object_id], c.[name], 'charmaxlen') AS NVARCHAR(10)) + ')'
                       ELSE ''
                     END                                                AS [LENGTH]
                    ,CASE
@@ -42,14 +42,14 @@ WITH sys_columns
                    ,ISNULL(OBJECT_DEFINITION(c.default_object_id), '') AS [DEFUALT]
               FROM sys_columns AS c
               LEFT JOIN sys.types AS ty ON ty.user_type_id = c.user_type_id
-                                           AND c.object_id = @id
+                                           AND c.[object_id] = @id
               LEFT JOIN (SELECT ic.column_id
                                 ,k.parent_object_id
                            FROM sys.key_constraints k
-                           JOIN   sys.index_columns ic ON ic.object_id = k.parent_object_id
-                                                          AND k.parent_object_id = @id
-                                                          AND ic.index_id = k.unique_index_id
-                                                          AND k.type = 'PK') AS kic ON kic.column_id = c.column_id)
+                           JOIN   sys.index_columns ic ON ic.[object_id] = k.[parent_object_id]
+                                                          AND k.[parent_object_id] = @id
+                                                          AND ic.[index_id] = k.[unique_index_id]
+                                                          AND k.[type] = 'PK') AS kic ON kic.[column_id] = c.[column_id])
 SELECT *
   FROM columns_info
  ORDER BY COLUMN_ID; 

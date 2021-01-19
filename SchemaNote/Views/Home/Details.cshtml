@@ -24,6 +24,20 @@
                 )
             }
         })();
+        function EditAll() {
+            var htmlCollection = document.getElementsByClassName("NoteField");
+            if (htmlCollection.length > 0) {
+                var arr = Array.prototype.slice.call(htmlCollection);
+                arr.forEach(
+                    function (item) {
+                        var doubleClickEvent = document.createEvent('MouseEvents');
+                        doubleClickEvent.initEvent('dblclick', true, true);
+                        item.dispatchEvent(doubleClickEvent);
+                    }
+                )
+                document.getElementById('EditAll').style.cssText = 'display:none;';
+            }
+        }
     </script>
 }
 <h2>Details</h2>
@@ -31,13 +45,15 @@
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
-<p>
+<div>
     <a asp-action="Overview" class="btn btn-default"><strong>&lt; </strong>Back to overview</a>
-</p>
+    <button id="EditAll" type="button" class="btn btn-default" onclick="EditAll();">轉為編輯</button>
+</div>
+<br />
 <form asp-action="Details" onsubmit="EmptyString('@Common.DefaultValue')" method="post" class="panel panel-default">
     <input name="[0].COLUMN_ID" value="0" style="display:none;" />
     <div class="panel-heading">
-        <stron class="TableName">
+        <stron class="objName">
             @Html.DisplayFor(n => Model.NAME)
         </stron>
         <sapn class="NoteField"
@@ -49,10 +65,21 @@
             @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[0].MS_Description" })
         </sapn>
         <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
+        <span class="count" data-toggle="tooltip" data-placement="top" title="@Common.CountTip">
+            @Html.DisplayNameFor(model => Model.QTY):<strong class="text-info">@Html.DisplayFor(modelItem => Model.QTY)</strong>
+        </span>
     </div>
     <div class="panel-body">
         <table class="tabDetail_left">
             <tbody>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.TYPE_NAME)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.TYPE_NAME)
+                    </td>
+                </tr>
                 <tr>
                     <td>
                         @Html.DisplayNameFor(model => Model.SCHEMA_NAME)
@@ -75,22 +102,6 @@
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => Model.MODIFY_DATE)
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.TYPE_NAME)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.TYPE_NAME)
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.QTY)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.QTY)
                     </td>
                 </tr>
             </tbody>

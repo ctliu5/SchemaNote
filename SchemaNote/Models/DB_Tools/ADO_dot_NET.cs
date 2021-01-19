@@ -119,9 +119,10 @@ namespace SchemaNote.DB_Tools.Models
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new SqlConnection();
             try
             {
+                conn.ConnectionString = ConnectionString;
                 conn.Open();
 
                 using (SqlCommand comm = new SqlCommand())
@@ -168,9 +169,10 @@ namespace SchemaNote.DB_Tools.Models
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new SqlConnection();
             try
             {
+                conn.ConnectionString = ConnectionString;
                 conn.Open();
 
                 using (SqlCommand comm = new SqlCommand())
@@ -223,11 +225,12 @@ namespace SchemaNote.DB_Tools.Models
                 TYPE = "",
                 NewLine = Environment.NewLine;
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new SqlConnection();
             SqlCommand comm = new SqlCommand();
 
             try
             {
+                conn.ConnectionString = ConnectionString;
                 comm.Connection = conn;
                 comm.Parameters.Add(para_OBJECT_ID);
                 conn.Open();
