@@ -4,6 +4,7 @@ using SchemaNote.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -19,8 +20,32 @@ namespace SchemaNote.Models
             List<DTO_Table> tbls = new List<DTO_Table>();
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
+            Stopwatch sw = new Stopwatch();
+            long ADO_dot_NET = 0, Dapper = 0;
+
             try
             {
+                for (int i = 0; i < 100; i++)
+                {
+                    sw.Start();
+                    ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                    dapper.GetColumns(ref cols);
+                    dapper.GetTables(ref tbls);
+                    dapper.GetExtended_prop(ref props);
+                    sw.Stop();
+                    Dapper += sw.ElapsedMilliseconds;
+                    sw.Reset();
+
+                    sw.Start();
+                    ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                    ADO.GetColumns(ref cols);
+                    ADO.GetTables(ref tbls);
+                    ADO.GetExtended_prop(ref props);
+                    sw.Stop();
+                    ADO_dot_NET += sw.ElapsedMilliseconds;
+                    sw.Reset();
+                }
+
                 switch (db_Tool)
                 {
                     case DB_tool.Dapper:
@@ -86,6 +111,10 @@ namespace SchemaNote.Models
                     };
                 }).ToList()
             };
+
+            Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
+            Flag.OBJ.Dapper = Dapper;
+
             return Flag;
         }
 

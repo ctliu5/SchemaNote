@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
-using System.Transactions;
 
 namespace SchemaNote.Models.DB_Tools
 {
