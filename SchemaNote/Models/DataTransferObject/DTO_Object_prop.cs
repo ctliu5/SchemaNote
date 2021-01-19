@@ -5,6 +5,10 @@ namespace SchemaNote.Models.DataTransferObject
     public class DTO_Object_prop
     {
         /// <summary>
+        /// 結構描述名稱
+        /// </summary>
+        public string SCHEMA_NAME { get; set; }
+        /// <summary>
         /// 物件識別碼
         /// </summary>
         public int OBJECT_ID { get; set; }
@@ -13,10 +17,6 @@ namespace SchemaNote.Models.DataTransferObject
         /// </summary>
         public string NAME { get; set; }
         /// <summary>
-        /// 結構描述名稱
-        /// </summary>
-        public string SCHEMA_NAME { get; set; }
-        /// <summary>
         /// 物件類型
         /// </summary>
         public string TYPE { get; set; }
@@ -24,6 +24,10 @@ namespace SchemaNote.Models.DataTransferObject
         /// 欄位序碼
         /// </summary>  
         public int COLUMN_ID { get; set; }
+        /// <summary>
+        /// 欄位名稱
+        /// </summary>  
+        public string COLUMN_NAME { get; set; }
         /// <summary>
         /// 項目識別碼
         /// </summary>

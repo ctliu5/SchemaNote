@@ -120,22 +120,6 @@ function ForeachObj(obj, func) {
     }
 }
 
-function EmptyString(DefaultValue) {
-    // Change empty string into default value!
-    /*
-    var htmlCollection = document.getElementsByClassName('NoteController');
-    if (htmlCollection.length > 0) {
-        var arr = Array.prototype.slice.call(htmlCollection);
-        arr.forEach(
-            function (item) {
-                if (item.value === "")
-                    item.value = DefaultValue;
-            }
-        )
-    }
-    */
-}
-
 function changeElement(e) {
     this.removeEventListener("dblclick", changeElement, false);
     var columnID = this.dataset.column_id;
@@ -166,4 +150,41 @@ function changeElement(e) {
     content/*.focus()*/.select();
 
     document.getElementById('submit').style.cssText = 'display:initial;';
+}
+
+function ExportExtendedPropScript() {
+    $.ajax({
+        url: "/Home/ExportExtendedPropScript",
+        type: "POST",
+        dataType: "text",
+        contentType: "text/plain;charset=UTF-8",
+        //contentType: "text/plain;charset=UTF-16LE",
+        success: function (data, textStatus, jqXHR) {
+            download('ExtendedPropScript_urlencoded_' + Date.now() + '.sql', data);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            //todo
+        }
+    })
+}
+
+function download(filename, text) {
+
+    text = '\ufeff' + text; //for windows OS, convert『UTF-8』 to 『UTF-8 with bom』,see https://stackoverflow.com/questions/17879198/adding-utf-8-bom-to-string-blob
+
+    var blob = new Blob([text], { type: 'text/plain;charset=UTF-8' });
+    //var blob = new Blob([text], { type: 'text/plain;charset=UTF-16LE' });
+    var url = window.URL.createObjectURL(blob);
+
+    var element = document.createElement('a');
+
+    element.setAttribute('href', url);
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
 }

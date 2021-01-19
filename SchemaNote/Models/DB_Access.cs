@@ -359,28 +359,51 @@ namespace SchemaNote.Models
             return Properties;
         }
 
-        internal static DTO_Flag<StringBuilder> ExportPropertiesScript(string ConnectionString, DB_tool db_Tool)
+        internal static DTO_Flag<StringBuilder> ExportPropertiesScript(string ConnectionString, DB_tool db_Tool, bool ForDeleteEmptyData = false)
         {
             var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod().Name);
 
             List<DTO_Object_prop> object_props = new List<DTO_Object_prop>();
-            string scriptTemp = SQLScripts.SavingScript_Extended_prop;
-            StringBuilder stringBuilder = new StringBuilder();
+            string scriptTemp = ForDeleteEmptyData ? SQLScripts.DeleteScript_Extended_prop : SQLScripts.SavingScript_Extended_prop, newLine = Environment.NewLine;
+            StringBuilder stringBuilder = new StringBuilder(
+                "DECLARE @id int," + newLine +
+                "        @col_id int," + newLine +
+                "        @name sysname," + newLine +
+                "        @value sql_variant," + newLine +
+                "        @level0name sysname," + newLine +
+                "        @level1type sysname," + newLine +
+                "        @level1name sysname," + newLine +
+                "        @level2name sysname," + newLine +
+                "        @propQty int;" + newLine
+                );
 
             #region 匯出擴充屬性資料
             try
             {
-                switch (db_Tool)
-                {
-                    case DB_tool.Dapper:
-                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
-                        dapper.ExportProperties(ref object_props);
-                        break;
-                    default:
-                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
-                        ADO.ExportProperties(ref object_props);
-                        break;
-                }
+                if (ForDeleteEmptyData)
+                    switch (db_Tool)
+                    {
+                        case DB_tool.Dapper:
+                            ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                            dapper.GetObjectExtendedProp_emptyValue(ref object_props);
+                            break;
+                        default:
+                            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                            ADO.GetObjectExtendedProp_emptyValue(ref object_props);
+                            break;
+                    }
+                else
+                    switch (db_Tool)
+                    {
+                        case DB_tool.Dapper:
+                            ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                            dapper.GetObjectExtendedProp(ref object_props);
+                            break;
+                        default:
+                            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                            ADO.GetObjectExtendedProp(ref object_props);
+                            break;
+                    }
                 if (object_props.Count < 1)
                 {
                     ObjFlag.ErrorMessages.Append("找不到擴充屬性");
@@ -391,10 +414,12 @@ namespace SchemaNote.Models
                 {
                     stringBuilder.Append(
                     string.Format(scriptTemp,
-                        op.OBJECT_ID,
-                        op.COLUMN_ID,
                         op.PROP_NAME,
-                        op.PROP_VALUE
+                        op.PROP_VALUE.ToString().Replace("'", "''"),
+                        op.SCHEMA_NAME,
+                        op.TYPE,
+                        op.NAME,
+                        op.COLUMN_NAME
                         ));
                 }
                 ObjFlag.OBJ = stringBuilder;

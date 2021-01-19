@@ -83,7 +83,7 @@ namespace SchemaNote.Controllers
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
-                return RedirectToAction("Index");
+                return RedirectToAction("Index");//todo
             }
             #endregion
 
@@ -91,9 +91,10 @@ namespace SchemaNote.Controllers
             if (Flag.ResultType != ExceResultType.Success)
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
+                return RedirectToAction("Overview");//todo
             }
-            return Content(Flag.OBJ.ToString());
+            return Content(Flag.OBJ.ToString(), "text/plain", System.Text.Encoding.UTF8);
+            //return Content(Flag.OBJ.ToString(), "text/plain", System.Text.Encoding.Unicode);
         }
 
         [HttpGet]

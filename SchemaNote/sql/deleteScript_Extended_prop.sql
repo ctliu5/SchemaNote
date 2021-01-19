@@ -35,22 +35,11 @@ IF (@id <> -1)
       BEGIN
         IF (@col_id > 0)
           BEGIN
-            EXEC sys.sp_updateextendedproperty @name = @name,@value = @value,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name,@level2type = N'COLUMN',@level2name = @level2name;
+            EXEC sys.sp_dropextendedproperty @name = @name,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name,@level2type = N'COLUMN',@level2name = @level2name;
           END
         ELSE
           BEGIN
-            EXEC sys.sp_updateextendedproperty @name = @name,@value = @value,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name;
-          END
-      END
-    ELSE
-      BEGIN
-        IF (@col_id > 0)
-          BEGIN
-            EXEC sys.sp_addextendedproperty @name = @name,@value = @value,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name,@level2type = N'COLUMN',@level2name = @level2name;
-          END
-        ELSE
-          BEGIN
-            EXEC sys.sp_addextendedproperty @name = @name,@value = @value,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name;
+            EXEC sys.sp_dropextendedproperty @name = @name,@level0type = N'SCHEMA',@level0name = @level0name,@level1type = @level1type,@level1name = @level1name;
           END
       END
   END 

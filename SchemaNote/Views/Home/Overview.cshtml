@@ -53,20 +53,6 @@
         *@
         //初始化下拉選單
         window.onload = initialOption;
-        //匯出擴充屬性Script
-        function ExportExtendedPropScript() {
-            $.ajax({
-                url: "/Home/ExportExtendedPropScript",
-                type: "POST",
-                dataType: "script",
-                contentType:"application/x-www-form-urlencoded; charset=UTF-8",
-                success: function (data, textStatus, jqXHR) {
-                    alert(data);
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                } 
-            })
-        }
     </script>
 }
 <h1>Overview</h1>

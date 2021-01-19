@@ -8,7 +8,7 @@ WITH PROP
          WHERE NOT([minor_id] = 0 AND 
                    [class] = 1 AND 
                    ([name] = N'microsoft_database_tools_support' OR [name] LIKE 'MS_DiagramPane%'))
-			   AND ISNULL([value], '') <> ''),
+			   AND ISNULL([value], '') = ''),
      TBL
      AS (SELECT s.[name] AS [SCHEMA_NAME], 
                 o.[object_id] AS [OBJECT_ID], 

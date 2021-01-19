@@ -376,13 +376,27 @@ namespace SchemaNote.Models.DB_Tools
             }
             return ObjFlag;
         }
-        internal void ExportProperties(ref List<DTO_Object_prop> object_props)
+
+        internal void GetObjectExtendedProp(ref List<DTO_Object_prop> object_props)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
 
                 using (SqlCommand comm = new SqlCommand(SQLScripts.GetObject_Extended_prop, conn))
+                {
+                    object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
+                }
+            }
+        }
+
+        internal void GetObjectExtendedProp_emptyValue(ref List<DTO_Object_prop> object_props)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                conn.Open();
+
+                using (SqlCommand comm = new SqlCommand(SQLScripts.GetObject_Extended_prop_emptyValue, conn))
                 {
                     object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
                 }
