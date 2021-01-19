@@ -46,7 +46,7 @@
               data-column_id="0"
               data-class="form-control tabName_Cht">
             @Html.DisplayFor(n => Model.NAME_CHT)
-            <span asp-validation-for="NAME_CHT" class="text-danger"></span>
+            @Html.ValidationMessageFor(model => model.NAME_CHT, null, new { data_valmsg_for = "[0].NAME_CHT" })
         </sapn>
         <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
     </div>
@@ -105,7 +105,7 @@
                  data-column_id="0"
                  data-class="form-control">
                 @Html.DisplayFor(n => Model.REMARK)
-                <span asp-validation-for="REMARK" class="text-danger"></span>
+                @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[0].REMARK" })
             </div>
         </div>
     </div>

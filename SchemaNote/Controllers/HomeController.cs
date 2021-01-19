@@ -31,7 +31,7 @@ namespace SchemaNote.Controllers
             {
                 if (string.IsNullOrEmpty(ConnectionString))
                 {
-                    TempData["ErrorMessage"] = "Your connection string is missing!";
+                    TempData["ErrorMessage"] = Common.ConnStringMissing;
                     return View("Index");
                 }
                 UserModel userModel = new UserModel();
@@ -52,7 +52,7 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
                 return View("Index");
             }
             #endregion
@@ -66,7 +66,7 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
                 return View("Index");
             }
             #endregion
@@ -91,14 +91,19 @@ namespace SchemaNote.Controllers
             string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = "Your connection string is missing!";
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
                 return View("Index");
             }
             #endregion
             else if (model.Count == 0)
             {
                 //沒有要新刪修的項目
-                return View(id);
+                return RedirectToAction("Details", id);
+            }
+            else if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = Common.ValidationMsg;
+                return RedirectToAction("Details", id);
             }
 
             DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model);

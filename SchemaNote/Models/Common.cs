@@ -9,6 +9,9 @@ namespace SchemaNote.Models
         public const string ConnString = "Connection String";
         public const string NAME_CHT = "中文名稱";
         public const string REMARK = "備註";
+        public const string ConnStringMissing = "Your connection string is missing!";
+        public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
+        public const int StrMaxLen = 4000;
     }
 
     [Flags]
