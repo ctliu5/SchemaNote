@@ -40,7 +40,7 @@ namespace SchemaNote.Models
                         ADO.GetExtended_prop(ref props);
                         break;
                 }
-
+                /* 測試效能
                 for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
@@ -70,6 +70,7 @@ namespace SchemaNote.Models
                     Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
                 }
+                */
             }
             catch (SqlException ex)
             {
@@ -120,11 +121,11 @@ namespace SchemaNote.Models
                     };
                 }).ToList()
             };
-
+            /* 測試效能
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
             Flag.OBJ.Dapper = Dapper;
             Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
-
+            */
             return Flag;
         }
 

@@ -15,7 +15,16 @@
         data-column_id="@Model.COLUMN_ID"
         data-class="form-control"
         rowspan="@(HasIndex ? "2": "1")">
-        @Html.DisplayFor(n => Model.MS_Description)
+        @if (Model.MS_Description == Common.DefaultValue)
+        {
+            <code>
+                @Html.DisplayFor(n => Model.MS_Description)
+            </code>
+        }
+        else
+        {
+            @Html.DisplayFor(n => Model.MS_Description)
+        }
         @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
     </td>
     <td rowspan="@(HasIndex ? "2": "1")">
@@ -35,7 +44,16 @@
         data-content="@Model.REMARK"
         data-column_id="@Model.COLUMN_ID"
         data-class="form-control">
-        @Html.DisplayFor(n => Model.REMARK)
+        @if (Model.REMARK == Common.DefaultValue)
+        {
+            <code>
+                @Html.DisplayFor(n => Model.REMARK)
+            </code>
+        }
+        else
+        {
+            @Html.DisplayFor(n => Model.REMARK)
+        }
         @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[" + Model.REMARK + "].REMARK" })
     </td>
 </tr>

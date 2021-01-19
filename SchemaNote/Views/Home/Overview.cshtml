@@ -56,9 +56,11 @@
     </script>
 }
 <h1>Overview</h1>
+<!-- 測試效能
 <h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>
 <h2>Dapper:@Model.Dapper 毫秒</h2>
 <h2>ADO_dot_NET2:@Model.ADO_dot_NET2 毫秒</h2>
+-->
 @if (TempData["ErrorMessage"] != null)
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
@@ -84,7 +86,16 @@
                     </strong>
                 </span>
                 <a class="description text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                    @Html.DisplayFor(modelItem => item.MS_Description)
+                    @if (item.MS_Description == Common.DefaultValue)
+                    {
+                        <code>
+                            @Html.DisplayFor(modelItem => item.MS_Description)
+                        </code>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.MS_Description)
+                    }
                 </a>
                 <span class="count" data-toggle="tooltip" data-placement="top" title="@Common.CountTip">
                     @Html.DisplayNameFor(model => t.QTY):<strong class="text-info">@Html.DisplayFor(modelItem => item.QTY)</strong>
@@ -133,7 +144,16 @@
                     </div>
                     <div>
                         <a class="remark text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                            @Html.DisplayFor(modelItem => item.REMARK)
+                            @if (item.REMARK == Common.DefaultValue)
+                            {
+                                <code>
+                                    @Html.DisplayFor(modelItem => item.REMARK)
+                                </code>
+                            }
+                            else
+                            {
+                                @Html.DisplayFor(modelItem => item.REMARK)
+                            }
                         </a>
                     </div>
                 </div>

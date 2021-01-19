@@ -147,8 +147,13 @@ function changeElement(e) {
     if (EleType === "textarea")
         content.setAttribute('rows', 3);
 
-    this.removeChild(this.childNodes[0]);
+    while (this.firstChild) {
+        this.removeChild(this.firstChild);
+    }
+
     this.insertBefore(content, this.childNodes[0]);
+
+    content/*.focus()*/.select();
 
     document.getElementById('submit').style.cssText = 'display:initial;';
 }

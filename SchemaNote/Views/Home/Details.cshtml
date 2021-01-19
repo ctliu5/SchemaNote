@@ -61,7 +61,16 @@
               data-content="@Model.MS_Description"
               data-column_id="0"
               data-class="form-control tabMS_Description">
-            @Html.DisplayFor(n => Model.MS_Description)
+            @if (Model.MS_Description == Common.DefaultValue)
+            {
+                <code>
+                    @Html.DisplayFor(n => Model.MS_Description)
+                </code>
+            }
+            else
+            {
+                @Html.DisplayFor(n => Model.MS_Description)
+            }
             @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[0].MS_Description" })
         </sapn>
         <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
@@ -115,7 +124,16 @@
                  data-content="@Model.REMARK"
                  data-column_id="0"
                  data-class="form-control">
-                @Html.DisplayFor(n => Model.REMARK)
+                @if (Model.REMARK == Common.DefaultValue)
+                {
+                    <code>
+                        @Html.DisplayFor(n => Model.REMARK)
+                    </code>
+                }
+                else
+                {
+                    @Html.DisplayFor(n => Model.REMARK)
+                }
                 @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[0].REMARK" })
             </div>
         </div>
