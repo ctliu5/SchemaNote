@@ -3,6 +3,8 @@ SchemaNote（以下簡稱本平台）是用來檢視、編輯SQL Server上自定
 
 # 基本畫面
 
+![未命名](https://user-images.githubusercontent.com/29647567/127631405-e55df674-f299-4906-b072-db0a16e0a5ab.png)
+
 ### 物件層
 
 ```
