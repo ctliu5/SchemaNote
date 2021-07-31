@@ -1,106 +1,98 @@
 ﻿@using SchemaNote.ViewModels;
 @model ColumnDetail
 @{
-    bool HasIndex = Model.Indexes.Count > 0;
-    Index ind = new Index();
+  bool HasIndex = Model.Indexes.Count > 0;
+  SchemaNote.ViewModels.Index ind = new SchemaNote.ViewModels.Index();
 }
 <tr>
-    <td rowspan="@(HasIndex ? "2": "1")">
-        @Html.DisplayFor(modelItem => modelItem.NAME)
-        <input name="@("[" + Model.SortNum + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
-    </td>
-    <td class="NoteField"
-        data-field="@Common.MS_Desc"
-        data-content="@Model.MS_Description"
-        data-column_id="@Model.COLUMN_ID"
-        data-sortnum="@Model.SortNum"
-        data-class="form-control"
-        rowspan="@(HasIndex ? "2": "1")">
-        @if (Model.MS_Description == Common.DefaultValue)
-        {
-            <code>
-                @Html.DisplayFor(n => Model.MS_Description)
-            </code>
-        }
-        else
-        {
-            @Html.DisplayFor(n => Model.MS_Description)
-        }
-        @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
-    </td>
-    <td rowspan="@(HasIndex ? "2": "1")">
-        @Html.DisplayFor(modelItem => modelItem.TYPE)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => modelItem.IS_PK)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => modelItem.DISALLOW_NULL)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => modelItem.DEFUALT)
-    </td>
-    <td class="NoteField"
-        data-field="@Common.Remark"
-        data-content="@Model.REMARK"
-        data-column_id="@Model.COLUMN_ID"
-        data-sortnum="@Model.SortNum"
-        data-class="form-control">
-        @if (Model.REMARK == Common.DefaultValue)
-        {
-            <code>
-                @Html.DisplayFor(n => Model.REMARK)
-            </code>
-        }
-        else
-        {
-            @Html.DisplayFor(n => Model.REMARK)
-        }
-        @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[" + Model.REMARK + "].REMARK" })
-    </td>
+  <td rowspan="@(HasIndex ? "2": "1")">
+    @Html.DisplayFor(modelItem => modelItem.NAME)
+    <input name="@("[" + Model.SortNum + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
+  </td>
+  <td class="NoteField"
+      data-field="@Common.MS_Desc"
+      data-content="@Model.MS_Description"
+      data-column_id="@Model.COLUMN_ID"
+      data-sortnum="@Model.SortNum"
+      data-class="form-control"
+      rowspan="@(HasIndex ? "2": "1")">
+    @if (Model.MS_Description == Common.DefaultValue) {
+      <code>
+        @Html.DisplayFor(n => Model.MS_Description)
+      </code>
+    } else {
+      @Html.DisplayFor(n => Model.MS_Description)
+    }
+    @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
+  </td>
+  <td rowspan="@(HasIndex ? "2": "1")">
+    @Html.DisplayFor(modelItem => modelItem.TYPE)
+  </td>
+  <td>
+    @Html.DisplayFor(modelItem => modelItem.IS_PK)
+  </td>
+  <td>
+    @Html.DisplayFor(modelItem => modelItem.DISALLOW_NULL)
+  </td>
+  <td>
+    @Html.DisplayFor(modelItem => modelItem.DEFUALT)
+  </td>
+  <td class="NoteField"
+      data-field="@Common.Remark"
+      data-content="@Model.REMARK"
+      data-column_id="@Model.COLUMN_ID"
+      data-sortnum="@Model.SortNum"
+      data-class="form-control">
+    @if (Model.REMARK == Common.DefaultValue) {
+      <code>
+        @Html.DisplayFor(n => Model.REMARK)
+      </code>
+    } else {
+      @Html.DisplayFor(n => Model.REMARK)
+    }
+    @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[" + Model.REMARK + "].REMARK" })
+  </td>
 </tr>
-@if (HasIndex)
-{
-    <tr class="indexes">
-        <td colspan="4">
-            <table class="table table-condensed">
-                <thead>
-                    <tr>
-                        <th>
-                            @Html.DisplayNameFor(modelItem => ind.IS_UNIQUE)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(modelItem => ind.TYPE_NAME)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(modelItem => ind.NAME)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(modelItem => ind.FILL_FACTOR)
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (Index index in Model.Indexes)
-                    {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(modelItem => index.IS_UNIQUE)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => index.TYPE_NAME)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => index.NAME)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => index.FILL_FACTOR)
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </td>
-    </tr>
+@if (HasIndex) {
+  <tr class="indexes">
+    <td colspan="4">
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th>
+              @Html.DisplayNameFor(modelItem => ind.IS_UNIQUE)
+            </th>
+            <th>
+              @Html.DisplayNameFor(modelItem => ind.TYPE_NAME)
+            </th>
+            <th>
+              @Html.DisplayNameFor(modelItem => ind.NAME)
+            </th>
+            <th>
+              @Html.DisplayNameFor(modelItem => ind.FILL_FACTOR)
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (SchemaNote.ViewModels.Index index in Model.Indexes) {
+            <tr>
+              <td>
+                @Html.DisplayFor(modelItem => index.IS_UNIQUE)
+              </td>
+              <td>
+                @Html.DisplayFor(modelItem => index.TYPE_NAME)
+              </td>
+              <td>
+                @Html.DisplayFor(modelItem => index.NAME)
+              </td>
+              <td>
+                @Html.DisplayFor(modelItem => index.FILL_FACTOR)
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </td>
+  </tr>
 }
 

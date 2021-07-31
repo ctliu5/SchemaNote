@@ -1,4 +1,4 @@
-﻿@using SchemaNote.ViewModels;
+﻿@using SchemaNote.ViewModels
 @model OverviewViewModel
 
 @{
@@ -13,19 +13,19 @@
         Overview = {
             'objName': {
                 name_cht: "物件名稱",
-                json: @Html.Raw(Json.Serialize(Model.TableNameJson))
+                json: @Html.Raw(Json.Serialize(Model.TableNameJson)),
             },
             'colName': {
                 name_cht: "欄位名稱",
-                json: @Html.Raw(Json.Serialize(Model.ColumnNameJson))
+                json: @Html.Raw(Json.Serialize(Model.ColumnNameJson)),
             },
             'description': {
                 name_cht: "中文名稱",
-                json: @Html.Raw(Json.Serialize(Model.DescriptionJson))
+                json: @Html.Raw(Json.Serialize(Model.DescriptionJson)),
             },
             'remark': {
                 name_cht: "備註",
-                json: @Html.Raw(Json.Serialize(Model.RemarkJson))
+                json: @Html.Raw(Json.Serialize(Model.RemarkJson)),
             },
         };
     </script>
@@ -152,7 +152,7 @@
                 </div>
             </div>
             <table class="table table-bordered table-hover subTable" border="1">
-                <partial name="_OverviewColumns" model="item.Columns" view-data="@{new ViewDataDictionary(ViewData){{ "TYPE", item.TYPE }}}" />
+                <partial name="_OverviewColumns" model="item.Columns" view-data="@(new ViewDataDictionary(ViewData){{ "TYPE", item.TYPE }})" />
                 @*  ↓↓↓equal↓↓↓↓
                     @{await Html.RenderPartialAsync("_OverviewColumns", item.Columns);}
                 *@

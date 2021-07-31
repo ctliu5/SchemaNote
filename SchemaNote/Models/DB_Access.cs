@@ -231,7 +231,7 @@ namespace SchemaNote.Models
                         DEFUALT = c.DEFUALT,
                         MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
                         REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
-                        Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new Index()
+                        Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new ViewModels.Index()
                         {
                             OBJECT_ID = i.OBJECT_ID,
                             INDEX_ID = i.INDEX_ID,

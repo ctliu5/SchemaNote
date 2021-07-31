@@ -1,28 +1,22 @@
 ﻿//#define SSL
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 #if SSL
 #else
 using System.Net;
 #endif
-namespace SchemaNote
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args).Build().Run();
-        }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-#if SSL
-#else
-                .UseKestrel(option =>
-                {
-                    option.Listen(IPAddress.Loopback, 8010);
-                })
-#endif
-                .UseStartup<Startup>();
+namespace SchemaNote {
+  public class Program {
+    public static void Main(string[] args) {
+      CreateHostBuilder(args).Build().Run();
     }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
+  }
 }
