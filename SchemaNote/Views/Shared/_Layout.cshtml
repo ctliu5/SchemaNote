@@ -28,7 +28,15 @@
             <p>&copy; 2019 - SchemaNote (@Common.CurrentVersion)</p>
         </footer>
     </div>
-
+    <script>
+        @*https://blog.darkthread.net/blog/jquery-in-electron/*@
+        if (typeof require !== "undefined") {
+            window.nodeRequire = require;
+            delete window.require;
+            delete window.exports;
+            delete window.module;
+        }
+    </script>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>

@@ -1,11 +1,8 @@
-﻿//#define SSL
+﻿using ElectronNET.API;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-#if SSL
-#else
 using System.Net;
-#endif
 namespace SchemaNote {
   public class Program {
     public static void Main(string[] args) {
@@ -16,6 +13,7 @@ namespace SchemaNote {
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
+                webBuilder.UseElectron(args);
                 webBuilder.UseStartup<Startup>();
             });
   }

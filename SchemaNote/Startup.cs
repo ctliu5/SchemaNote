@@ -1,4 +1,4 @@
-﻿//#define SSL
+﻿using ElectronNET.API;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SchemaNote.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace SchemaNote {
   public class Startup {
@@ -20,12 +21,7 @@ namespace SchemaNote {
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services) {
       services.Configure<CookiePolicyOptions>(options => {
-        // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-#if SSL
-                options.CheckConsentNeeded = context => true;
-#else
         options.CheckConsentNeeded = context => false;
-#endif
         options.MinimumSameSitePolicy = SameSiteMode.None;
       });
 
@@ -33,14 +29,8 @@ namespace SchemaNote {
       services.AddDistributedMemoryCache();
 
       services.AddSession(options => {
-#if SSL
-                //限制只有在 HTTPS 連線的情況下，才允許使用 Session。如此一來變成加密連線，就不容易被攔截。
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-#else
         //允許在 HTTP 連線的情況下，也使用 Session。建議只在受保護的網路內使用
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-#endif
-
 
         //沒必要將 Server 或網站技術的資訊爆露在外面，所以預設 Session 名稱 .AspNetCore.Session 可以改掉。
         options.Cookie.Name = "SchemaNote";
@@ -75,6 +65,9 @@ namespace SchemaNote {
         endpoints.MapControllers();
         endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
       });
+
+      // Open the Electron-Window here
+      Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
     }
   }
 }
