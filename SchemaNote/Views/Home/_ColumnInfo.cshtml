@@ -2,7 +2,7 @@
 @model ColumnDetail
 @{
   bool HasIndex = Model.Indexes.Count > 0;
-  SchemaNote.ViewModels.Index ind = new SchemaNote.ViewModels.Index();
+  IndexDetail ind = new IndexDetail();
 }
 <tr>
   <td rowspan="@(HasIndex ? "2": "1")">
@@ -74,7 +74,7 @@
           </tr>
         </thead>
         <tbody>
-          @foreach (SchemaNote.ViewModels.Index index in Model.Indexes) {
+          @foreach (IndexDetail index in Model.Indexes) {
             <tr>
               <td>
                 @Html.DisplayFor(modelItem => index.IS_UNIQUE)

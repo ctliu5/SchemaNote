@@ -41,10 +41,10 @@ namespace SchemaNote.ViewModels
     public class ColumnDetail : Column
     {
         public int SortNum { get; set; }
-        public List<Index> Indexes { get; set; }
+        public List<IndexDetail> Indexes { get; set; }
     }
 
-    public class Index : DTO_Index
+    public class IndexDetail : DTO_Index
     {
         [Display(Name = "索引類型")]
         public string TYPE_NAME {
