@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
+using SchemaNote.Models.Extensions;
 using SchemaNote.ViewModels;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace SchemaNote.Controllers
 {
@@ -177,5 +179,35 @@ namespace SchemaNote.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+    [HttpGet]
+    public ActionResult Excel()
+    {
+      #region check Connection
+      string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+      if (string.IsNullOrEmpty(ConnectionString))
+      {
+        TempData["ErrorMessage"] = Common.ConnStringMissing;
+        return RedirectToAction("Index");
+      }
+      #endregion
+
+      DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+      if (Flag.ResultType != ExceResultType.Success)
+      {
+        TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+        return View();
+      }
+
+      var excel = Flag.OBJ.GetExcel();
+      MemoryStream ms = new MemoryStream();
+      excel.SaveAs(ms);
+      excel.Dispose();
+      ms.Position = 0;
+
+      return File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ExportSchemaNote.xlsx");
     }
+  }
+
+
 }

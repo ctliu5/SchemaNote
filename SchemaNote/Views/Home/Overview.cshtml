@@ -64,6 +64,12 @@
     <div class="form-group form-group-lg">
         <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
     </div>
+    <div class="form-group form-group-lg">
+        <input type="button" class="form-control" onclick="ExportExcel()" value="匯出Excel" />
+    </div>
+    <form action="/Home/Excel" style="display:none" method="get">
+        <input id="getExcel" type="submit">
+    </form>
 </div>
 <br />
 @foreach (var item in Model.Tables)
