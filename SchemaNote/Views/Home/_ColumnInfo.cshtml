@@ -40,6 +40,12 @@
     <td>
         @Html.DisplayFor(modelItem => modelItem.DEFUALT)
     </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.IS_COMPUTED)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => modelItem.DEFINITION)
+    </td>
     <td class="NoteField"
         data-field="@Common.Remark"
         data-content="@Model.REMARK"
@@ -62,7 +68,7 @@
 @if (HasIndex)
 {
     <tr class="indexes">
-        <td colspan="4">
+        <td colspan="6">
             <table class="table table-condensed">
                 <thead>
                     <tr>

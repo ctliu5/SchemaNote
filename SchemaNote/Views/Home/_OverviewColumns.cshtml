@@ -24,6 +24,12 @@
             @Html.DisplayNameFor(model => c.DEFUALT)
         </th>
         <th>
+            @Html.DisplayNameFor(model => c.IS_COMPUTED)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => c.DEFINITION)
+        </th>
+        <th>
             @Html.DisplayNameFor(model => c.REMARK)
         </th>
     </tr>
@@ -60,8 +66,15 @@
             <td>
                 @Html.DisplayFor(modelItem => col.DISALLOW_NULL)
             </td>
+
             <td>
                 @Html.DisplayFor(modelItem => col.DEFUALT)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.IS_COMPUTED)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => col.DEFINITION)
             </td>
             <td>
                 <a class="remark text-info" asp-action="Details" asp-route-id="@col.OBJECT_ID">

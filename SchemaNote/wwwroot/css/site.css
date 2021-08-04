@@ -94,6 +94,14 @@
 }
 
 .subTable > tbody > tr > td:nth-child(7), .subTable > thead > tr > th:nth-child(7) {
+    max-width: 30px
+}
+
+.subTable > tbody > tr > td:nth-child(8), .subTable > thead > tr > th:nth-child(8) {
+    max-width: 40px
+}
+
+.subTable > tbody > tr > td:nth-child(9), .subTable > thead > tr > th:nth-child(9) {
     max-width: 250px
 }
 

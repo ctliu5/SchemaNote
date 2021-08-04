@@ -118,6 +118,8 @@ namespace SchemaNote.Models
                     IS_PK = c.IS_PK,
                     DISALLOW_NULL = c.DISALLOW_NULL,
                     DEFUALT = c.DEFUALT,
+                    IS_COMPUTED = c.IS_COMPUTED,
+                    DEFINITION = c.DEFINITION,
                     MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
                     REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
                   };
@@ -230,6 +232,8 @@ namespace SchemaNote.Models
             IS_PK = c.IS_PK,
             DISALLOW_NULL = c.DISALLOW_NULL,
             DEFUALT = c.DEFUALT,
+            IS_COMPUTED = c.IS_COMPUTED,
+            DEFINITION = c.DEFINITION,
             MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
             REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
             Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new Index()

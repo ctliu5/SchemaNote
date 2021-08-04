@@ -35,5 +35,11 @@ namespace SchemaNote.Models.DataTransferObject
     [Display(Name = "預設值")]
     [Excel(7)]
     public string DEFUALT { get; set; }
+    [Display(Name = "計算欄位")]
+    [Excel(8)]
+    public bool　IS_COMPUTED { get; set; }
+    [Display(Name = "計算公式")]
+    [Excel(9)]
+    public string DEFINITION { get; set; }
   }
 }
