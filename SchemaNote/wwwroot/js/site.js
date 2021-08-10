@@ -281,10 +281,6 @@ function ExportExtendedPropScript() {
         }
     })
 }
-function ExportExcel() {
-    $("#getExcel").click();
-}
-
 
 function download(filename, text) {
 
