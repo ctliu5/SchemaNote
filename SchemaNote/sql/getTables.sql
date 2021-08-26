@@ -1,7 +1,7 @@
 WITH qty
-     AS (SELECT Sum (row_count) AS [QTY]
+     AS (SELECT Sum (rows) AS [QTY]
                 ,[object_id]
-           FROM sys.dm_db_partition_stats
+           FROM sys.partitions
           WHERE index_id < 2
           GROUP BY [object_id])
     SELECT o.[object_id]       AS [OBJECT_ID]
