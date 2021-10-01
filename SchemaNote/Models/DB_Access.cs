@@ -92,7 +92,7 @@ namespace SchemaNote.Models
                 Tables = tbls.Select(t =>
                 {
                     var pObj = props.Where(p => p.MAJOR_ID == t.OBJECT_ID);
-                    var pT = pObj.Where(p => p.MINOR_ID == 0);
+                    var pT = pObj.Where(p => p.MINOR_ID == 0);        
                     return new Table
                     {
                         OBJECT_ID = t.OBJECT_ID,
@@ -102,8 +102,8 @@ namespace SchemaNote.Models
                         CREATE_DATE = t.CREATE_DATE,
                         MODIFY_DATE = t.MODIFY_DATE,
                         QTY = t.QTY,
-                        MS_Description = pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
-                        REMARK = pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
+                        MS_Description = (pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
+                        REMARK = (pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
                         Columns = cols.Where(c => c.OBJECT_ID == t.OBJECT_ID).Select(c =>
                         {
                             var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -117,8 +117,8 @@ namespace SchemaNote.Models
                                 IS_PK = c.IS_PK,
                                 DISALLOW_NULL = c.DISALLOW_NULL,
                                 DEFUALT = c.DEFUALT,
-                                MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
-                                REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
+                                MS_Description = (pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
+                                REMARK = (pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
                             };
                         }).ToList()
                     };
@@ -213,8 +213,8 @@ namespace SchemaNote.Models
                 CREATE_DATE = tbl.CREATE_DATE,
                 MODIFY_DATE = tbl.MODIFY_DATE,
                 QTY = tbl.QTY,
-                MS_Description = pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
-                REMARK = pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
+                MS_Description = (pT.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
+                REMARK = (pT.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
                 Columns = cols.Select(c =>
                 {
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -229,8 +229,8 @@ namespace SchemaNote.Models
                         IS_PK = c.IS_PK,
                         DISALLOW_NULL = c.DISALLOW_NULL,
                         DEFUALT = c.DEFUALT,
-                        MS_Description = pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE.ToString(),
-                        REMARK = pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE.ToString(),
+                        MS_Description = (pC.Where(p => p.NAME == Common.MS_Desc).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
+                        REMARK = (pC.Where(p => p.NAME == Common.Remark).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
                         Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new IndexDetail()
                         {
                             OBJECT_ID = i.OBJECT_ID,
@@ -325,7 +325,7 @@ namespace SchemaNote.Models
                      COLUMN_ID = d.COLUMN_ID,
                      NAME = d.NAME,
                      VALUE = d.VALUE.Trim(),
-                     Original_VALUE = p.FirstOrDefault()?.VALUE.ToString().Trim(),
+                     Original_VALUE = (p.FirstOrDefault()?.VALUE) is object obj ? obj.ToString().Trim() : null,
                  });
 
             List<DTO_prop> Properties = new List<DTO_prop>();
