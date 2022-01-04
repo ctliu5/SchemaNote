@@ -4,7 +4,7 @@ namespace SchemaNote.Models
 {
     public static class Common
     {
-        public const string CurrentVersion = "Version: 0.1.2";
+        public const string CurrentVersion = "Version: 0.1.3";
         public const string DefaultValue = "null";
         public const string ConnString = "Connection String";
         public const string PropDesc = "欄位說明";
