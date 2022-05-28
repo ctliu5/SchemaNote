@@ -1,6 +1,6 @@
 DECLARE @qty BIGINT, @id INT= @OBJECT_ID;
-SELECT @qty = Sum (row_count)
-  FROM sys.dm_db_partition_stats 
+SELECT @qty = Sum (rows)
+  FROM sys.partitions 
  WHERE index_id < 2
    AND [object_id] = @id
 SELECT o.[object_id] AS [OBJECT_ID]
@@ -26,9 +26,9 @@ SELECT o.[object_id] AS [OBJECT_ID]
  ORDER BY o.[name]
 /*
 SELECT Sum (CASE 
-              WHEN ( index_id < 2 ) THEN row_count 
+              WHEN ( index_id < 2 ) THEN rows 
               ELSE 0 
             END) 
-FROM   sys.dm_db_partition_stats 
+FROM   sys.partitions 
 WHERE  object_id = @OBJECT_ID
 */
