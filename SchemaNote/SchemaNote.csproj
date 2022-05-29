@@ -4,10 +4,11 @@
     <ApplicationIcon />
     <Win32Resource />
     <Configurations>Debug;Release</Configurations>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="2.9.406" />
