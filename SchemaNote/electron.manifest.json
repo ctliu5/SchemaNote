@@ -30,6 +30,14 @@
         "filter": [ "**/*" ]
       },
       "**/*"
-    ]
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "guid": "12b40a2e-3a60-4e27-a550-65647f0f0dae",
+      "oneClick": true,
+      "perMachine": true
+    }
   }
 }
