@@ -2,6 +2,12 @@ DECLARE @qty BIGINT, @id INT= @OBJECT_ID;
 SELECT @qty = Sum (row_count)
   FROM sys.dm_db_partition_stats 
  WHERE index_id < 2
+ /*
+ sys.partitions.index_id
+ 0 = 堆積（實測MSSQL14，狀況是無索引或無叢集索引的非叢集索引）
+ 1 = 叢集索引
+ 2 或以上 = 非叢集索引（實測MSSQL14，狀況是有叢集索引的非叢集索引）
+ */
    AND [object_id] = @id
 SELECT o.[object_id] AS [OBJECT_ID]
        ,o.[name]     AS [NAME]
