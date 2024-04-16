@@ -23,8 +23,8 @@ namespace SchemaNote.Models
 
             Stopwatch sw = new Stopwatch();
             /* 測試效能
-            long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0;
             */
+            long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0, ADO_dot_NET3 = 0, ADO_dot_NET4 = 0;
 
             try
             {
@@ -44,8 +44,27 @@ namespace SchemaNote.Models
                         break;
                 }
                 /* 測試效能
+                */
                 for (int i = 0; i < 200; i++)
                 {
+                    sw.Start();
+                    ADO_dot_NET4 ADO4 = new ADO_dot_NET4(ConnectionString);
+                    ADO4.GetColumns(ref cols);
+                    ADO4.GetTables(ref tbls);
+                    ADO4.GetExtended_prop(ref props);
+                    sw.Stop();
+                    ADO_dot_NET4 += sw.ElapsedMilliseconds;
+                    sw.Reset();
+
+                    sw.Start();
+                    ADO_dot_NET3 ADO3 = new ADO_dot_NET3(ConnectionString);
+                    ADO3.GetColumns(ref cols);
+                    ADO3.GetTables(ref tbls);
+                    ADO3.GetExtended_prop(ref props);
+                    sw.Stop();
+                    ADO_dot_NET3 += sw.ElapsedMilliseconds;
+                    sw.Reset();
+
                     sw.Start();
                     ADO_dot_NET2 ADO2 = new ADO_dot_NET2(ConnectionString);
                     ADO2.GetColumns(ref cols);
@@ -73,7 +92,6 @@ namespace SchemaNote.Models
                     Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
                 }
-                */
             }
             catch (SqlException ex)
             {
@@ -125,10 +143,12 @@ namespace SchemaNote.Models
                 }).ToList()
             };
             /* 測試效能
+            */
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
             Flag.OBJ.Dapper = Dapper;
             Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
-            */
+            Flag.OBJ.ADO_dot_NET3 = ADO_dot_NET3;
+            Flag.OBJ.ADO_dot_NET4 = ADO_dot_NET4;
             return Flag;
         }
 

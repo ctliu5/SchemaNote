@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -92,8 +93,9 @@ namespace SchemaNote.Models.Extensions
                 var dto = new T();
                 foreach (PropertyInfo PropInfo in propInfos)
                 {
-                    foreach (string field in Fields)
+                    if (Fields.Contains(PropInfo.Name))
                     {
+                        string field = PropInfo.Name;
                         Type PropType = PropInfo.PropertyType;
                         Type DataType = dr.GetFieldType(field);
                         if (PropType == DataType)
@@ -197,8 +199,9 @@ namespace SchemaNote.Models.Extensions
                 var dto = new T();
                 foreach (PropertyInfo PropInfo in propInfos)
                 {
-                    foreach (string field in Fields)
+                    if (Fields.Contains(PropInfo.Name))
                     {
+                        string field = PropInfo.Name;
                         Type PropType = PropInfo.PropertyType;
                         Type DataType = dr.GetFieldType(field);
                         if (PropType == DataType)
