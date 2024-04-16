@@ -151,69 +151,77 @@ namespace SchemaNote.Models
             PropType = PropInfo.PropertyType;
             DataType = dataType;
             Index = index;
-
+            Assign = GetAction(PropType, DataType);
+        }
+        readonly PropertyInfo PropInfo;
+        readonly Type PropType;
+        readonly Type DataType;
+        readonly int Index;
+        internal Action<T, SqlDataReader> Assign { get; set; }
+        internal Action<T, SqlDataReader> GetAction(Type PropType, Type DataType)
+        {
             if (PropType == DataType)
             {
                 if (DataType.IsValueType)
                 {
                     if (PropType == typeof(bool))
                     {
-                        Assign = Assign_bool;
+                        return Assign_bool;
                     }
                     else if (PropType == typeof(char))
                     {
-                        Assign = Assign_char;
+                        return Assign_char;
                     }
                     else if (PropType == typeof(byte))
                     {
-                        Assign = Assign_byte;
+                        return Assign_byte;
                     }
                     else if (PropType == typeof(short))
                     {
-                        Assign = Assign_short;
+                        return Assign_short;
                     }
                     else if (PropType == typeof(int))
                     {
-                        Assign = Assign_int;
+                        return Assign_int;
                     }
                     else if (PropType == typeof(long))
                     {
-                        Assign = Assign_long;
+                        return Assign_long;
                     }
                     else if (PropType == typeof(float))
                     {
-                        Assign = Assign_float;
+                        return Assign_float;
                     }
                     else if (PropType == typeof(double))
                     {
-                        Assign = Assign_double;
+                        return Assign_double;
                     }
                     else if (PropType == typeof(decimal))
                     {
-                        Assign = Assign_decimal;
+                        return Assign_decimal;
                     }
                     else if (PropType == typeof(DateTime))
                     {
-                        Assign = Assign_DateTime;
+                        return Assign_DateTime;
                     }
                     else if (PropType == typeof(DateTimeOffset))
                     {
-                        Assign = Assign_DateTimeOffset;
+                        return Assign_DateTimeOffset;
                     }
                     else if (PropType == typeof(TimeSpan))
                     {
-                        Assign = Assign_TimeSpan;
+                        return Assign_TimeSpan;
                     }
                 }
                 else
                 {
                     if (PropType == typeof(string))
                     {
-                        Assign = Assign_String;
+                        return Assign_String;
                     }
                     else
                     {
-                        Assign = Assign_SameType;
+                        return Assign_SameType;
                     }
                 }
             }
@@ -221,7 +229,7 @@ namespace SchemaNote.Models
             {
                 if (PropType.IsEnum)
                 {
-                    Assign = Assign_forEnum;
+                    return Assign_forEnum;
                 }
                 else if (PropType.IsValueType)
                 {
@@ -232,23 +240,13 @@ namespace SchemaNote.Models
                     }
                     if (CanAccommodate)
                     {
-                        Assign = Assign_ValueType;
+                        return Assign_ValueType;
                     }
                     else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
                 }
             }
-            else
-            {
-                Assign = Assign_DifferentType;
-            }
+            return Assign_DifferentType;
         }
-
-        readonly PropertyInfo PropInfo;
-        readonly Type PropType;
-        readonly Type DataType;
-        readonly int Index;
-        internal Action<T, SqlDataReader> Assign { get; set; }
-
         void Assign_bool(T dto, SqlDataReader dr)
         {
             if (!dr.IsDBNull(Index))
@@ -294,7 +292,6 @@ namespace SchemaNote.Models
             if (!dr.IsDBNull(Index))
                 PropInfo.SetValue(dto, dr.GetDecimal(Index));
         }
-
         void Assign_String(T dto, SqlDataReader dr)
         {
             if (!dr.IsDBNull(Index))
@@ -320,7 +317,6 @@ namespace SchemaNote.Models
             if (!dr.IsDBNull(Index))
                 PropInfo.SetValue(dto, dr[Index]);
         }
-
         void Assign_forEnum(T dto, SqlDataReader dr)
         {
             if (!dr.IsDBNull(Index))

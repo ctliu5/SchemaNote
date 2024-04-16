@@ -420,4 +420,38 @@ namespace SchemaNote.Models.DB_Tools
             }
         }
     }
+    public class ADO_dot_NET3 : ADO_dot_NET
+    {
+        public ADO_dot_NET3(string _ConnectionString) : base(_ConnectionString)
+        {
+        }
+
+        public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
+        {
+            using (SqlDataReader dr = comm.ExecuteReader())
+            {
+                if (dr.HasRows)
+                    return dr.ReadAll3<T>();
+                else
+                    return new List<T>();
+            }
+        }
+    }
+    public class ADO_dot_NET4 : ADO_dot_NET
+    {
+        public ADO_dot_NET4(string _ConnectionString) : base(_ConnectionString)
+        {
+        }
+
+        public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
+        {
+            using (SqlDataReader dr = comm.ExecuteReader())
+            {
+                if (dr.HasRows)
+                    return dr.ReadAll4<T>();
+                else
+                    return new List<T>();
+            }
+        }
+    }
 }
