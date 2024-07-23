@@ -5,8 +5,6 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchemaNote", "SchemaNote\SchemaNote.csproj", "{D7F68ACA-FFDE-4D11-8FAC-AD2BDD488BA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaNote_6.0", "SchemaNote_6.0\SchemaNote_6.0.csproj", "{8C068556-577A-42C6-9C77-52C86DA49C9D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{D7F68ACA-FFDE-4D11-8FAC-AD2BDD488BA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7F68ACA-FFDE-4D11-8FAC-AD2BDD488BA4}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{D7F68ACA-FFDE-4D11-8FAC-AD2BDD488BA4}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{8C068556-577A-42C6-9C77-52C86DA49C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C068556-577A-42C6-9C77-52C86DA49C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C068556-577A-42C6-9C77-52C86DA49C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C068556-577A-42C6-9C77-52C86DA49C9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
