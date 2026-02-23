@@ -4,7 +4,6 @@ using SchemaNote.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -21,10 +20,10 @@ namespace SchemaNote.Models
             List<DTO_Table> tbls = new List<DTO_Table>();
             List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
 
-            Stopwatch sw = new Stopwatch();
             /* 測試效能
-            */
+            Stopwatch sw = new Stopwatch();
             long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0, ADO_dot_NET3 = 0, ADO_dot_NET4 = 0;
+            */
 
             try
             {
@@ -44,7 +43,6 @@ namespace SchemaNote.Models
                         break;
                 }
                 /* 測試效能
-                */
                 for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
@@ -92,6 +90,7 @@ namespace SchemaNote.Models
                     Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
                 }
+                */
             }
             catch (SqlException ex)
             {
@@ -110,7 +109,7 @@ namespace SchemaNote.Models
                 Tables = tbls.Select(t =>
                 {
                     var pObj = props.Where(p => p.MAJOR_ID == t.OBJECT_ID);
-                    var pT = pObj.Where(p => p.MINOR_ID == 0);        
+                    var pT = pObj.Where(p => p.MINOR_ID == 0);
                     return new Table
                     {
                         OBJECT_ID = t.OBJECT_ID,
@@ -143,12 +142,12 @@ namespace SchemaNote.Models
                 }).ToList()
             };
             /* 測試效能
-            */
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
             Flag.OBJ.Dapper = Dapper;
             Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
             Flag.OBJ.ADO_dot_NET3 = ADO_dot_NET3;
             Flag.OBJ.ADO_dot_NET4 = ADO_dot_NET4;
+            */
             return Flag;
         }
 
