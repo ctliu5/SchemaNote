@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿#define 測試效能
+using Microsoft.Data.SqlClient;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.DB_Tools;
 using SchemaNote.ViewModels;
@@ -16,10 +17,10 @@ namespace SchemaNote.Models
             List<DTO_Column> cols = [];
             List<DTO_Table> tbls = [];
             List<DTO_Extended_prop> props = [];
-            /* 測試效能
+#if 測試效能
             System.Diagnostics.Stopwatch sw = new();
             long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0, ADO_dot_NET3 = 0, ADO_dot_NET4 = 0;
-            */
+#endif
 
             try
             {
@@ -38,7 +39,7 @@ namespace SchemaNote.Models
                         ADO.GetExtended_prop(ref props);
                         break;
                 }
-                /* 測試效能
+#if 測試效能
                 for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
@@ -86,7 +87,7 @@ namespace SchemaNote.Models
                     Dapper += sw.ElapsedMilliseconds;
                     sw.Reset();
                 }
-                */
+#endif
             }
             catch (SqlException ex)
             {
@@ -137,13 +138,13 @@ namespace SchemaNote.Models
                     };
                 })]
             };
-            /* 測試效能
+#if 測試效能
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
             Flag.OBJ.Dapper = Dapper;
             Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
             Flag.OBJ.ADO_dot_NET3 = ADO_dot_NET3;
             Flag.OBJ.ADO_dot_NET4 = ADO_dot_NET4;
-            */
+#endif
             return Flag;
         }
 

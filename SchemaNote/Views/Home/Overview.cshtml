@@ -8,7 +8,7 @@
 }
 
 @section Scripts
-    {
+{
     <script>
         Overview = {
             'objName': {
@@ -30,19 +30,20 @@
         };
     </script>
 
-    <script>        
+    <script>
         //初始化下拉選單
         window.onload = initialOption;
     </script>
 }
 <h1>Overview</h1>
-<!-- 測試效能
--->
-<h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>
-<h2>Dapper:@Model.Dapper 毫秒</h2>
-<h2>ADO_dot_NET2:@Model.ADO_dot_NET2 毫秒</h2>
-<h2>ADO_dot_NET3:@Model.ADO_dot_NET3 毫秒</h2>
-<h2>ADO_dot_NET4:@Model.ADO_dot_NET4 毫秒</h2>
+@if (Model.ADO_dot_NET > 0)
+{
+    <h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>
+    <h2>Dapper:@Model.Dapper 毫秒</h2>
+    <h2>ADO_dot_NET2:@Model.ADO_dot_NET2 毫秒</h2>
+    <h2>ADO_dot_NET3:@Model.ADO_dot_NET3 毫秒</h2>
+    <h2>ADO_dot_NET4:@Model.ADO_dot_NET4 毫秒</h2>
+}
 @if (TempData["ErrorMessage"] != null)
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
@@ -71,10 +72,10 @@
 @foreach (var item in Model.Tables)
 {
     i++;
-    <div class="panel-group accordion" id="@Html.Raw(Common.accordion+i)" role="tablist" aria-multiselectable="true">
+    <div class="panel-group accordion" id="@Html.Raw(Common.accordion + i)" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default ">
             <div class="panel-heading" role="tab">
-                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw(Common.accordion+i)" href="#@Html.Raw("collapse"+i)" aria-expanded="false" aria-controls="@Html.Raw("collapse"+i)">
+                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw(Common.accordion + i)" href="#@Html.Raw("collapse" + i)" aria-expanded="false" aria-controls="@Html.Raw("collapse" + i)">
                     <span class="caret"></span>
                     <strong class="objName">
                         @Html.DisplayFor(modelItem => item.NAME)
@@ -96,7 +97,7 @@
                     @Html.DisplayNameFor(model => t.QTY):<strong class="text-info">@Html.DisplayFor(modelItem => item.QTY)</strong>
                 </span>
             </div>
-            <div id="@Html.Raw("collapse"+i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
+            <div id="@Html.Raw("collapse" + i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
                 <table class="tabDetail_left">
                     <tbody>
                         <tr>
@@ -154,7 +155,7 @@
                 </div>
             </div>
             <table class="table table-bordered table-hover subTable" border="1">
-                <partial name="_OverviewColumns" model="item.Columns" view-data="@(new ViewDataDictionary(ViewData){{ "TYPE", item.TYPE }})" />
+                <partial name="_OverviewColumns" model="item.Columns" view-data="@(new ViewDataDictionary(ViewData) { { "TYPE", item.TYPE } })" />
                 @*  ↓↓↓equal↓↓↓↓
                     @{await Html.RenderPartialAsync("_OverviewColumns", item.Columns);}
                 *@
