@@ -11,14 +11,13 @@ namespace SchemaNote.Models
     {
         internal static DTO_Flag<OverviewViewModel> GetTables_Columns(string ConnectionString, DB_tool db_Tool)
         {
-            var Flag = new DTO_Flag<OverviewViewModel>(MethodBase.GetCurrentMethod().Name);
+            var Flag = new DTO_Flag<OverviewViewModel>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
-            List<DTO_Column> cols = new List<DTO_Column>();
-            List<DTO_Table> tbls = new List<DTO_Table>();
-            List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
-
+            List<DTO_Column> cols = [];
+            List<DTO_Table> tbls = [];
+            List<DTO_Extended_prop> props = [];
             /* 測試效能
-            Stopwatch sw = new Stopwatch();
+            System.Diagnostics.Stopwatch sw = new();
             long ADO_dot_NET = 0, Dapper = 0, ADO_dot_NET2 = 0, ADO_dot_NET3 = 0, ADO_dot_NET4 = 0;
             */
 
@@ -27,13 +26,13 @@ namespace SchemaNote.Models
                 switch (db_Tool)
                 {
                     case DB_tool.Dapper:
-                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        ORM_Dapper dapper = new(ConnectionString);
                         dapper.GetColumns(ref cols);
                         dapper.GetTables(ref tbls);
                         dapper.GetExtended_prop(ref props);
                         break;
                     default:
-                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO_dot_NET ADO = new(ConnectionString);
                         ADO.GetColumns(ref cols);
                         ADO.GetTables(ref tbls);
                         ADO.GetExtended_prop(ref props);
@@ -43,7 +42,7 @@ namespace SchemaNote.Models
                 for (int i = 0; i < 200; i++)
                 {
                     sw.Start();
-                    ADO_dot_NET4 ADO4 = new ADO_dot_NET4(ConnectionString);
+                    ADO_dot_NET4 ADO4 = new(ConnectionString);
                     ADO4.GetColumns(ref cols);
                     ADO4.GetTables(ref tbls);
                     ADO4.GetExtended_prop(ref props);
@@ -52,7 +51,7 @@ namespace SchemaNote.Models
                     sw.Reset();
 
                     sw.Start();
-                    ADO_dot_NET3 ADO3 = new ADO_dot_NET3(ConnectionString);
+                    ADO_dot_NET3 ADO3 = new(ConnectionString);
                     ADO3.GetColumns(ref cols);
                     ADO3.GetTables(ref tbls);
                     ADO3.GetExtended_prop(ref props);
@@ -61,7 +60,7 @@ namespace SchemaNote.Models
                     sw.Reset();
 
                     sw.Start();
-                    ADO_dot_NET2 ADO2 = new ADO_dot_NET2(ConnectionString);
+                    ADO_dot_NET2 ADO2 = new(ConnectionString);
                     ADO2.GetColumns(ref cols);
                     ADO2.GetTables(ref tbls);
                     ADO2.GetExtended_prop(ref props);
@@ -70,7 +69,7 @@ namespace SchemaNote.Models
                     sw.Reset();
 
                     sw.Start();
-                    ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                    ADO_dot_NET ADO = new(ConnectionString);
                     ADO.GetColumns(ref cols);
                     ADO.GetTables(ref tbls);
                     ADO.GetExtended_prop(ref props);
@@ -79,7 +78,7 @@ namespace SchemaNote.Models
                     sw.Reset();
 
                     sw.Start();
-                    ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                    ORM_Dapper dapper = new(ConnectionString);
                     dapper.GetColumns(ref cols);
                     dapper.GetTables(ref tbls);
                     dapper.GetExtended_prop(ref props);
@@ -103,10 +102,10 @@ namespace SchemaNote.Models
 
             Flag.OBJ = new OverviewViewModel
             {
-                Tables = tbls.Select(t =>
+                Tables = [.. tbls.Select(t =>
                 {
                     var pObj = props.Where(p => p.MAJOR_ID == t.OBJECT_ID);
-                    var pT = pObj.Where(p => p.MINOR_ID == 0);
+                    IEnumerable<DTO_Extended_prop> pT = pObj.Where(p => p.MINOR_ID == 0);
                     return new Table
                     {
                         OBJECT_ID = t.OBJECT_ID,
@@ -116,9 +115,9 @@ namespace SchemaNote.Models
                         CREATE_DATE = t.CREATE_DATE,
                         MODIFY_DATE = t.MODIFY_DATE,
                         QTY = t.QTY,
-                        MS_Description = (pT.Where(p => p.NAME.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
-                        REMARK = (pT.Where(p => p.NAME.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
-                        Columns = cols.Where(c => c.OBJECT_ID == t.OBJECT_ID).Select(c =>
+                        MS_Description = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
+                        REMARK = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
+                        Columns = [.. cols.Where(c => c.OBJECT_ID == t.OBJECT_ID).Select(c =>
                         {
                             var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
                             return new Column
@@ -131,12 +130,12 @@ namespace SchemaNote.Models
                                 IS_PK = c.IS_PK,
                                 DISALLOW_NULL = c.DISALLOW_NULL,
                                 DEFUALT = c.DEFUALT,
-                                MS_Description = (pC.Where(p => p.NAME.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
-                                REMARK = (pC.Where(p => p.NAME.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
+                                MS_Description = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
+                                REMARK = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
                             };
-                        }).ToList()
+                        })]
                     };
-                }).ToList()
+                })]
             };
             /* 測試效能
             Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
@@ -150,19 +149,19 @@ namespace SchemaNote.Models
 
         internal static DTO_Flag<DetailsViewModel> GetTable_Columns(string ConnectionString, int _OBJECT_ID, DB_tool db_Tool)
         {
-            var Flag = new DTO_Flag<DetailsViewModel>(MethodBase.GetCurrentMethod().Name);
+            var Flag = new DTO_Flag<DetailsViewModel>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
-            List<DTO_Extended_prop> props = new List<DTO_Extended_prop>();
-            List<DTO_Index> indexes = new List<DTO_Index>();
-            DTO_Table tbl = new DTO_Table();
-            List<DTO_Column> cols = new List<DTO_Column>();
+            List<DTO_Extended_prop> props = [];
+            List<DTO_Index> indexes = [];
+            DTO_Table tbl = new();
+            List<DTO_Column> cols = [];
 
             try
             {
                 switch (db_Tool)
                 {
                     case DB_tool.Dapper:
-                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        ORM_Dapper dapper = new(ConnectionString);
                         var Flag_a_col = dapper.GetColumnsByOBJECT_ID(_OBJECT_ID);
                         if (Flag_a_col.ResultType != ExceResultType.Success)
                         {
@@ -179,11 +178,11 @@ namespace SchemaNote.Models
 
                         dapper.GetExtended_prop(ref props);
                         dapper.GetIndexes(ref indexes);
-                        tbl = Flag_a_tbl.OBJ.FirstOrDefault();
+                        if (Flag_a_tbl.OBJ.FirstOrDefault() is DTO_Table table1) tbl = table1;
                         cols = Flag_a_col.OBJ;
                         break;
                     default:
-                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO_dot_NET ADO = new(ConnectionString);
                         var Flag_b_col = ADO.GetColumnsByOBJECT_ID(_OBJECT_ID);
                         if (Flag_b_col.ResultType != ExceResultType.Success)
                         {
@@ -200,7 +199,7 @@ namespace SchemaNote.Models
 
                         ADO.GetExtended_prop(ref props);
                         ADO.GetIndexes(ref indexes);
-                        tbl = Flag_b_tbl.OBJ.FirstOrDefault();
+                        if (Flag_b_tbl.OBJ.FirstOrDefault() is DTO_Table table2) tbl = table2;
                         cols = Flag_b_col.OBJ;
                         break;
                 }
@@ -229,9 +228,9 @@ namespace SchemaNote.Models
                 CREATE_DATE = tbl.CREATE_DATE,
                 MODIFY_DATE = tbl.MODIFY_DATE,
                 QTY = tbl.QTY,
-                MS_Description = (pT.Where(p => p.NAME.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
-                REMARK = (pT.Where(p => p.NAME.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
-                Columns = cols.Select(c =>
+                MS_Description = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
+                REMARK = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
+                Columns = [.. cols.Select(c =>
                 {
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
                     return new ColumnDetail()
@@ -245,9 +244,9 @@ namespace SchemaNote.Models
                         IS_PK = c.IS_PK,
                         DISALLOW_NULL = c.DISALLOW_NULL,
                         DEFUALT = c.DEFUALT,
-                        MS_Description = (pC.Where(p => p.NAME.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
-                        REMARK = (pC.Where(p => p.NAME.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
-                        Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new IndexDetail()
+                        MS_Description = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
+                        REMARK = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
+                        Indexes = [.. iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new IndexDetail()
                         {
                             OBJECT_ID = i.OBJECT_ID,
                             INDEX_ID = i.INDEX_ID,
@@ -258,16 +257,16 @@ namespace SchemaNote.Models
                             IS_UNIQUE = i.IS_UNIQUE,
                             IS_PK = i.IS_PK,
                             FILL_FACTOR = i.FILL_FACTOR,
-                        }).ToList()
+                        })]
                     };
-                }).ToList()
+                })]
             };
             return Flag;
         }
 
         internal static DTO_Flag<int> SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model, DB_tool db_Tool)
         {
-            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
             #region 取得物件的所有自訂屬性
             var props = new List<DTO_Extended_prop>();
@@ -276,13 +275,13 @@ namespace SchemaNote.Models
                 switch (db_Tool)
                 {
                     case DB_tool.Dapper:
-                        ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                        ORM_Dapper dapper = new(ConnectionString);
                         dapper.GetExtended_prop(ref props);
-                        return dapper.SaveProperties(id, Categorized(model, props.Where(p => p.MAJOR_ID == id).ToList()));
+                        return dapper.SaveProperties(id, Categorized(model, [.. props.Where(p => p.MAJOR_ID == id)]));
                     default:
-                        ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                        ADO_dot_NET ADO = new(ConnectionString);
                         ADO.GetExtended_prop(ref props);
-                        return ADO.SaveProperties(id, Categorized(model, props.Where(p => p.MAJOR_ID == id).ToList()));
+                        return ADO.SaveProperties(id, Categorized(model, [.. props.Where(p => p.MAJOR_ID == id)]));
                 }
 
             }
@@ -309,7 +308,7 @@ namespace SchemaNote.Models
         /// <returns></returns>
         static List<DTO_prop> Categorized(ICollection<VM_Property> model, List<DTO_Extended_prop> curr_props)
         {
-            List<DTO_prop> dto_prop = new List<DTO_prop>();
+            List<DTO_prop> dto_prop = [];
 
             foreach (VM_Property vm in model)
             {
@@ -334,17 +333,17 @@ namespace SchemaNote.Models
 
             IEnumerable<DTO_prop> UnionProp = dto_prop.GroupJoin(
                  curr_props,
-                 d => new { d.COLUMN_ID, NAME = d.NAME.ToUpper() },
-                 p => new { COLUMN_ID = p.MINOR_ID, NAME = p.NAME.ToUpper() },
+                 d => new { d.COLUMN_ID, NAME = d.NAME?.ToUpper() },
+                 p => new { COLUMN_ID = p.MINOR_ID, NAME = p.NAME?.ToUpper() },
                  (d, p) => new DTO_prop
                  {
                      COLUMN_ID = d.COLUMN_ID,
                      NAME = d.NAME,
-                     VALUE = d.VALUE.Trim(),
-                     Original_VALUE = (p.FirstOrDefault()?.VALUE) is object obj ? obj.ToString().Trim() : null,
+                     VALUE = d.VALUE?.Trim(),
+                     Original_VALUE = (p.FirstOrDefault()?.VALUE) is object obj ? obj.ToString() is string obj_str ? obj_str.Trim() : string.Empty : string.Empty,
                  });
 
-            List<DTO_prop> Properties = new List<DTO_prop>();
+            List<DTO_prop> Properties = [];
 
             foreach (DTO_prop p in UnionProp)
             {
@@ -379,11 +378,11 @@ namespace SchemaNote.Models
 
         internal static DTO_Flag<StringBuilder> ExportPropertiesScript(string ConnectionString, DB_tool db_Tool, bool ForDeleteEmptyData = false)
         {
-            var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod().Name);
+            var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
-            List<DTO_Object_prop> object_props = new List<DTO_Object_prop>();
+            List<DTO_Object_prop> object_props = [];
             string scriptTemp = ForDeleteEmptyData ? SQLScripts.DeleteScript_Extended_prop : SQLScripts.SavingScript_Extended_prop, newLine = Environment.NewLine;
-            StringBuilder stringBuilder = new StringBuilder(
+            StringBuilder stringBuilder = new(
                 "DECLARE @id int," + newLine +
                 "        @col_id int," + newLine +
                 "        @name sysname," + newLine +
@@ -402,11 +401,11 @@ namespace SchemaNote.Models
                     switch (db_Tool)
                     {
                         case DB_tool.Dapper:
-                            ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                            ORM_Dapper dapper = new(ConnectionString);
                             dapper.GetObjectExtendedProp_emptyValue(ref object_props);
                             break;
                         default:
-                            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                            ADO_dot_NET ADO = new(ConnectionString);
                             ADO.GetObjectExtendedProp_emptyValue(ref object_props);
                             break;
                     }
@@ -414,11 +413,11 @@ namespace SchemaNote.Models
                     switch (db_Tool)
                     {
                         case DB_tool.Dapper:
-                            ORM_Dapper dapper = new ORM_Dapper(ConnectionString);
+                            ORM_Dapper dapper = new(ConnectionString);
                             dapper.GetObjectExtendedProp(ref object_props);
                             break;
                         default:
-                            ADO_dot_NET ADO = new ADO_dot_NET(ConnectionString);
+                            ADO_dot_NET ADO = new(ConnectionString);
                             ADO.GetObjectExtendedProp(ref object_props);
                             break;
                     }
@@ -433,7 +432,7 @@ namespace SchemaNote.Models
                     stringBuilder.Append(
                     string.Format(scriptTemp,
                         op.PROP_NAME,
-                        op.PROP_VALUE.ToString().Replace("'", "''"),
+                        op.PROP_VALUE?.ToString()?.Replace("'", "''") ?? string.Empty,
                         op.SCHEMA_NAME,
                         op.TYPE,
                         op.NAME,

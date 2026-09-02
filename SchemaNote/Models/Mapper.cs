@@ -13,67 +13,67 @@ namespace SchemaNote.Models
             PropType = PropInfo.PropertyType;
             DataType = dataType;
             Index = index;
-            Assign = (T dto, SqlDataReader dr) => { };//do nothing.
+            Assign = (dto, dr) => { };//do nothing.
             if (PropType == DataType)
             {
                 switch (Type.GetTypeCode(DataType))
                 {
                     case TypeCode.Boolean:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetBoolean(Index));
                         }; break;
                     case TypeCode.Char:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetChar(Index));
                         }; break;
                     case TypeCode.Byte:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetByte(Index));
                         }; break;
                     //case TypeCode.SByte: break;
                     //case TypeCode.UInt16: break;
                     case TypeCode.Int16:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt16(Index));
                         }; break;
                     //case TypeCode.UInt32: break;
                     case TypeCode.Int32:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt32(Index));
                         }; break;
                     //case TypeCode.UInt64: break;
                     case TypeCode.Int64:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt64(Index));
                         }; break;
                     case TypeCode.Single:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetFloat(Index));
                         }; break;
                     case TypeCode.Double:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDouble(Index));
                         }; break;
                     case TypeCode.Decimal:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDecimal(Index));
                         }; break;
                     case TypeCode.String:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetString(Index).Trim());
                         }; break;
                     case TypeCode.DateTime:
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index))
                                 PropInfo.SetValue(dto, dr.GetDateTime(Index));
@@ -81,7 +81,7 @@ namespace SchemaNote.Models
                     default:
                         if (PropType == typeof(DateTimeOffset))
                         {
-                            Assign = (T dto, SqlDataReader dr) =>
+                            Assign = (dto, dr) =>
                             {
                                 if (!dr.IsDBNull(Index))
                                     PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
@@ -89,7 +89,7 @@ namespace SchemaNote.Models
                         }
                         else if (PropType == typeof(TimeSpan))
                         {
-                            Assign = (T dto, SqlDataReader dr) =>
+                            Assign = (dto, dr) =>
                             {
                                 if (!dr.IsDBNull(Index))
                                     PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
@@ -97,7 +97,7 @@ namespace SchemaNote.Models
                         }
                         else
                         {
-                            Assign = (T dto, SqlDataReader dr) =>
+                            Assign = (dto, dr) =>
                             {
                                 if (!dr.IsDBNull(Index))
                                     PropInfo.SetValue(dto, dr[Index]);
@@ -110,7 +110,7 @@ namespace SchemaNote.Models
             {
                 if (PropType.IsEnum)
                 {
-                    Assign = (T dto, SqlDataReader dr) =>
+                    Assign = (dto, dr) =>
                     {
                         if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
                     };
@@ -124,7 +124,7 @@ namespace SchemaNote.Models
                     }
                     if (CanAccommodate)
                     {
-                        Assign = (T dto, SqlDataReader dr) =>
+                        Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
                         };

@@ -1,23 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.ViewModels;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(ISessionWrapper sessionWapper) : Controller
     {
-        private readonly ISessionWrapper _sessionWapper;
-        private readonly DB_tool _db_tool;
-
-        public HomeController(ISessionWrapper sessionWapper)
-        {
-            _sessionWapper = sessionWapper;
-            _db_tool = DB_tool.ADO_dot_NET;
-        }
+        private readonly ISessionWrapper _sessionWapper = sessionWapper;
+        private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
 
         [HttpGet]
         public IActionResult Index()
@@ -36,7 +28,7 @@ namespace SchemaNote.Controllers
                     TempData["ErrorMessage"] = Common.ConnStringMissing;
                     return RedirectToAction("Index");
                 }
-                UserModel userModel = new UserModel();
+                UserModel userModel = new();
                 userModel.SetMiddlewareValue(ConnectionString);
                 _sessionWapper.User = userModel;
 
@@ -58,7 +50,7 @@ namespace SchemaNote.Controllers
         public ActionResult Overview()
         {
             #region check Connection
-            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            string? ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
@@ -79,7 +71,7 @@ namespace SchemaNote.Controllers
         public ActionResult ExportExtendedPropScript()
         {
             #region check Connection
-            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            string? ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
@@ -101,7 +93,7 @@ namespace SchemaNote.Controllers
         public ActionResult Details(int? id)
         {
             #region check Connection
-            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            string? ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;
@@ -127,7 +119,7 @@ namespace SchemaNote.Controllers
         public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
         {
             #region check Connection
-            string ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
+            string? ConnectionString = _sessionWapper.User.SessionInfo_MiddlewareValue;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = Common.ConnStringMissing;

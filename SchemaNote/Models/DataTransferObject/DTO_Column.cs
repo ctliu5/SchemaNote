@@ -11,13 +11,13 @@ namespace SchemaNote.Models.DataTransferObject
         public int COLUMN_ID { get; set; }
 
         [Display(Name = "欄位名稱")]
-        public string NAME { get; set; }
+        public string? NAME { get; set; }
 
         [Display(Name = "資料型別")]
-        public string TYPE_NAME { get; set; }
+        public string? TYPE_NAME { get; set; }
 
         [Display(Name = "資料長度")]
-        public string LENGTH { get; set; }
+        public string? LENGTH { get; set; }
 
         [Display(Name = "主鍵")]
         public bool IS_PK { get; set; }
@@ -26,6 +26,6 @@ namespace SchemaNote.Models.DataTransferObject
         public bool DISALLOW_NULL { get; set; }
 
         [Display(Name = "預設值")]
-        public string DEFUALT { get; set; }
+        public string? DEFUALT { get; set; }
     }
 }

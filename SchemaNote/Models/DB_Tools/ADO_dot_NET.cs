@@ -9,94 +9,71 @@ namespace SchemaNote.Models.DB_Tools
     /// <summary>
     /// <see cref="https://stackoverflow.com/questions/4439409/open-close-sqlconnection-or-keep-open"/>
     /// </summary>
-    public class ADO_dot_NET
+    public class ADO_dot_NET(string _ConnectionString)
     {
-        protected string ConnectionString { get; set; }
-
-        public ADO_dot_NET(string _ConnectionString)
-        {
-            ConnectionString = _ConnectionString;
-        }
+        protected string ConnectionString { get; set; } = _ConnectionString;
 
         public virtual List<T> ExecSqlDataReader<T>(SqlCommand comm) where T : new()
         {
-            using (SqlDataReader dr = comm.ExecuteReader())
-            {
-                if (dr.HasRows)
-                    return dr.ReadAll<T>();
-                else
-                    return new List<T>();
-            }
+            using SqlDataReader dr = comm.ExecuteReader();
+            if (dr.HasRows)
+                return dr.ReadAll<T>();
+            else
+                return [];
         }
 
         internal void GetColumns(ref List<DTO_Column> cols)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumns, conn))
-                {
-                    cols = ExecSqlDataReader<DTO_Column>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetColumns, conn);
+            cols = ExecSqlDataReader<DTO_Column>(comm);
         }
 
         internal void GetTables(ref List<DTO_Table> tbls)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTables, conn))
-                {
-                    tbls = ExecSqlDataReader<DTO_Table>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetTables, conn);
+            tbls = ExecSqlDataReader<DTO_Table>(comm);
         }
 
         internal void GetExtended_prop(ref List<DTO_Extended_prop> props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetExtended_prop, conn))
-                {
-                    props = ExecSqlDataReader<DTO_Extended_prop>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetExtended_prop, conn);
+            props = ExecSqlDataReader<DTO_Extended_prop>(comm);
         }
 
         internal void GetIndexes(ref List<DTO_Index> indexes)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetIndexes, conn))
-                {
-                    indexes = ExecSqlDataReader<DTO_Index>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetIndexes, conn);
+            indexes = ExecSqlDataReader<DTO_Index>(comm);
         }
 
         internal DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
         {
-            var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod().Name);
-            SqlParameter para = new SqlParameter()
+            var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+            SqlParameter para = new()
             {
                 ParameterName = "OBJECT_ID",
                 SqlDbType = System.Data.SqlDbType.Int,
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new(ConnectionString);
             try
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetColumnsByObject_id, conn))
+                using (SqlCommand comm = new(SQLScripts.GetColumnsByObject_id, conn))
                 {
                     comm.Parameters.Add(para);
                     ObjFlag.OBJ = ExecSqlDataReader<DTO_Column>(comm);
@@ -126,20 +103,20 @@ namespace SchemaNote.Models.DB_Tools
 
         internal DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
         {
-            var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod().Name);
-            SqlParameter para = new SqlParameter()
+            var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+            SqlParameter para = new()
             {
                 ParameterName = "OBJECT_ID",
                 SqlDbType = System.Data.SqlDbType.Int,
                 Value = _OBJECT_ID
             };
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new(ConnectionString);
             try
             {
                 conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetTablesByObject_id, conn))
+                using (SqlCommand comm = new(SQLScripts.GetTablesByObject_id, conn))
                 {
                     comm.Parameters.Add(para);
                     ObjFlag.OBJ = ExecSqlDataReader<DTO_Table>(comm);
@@ -169,8 +146,8 @@ namespace SchemaNote.Models.DB_Tools
 
         internal DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
         {
-            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
-            SqlParameter para_OBJECT_ID = new SqlParameter()
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+            SqlParameter para_OBJECT_ID = new()
             {
                 ParameterName = "OBJECT_ID",
                 SqlDbType = System.Data.SqlDbType.Int,
@@ -183,8 +160,8 @@ namespace SchemaNote.Models.DB_Tools
                 TYPE = "",
                 NewLine = Environment.NewLine;
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
-            SqlCommand comm = new SqlCommand();
+            SqlConnection conn = new(ConnectionString);
+            SqlCommand comm = new();
 
             try
             {
@@ -198,9 +175,9 @@ namespace SchemaNote.Models.DB_Tools
                 {
                     while (dr.Read())
                     {
-                        OBJECT_NAME = dr["OBJECT_NAME"].ToString();
-                        SCHEMA_NAME = dr["SCHEMA_NAME"].ToString();
-                        TYPE = dr["TYPE"].ToString().Trim();
+                        OBJECT_NAME = dr["OBJECT_NAME"]?.ToString() ?? string.Empty;
+                        SCHEMA_NAME = dr["SCHEMA_NAME"]?.ToString() ?? string.Empty;
+                        TYPE = dr["TYPE"]?.ToString()?.Trim() ?? string.Empty;
                     }
                 }
 
@@ -232,129 +209,124 @@ namespace SchemaNote.Models.DB_Tools
                 #endregion
 
                 #region Add/Update/Drop Prop
-                SqlParameter[] paras = new SqlParameter[]
-                {
-                    new SqlParameter()
+                SqlParameter[] paras =
+                [
+                    new()
                     {
                         ParameterName = "SCHEMA_NAME",
                         SqlDbType = System.Data.SqlDbType.NVarChar,
                         Value = SCHEMA_NAME
                     },
-                    new SqlParameter()
+                    new()
                     {
                         ParameterName = "OBJECT_NAME",
                         SqlDbType = System.Data.SqlDbType.NVarChar,
                         Value = OBJECT_NAME
                     },
-                    new SqlParameter()
+                    new()
                     {
                         ParameterName = "TYPE",
                         SqlDbType = System.Data.SqlDbType.Char,
                         Value = TYPE
                     },
                     para_OBJECT_ID
-                };
-                using (TransactionScope transaction = new TransactionScope())
+                ];
+                using TransactionScope transaction = new();
+                foreach (DTO_prop prop in props)
                 {
-                    foreach (DTO_prop prop in props)
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddRange(paras);
+                    switch (prop.Verb)
                     {
-                        comm.Parameters.Clear();
-                        comm.Parameters.AddRange(paras);
-                        switch (prop.Verb)
-                        {
-                            case PropVerb.add:
-                                comm.Parameters.AddRange(
-                                new SqlParameter[]
-                                {
-                                new SqlParameter()
+                        case PropVerb.add:
+                            comm.Parameters.AddRange(
+                            [
+                                new()
                                 {
                                     ParameterName = "COLUMN_ID",
                                     SqlDbType = System.Data.SqlDbType.Int,
                                     Value = prop.COLUMN_ID
                                 },
-                                new SqlParameter()
+                                new()
                                 {
                                     ParameterName = "PROP_NAME",
                                     SqlDbType = System.Data.SqlDbType.NVarChar,
                                     Value = prop.NAME
                                 },
-                                new SqlParameter()
+                                new()
                                 {
                                     ParameterName = "PROP_VALUE",
                                     SqlDbType = System.Data.SqlDbType.Variant,
                                     Value = prop.VALUE
                                 },
-                                });
-                                comm.CommandText = SQLScripts.Addextendedproperty;
-                                ObjFlag.OBJ += comm.ExecuteNonQuery();
-                                if (ObjFlag.OBJ == 0)
-                                {
-                                    ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
-                                        "內容為：\"" + prop.VALUE + "\"");
-                                    return ObjFlag;
-                                }
-                                break;
-                            case PropVerb.update:
-                                comm.Parameters.AddRange(
-                                new SqlParameter[]
-                                {
-                                new SqlParameter()
+                            ]);
+                            comm.CommandText = SQLScripts.Addextendedproperty;
+                            ObjFlag.OBJ += comm.ExecuteNonQuery();
+                            if (ObjFlag.OBJ == 0)
+                            {
+                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
+                                    "內容為：\"" + prop.VALUE + "\"");
+                                return ObjFlag;
+                            }
+                            break;
+                        case PropVerb.update:
+                            comm.Parameters.AddRange(
+                            [
+                                new()
                                 {
                                     ParameterName = "COLUMN_ID",
                                     SqlDbType = System.Data.SqlDbType.Int,
                                     Value = prop.COLUMN_ID
                                 },
-                                new SqlParameter()
+                                new()
                                 {
                                     ParameterName = "PROP_NAME",
                                     SqlDbType = System.Data.SqlDbType.NVarChar,
                                     Value = prop.NAME
                                 },
-                                new SqlParameter()
+                                new()
                                 {
                                     ParameterName = "PROP_VALUE",
                                     SqlDbType = System.Data.SqlDbType.Variant,
                                     Value = prop.VALUE
                                 },
-                                });
-                                comm.CommandText = SQLScripts.Updateextendedproperty;
-                                ObjFlag.OBJ += comm.ExecuteNonQuery();
-                                if (ObjFlag.OBJ == 0)
-                                {
-                                    ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
-                                        "內容為：\"" + prop.VALUE + "\"");
-                                    return ObjFlag;
-                                }
-                                break;
-                            case PropVerb.drop:
-                                comm.Parameters.AddRange(
-                                new SqlParameter[]
-                                {
-                                new SqlParameter()
+                            ]);
+                            comm.CommandText = SQLScripts.Updateextendedproperty;
+                            ObjFlag.OBJ += comm.ExecuteNonQuery();
+                            if (ObjFlag.OBJ == 0)
+                            {
+                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
+                                    "內容為：\"" + prop.VALUE + "\"");
+                                return ObjFlag;
+                            }
+                            break;
+                        case PropVerb.drop:
+                            comm.Parameters.AddRange(
+                            [
+                                new()
                                 {
                                     ParameterName = "COLUMN_ID",
                                     SqlDbType = System.Data.SqlDbType.Int,
                                     Value = prop.COLUMN_ID
                                 },
-                                new SqlParameter()
+                                new()
                                 {
                                     ParameterName = "PROP_NAME",
                                     SqlDbType = System.Data.SqlDbType.NVarChar,
                                     Value = prop.NAME
                                 },
-                                });
-                                comm.CommandText = SQLScripts.Dropextendedproperty;
-                                ObjFlag.OBJ += comm.ExecuteNonQuery();
-                                if (ObjFlag.OBJ == 0)
-                                {
-                                    ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗");
-                                    return ObjFlag;
-                                }
-                                break;
-                        }
+                            ]);
+                            comm.CommandText = SQLScripts.Dropextendedproperty;
+                            ObjFlag.OBJ += comm.ExecuteNonQuery();
+                            if (ObjFlag.OBJ == 0)
+                            {
+                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗");
+                                return ObjFlag;
+                            }
+                            break;
                     }
-                    transaction.Complete();
                 }
+                transaction.Complete();
                 #endregion
             }
             catch (SqlException ex)
@@ -376,79 +348,53 @@ namespace SchemaNote.Models.DB_Tools
 
         internal void GetObjectExtendedProp(ref List<DTO_Object_prop> object_props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetObject_Extended_prop, conn))
-                {
-                    object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetObject_Extended_prop, conn);
+            object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
         }
 
         internal void GetObjectExtendedProp_emptyValue(ref List<DTO_Object_prop> object_props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
 
-                using (SqlCommand comm = new SqlCommand(SQLScripts.GetObject_Extended_prop_emptyValue, conn))
-                {
-                    object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
-                }
-            }
+            using SqlCommand comm = new(SQLScripts.GetObject_Extended_prop_emptyValue, conn);
+            object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
         }
     }
-    public class ADO_dot_NET2 : ADO_dot_NET
+    public class ADO_dot_NET2(string _ConnectionString) : ADO_dot_NET(_ConnectionString)
     {
-        public ADO_dot_NET2(string _ConnectionString) : base(_ConnectionString)
-        {
-        }
-
         public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
         {
-            using (SqlDataReader dr = comm.ExecuteReader())
-            {
-                if (dr.HasRows)
-                    return dr.ReadAll2<T>();
-                else
-                    return new List<T>();
-            }
+            using SqlDataReader dr = comm.ExecuteReader();
+            if (dr.HasRows)
+                return dr.ReadAll2<T>();
+            else
+                return [];
         }
     }
-    public class ADO_dot_NET3 : ADO_dot_NET
+    public class ADO_dot_NET3(string _ConnectionString) : ADO_dot_NET(_ConnectionString)
     {
-        public ADO_dot_NET3(string _ConnectionString) : base(_ConnectionString)
-        {
-        }
-
         public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
         {
-            using (SqlDataReader dr = comm.ExecuteReader())
-            {
-                if (dr.HasRows)
-                    return dr.ReadAll3<T>();
-                else
-                    return new List<T>();
-            }
+            using SqlDataReader dr = comm.ExecuteReader();
+            if (dr.HasRows)
+                return dr.ReadAll3<T>();
+            else
+                return [];
         }
     }
-    public class ADO_dot_NET4 : ADO_dot_NET
+    public class ADO_dot_NET4(string _ConnectionString) : ADO_dot_NET(_ConnectionString)
     {
-        public ADO_dot_NET4(string _ConnectionString) : base(_ConnectionString)
-        {
-        }
-
         public override List<T> ExecSqlDataReader<T>(SqlCommand comm)
         {
-            using (SqlDataReader dr = comm.ExecuteReader())
-            {
-                if (dr.HasRows)
-                    return dr.ReadAll4<T>();
-                else
-                    return new List<T>();
-            }
+            using SqlDataReader dr = comm.ExecuteReader();
+            if (dr.HasRows)
+                return dr.ReadAll4<T>();
+            else
+                return [];
         }
     }
 }

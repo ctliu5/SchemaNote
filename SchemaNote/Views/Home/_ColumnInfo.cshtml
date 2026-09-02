@@ -1,7 +1,7 @@
 ﻿@using SchemaNote.ViewModels;
 @model ColumnDetail
 @{
-  bool HasIndex = Model.Indexes.Count > 0;
+  bool HasIndex = Model.Indexes.Length > 0;
   IndexDetail ind = new IndexDetail();
 }
 <tr>

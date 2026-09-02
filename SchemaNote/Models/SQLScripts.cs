@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 
 namespace SchemaNote.Models
@@ -25,84 +24,109 @@ namespace SchemaNote.Models
     /// </remarks>
     public static class SQLScripts
     {
-        static Assembly _Assembly { get { return Assembly.GetExecutingAssembly(); } }
+        static Assembly Assembly { get { return Assembly.GetExecutingAssembly(); } }
         static string GetScript(string _name)
         {
-            var resourceStream = _Assembly.GetManifestResourceStream(_name);
-
-            using (var reader = new StreamReader(resourceStream, Encoding.UTF8))
-            {
-                return reader.ReadToEnd();
-            }
-
+            var resourceStream = Assembly.GetManifestResourceStream(_name);
+            if (resourceStream == null) return string.Empty;
+            using var reader = new StreamReader(resourceStream, Encoding.UTF8);
+            return reader.ReadToEnd();
         }
-        public static string GetTables {
-            get {
+        public static string GetTables
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getTables.sql");
             }
         }
-        public static string GetColumns {
-            get {
+        public static string GetColumns
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getColumns.sql");
             }
         }
-        public static string GetExtended_prop {
-            get {
+        public static string GetExtended_prop
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getExtended_prop.sql");
             }
         }
-        public static string GetIndexes {
-            get {
+        public static string GetIndexes
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getIndexes.sql");
             }
         }
-        public static string GetColumnsByObject_id {
-            get {
+        public static string GetColumnsByObject_id
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getColumns_ByObject_id.sql");
             }
         }
-        public static string GetTablesByObject_id {
-            get {
+        public static string GetTablesByObject_id
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getTables_ByObject_id.sql");
             }
         }
-        public static string GetSchema_ByObject_id {
-            get {
+        public static string GetSchema_ByObject_id
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getSchema_ByObject_id.sql");
             }
         }
-        public static string Addextendedproperty {
-            get {
+        public static string Addextendedproperty
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.addextendedproperty.sql");
             }
         }
-        public static string Updateextendedproperty {
-            get {
+        public static string Updateextendedproperty
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.updateextendedproperty.sql");
             }
         }
-        public static string Dropextendedproperty {
-            get {
+        public static string Dropextendedproperty
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.dropextendedproperty.sql");
             }
         }
-        public static string GetObject_Extended_prop {
-            get {
+        public static string GetObject_Extended_prop
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getObject_Extended_prop.sql");
             }
         }
-        public static string GetObject_Extended_prop_emptyValue {
-            get {
+        public static string GetObject_Extended_prop_emptyValue
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.getObject_Extended_prop_emptyValue.sql");
             }
         }
-        public static string SavingScript_Extended_prop {
-            get {
+        public static string SavingScript_Extended_prop
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.savingScript_Extended_prop.sql");
             }
         }
-        public static string DeleteScript_Extended_prop {
-            get {
+        public static string DeleteScript_Extended_prop
+        {
+            get
+            {
                 return GetScript("SchemaNote.sql.deleteScript_Extended_prop.sql");
             }
         }

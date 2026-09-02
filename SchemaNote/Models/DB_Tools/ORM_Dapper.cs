@@ -6,60 +6,47 @@ using System.Reflection;
 
 namespace SchemaNote.Models.DB_Tools
 {
-    public class ORM_Dapper
+    public class ORM_Dapper(string _ConnectionString)
     {
-        string ConnectionString { get; set; }
-
-        public ORM_Dapper(string _ConnectionString)
-        {
-            ConnectionString = _ConnectionString;
-        }
+        string ConnectionString { get; set; } = _ConnectionString;
 
         internal void GetColumns(ref List<DTO_Column> cols)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                cols = conn.Query<DTO_Column>(SQLScripts.GetColumns).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            cols = [.. conn.Query<DTO_Column>(SQLScripts.GetColumns)];
         }
 
         internal void GetTables(ref List<DTO_Table> tbls)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                tbls = conn.Query<DTO_Table>(SQLScripts.GetTables).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            tbls = [.. conn.Query<DTO_Table>(SQLScripts.GetTables)];
         }
 
         internal void GetExtended_prop(ref List<DTO_Extended_prop> props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                props = conn.Query<DTO_Extended_prop>(SQLScripts.GetExtended_prop).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            props = [.. conn.Query<DTO_Extended_prop>(SQLScripts.GetExtended_prop)];
         }
 
         internal void GetIndexes(ref List<DTO_Index> indexes)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                indexes = conn.Query<DTO_Index>(SQLScripts.GetIndexes).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            indexes = [.. conn.Query<DTO_Index>(SQLScripts.GetIndexes)];
         }
 
         internal DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
         {
-            var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod().Name);
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+            SqlConnection conn = new(ConnectionString);
             try
             {
                 conn.Open();
 
-                ObjFlag.OBJ = conn.Query<DTO_Column>(SQLScripts.GetColumnsByObject_id, new { OBJECT_ID = _OBJECT_ID }).ToList();
+                ObjFlag.OBJ = [.. conn.Query<DTO_Column>(SQLScripts.GetColumnsByObject_id, new { OBJECT_ID = _OBJECT_ID })];
                 if (ObjFlag.OBJ.Count < 1)
                 {
                     ObjFlag.ErrorMessages.Append("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
@@ -85,13 +72,13 @@ namespace SchemaNote.Models.DB_Tools
 
         internal DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
         {
-            var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod().Name);
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+            SqlConnection conn = new(ConnectionString);
             try
             {
                 conn.Open();
 
-                ObjFlag.OBJ = conn.Query<DTO_Table>(SQLScripts.GetTablesByObject_id, new { OBJECT_ID = _OBJECT_ID }).ToList();
+                ObjFlag.OBJ = [.. conn.Query<DTO_Table>(SQLScripts.GetTablesByObject_id, new { OBJECT_ID = _OBJECT_ID })];
                 if (ObjFlag.OBJ.Count < 1)
                 {
                     ObjFlag.ErrorMessages.Append("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
@@ -117,25 +104,25 @@ namespace SchemaNote.Models.DB_Tools
 
         internal DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
         {
-            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod().Name);
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
-            string TYPE = "", NewLine = Environment.NewLine;
+            string TYPE, NewLine = Environment.NewLine;
 
-            SqlConnection conn = new SqlConnection(ConnectionString);
+            SqlConnection conn = new(ConnectionString);
             conn.Open();
-            using (IDbTransaction transaction = conn.BeginTransaction())
+            using (SqlTransaction transaction = conn.BeginTransaction())
             {
                 try
                 {
                     #region GetSchema By OBJECT_ID
                     var schemaInfo = conn.QueryFirst<dynamic>(SQLScripts.GetSchema_ByObject_id, new { OBJECT_ID = _OBJECT_ID }, transaction, 3, CommandType.Text);
-                    if (!(schemaInfo.OBJECT_NAME is string OBJECT_NAME) || string.IsNullOrEmpty(OBJECT_NAME))
+                    if (schemaInfo.OBJECT_NAME is not string OBJECT_NAME || string.IsNullOrEmpty(OBJECT_NAME))
                     {
                         ObjFlag.ErrorMessages.Append("找不到OBJECT_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
                         ObjFlag.ResultType |= ExceResultType.Failed;
                         return ObjFlag;
                     }
-                    if (!(schemaInfo.SCHEMA_NAME is string SCHEMA_NAME) || string.IsNullOrEmpty(SCHEMA_NAME))
+                    if (schemaInfo.SCHEMA_NAME is not string SCHEMA_NAME || string.IsNullOrEmpty(SCHEMA_NAME))
                     {
                         ObjFlag.ErrorMessages.Append("找不到SCHEMA_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
                         ObjFlag.ResultType |= ExceResultType.Failed;
@@ -243,20 +230,16 @@ namespace SchemaNote.Models.DB_Tools
 
         internal void GetObjectExtendedProp(ref List<DTO_Object_prop> object_props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                object_props = conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            object_props = [.. conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop)];
         }
 
         internal void GetObjectExtendedProp_emptyValue(ref List<DTO_Object_prop> object_props)
         {
-            using (SqlConnection conn = new SqlConnection(ConnectionString))
-            {
-                conn.Open();
-                object_props = conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop_emptyValue).ToList();
-            }
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            object_props = [.. conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop_emptyValue)];
         }
     }
 }

@@ -6,8 +6,8 @@ namespace SchemaNote.ViewModels
     {
         public int COLUMN_ID { get; set; }
         [DisplayFormat(ConvertEmptyStringToNull = false), StringLength(Models.Common.StrMaxLen)]
-        public string MS_Description { get; set; }
+        public string? MS_Description { get; set; }
         [DisplayFormat(ConvertEmptyStringToNull = false), StringLength(Models.Common.StrMaxLen)]
-        public string REMARK { get; set; }
+        public string? REMARK { get; set; }
     }
 }

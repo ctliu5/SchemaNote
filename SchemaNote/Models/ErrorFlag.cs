@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using System.Text;
 
 namespace SchemaNote.Models
@@ -47,17 +46,12 @@ namespace SchemaNote.Models
         }
     }
 
-    public class DTO_Flag<T> : Error_Flag where T : new()
+    public class DTO_Flag<T>(string methodName) : Error_Flag where T : new()
     {
         readonly Type BaseType = typeof(Error_Flag);
 
-        public DTO_Flag(string methodName)
-        {
-            MethodName = methodName;
-            OBJ = new T();
-        }
-        public string MethodName { get; private set; }
-        public T OBJ { get; set; }
+        public string MethodName { get; private set; } = methodName;
+        public T OBJ { get; set; } = new T();
 
         public void Transfer<U>(ref U flag) where U : Error_Flag
         {

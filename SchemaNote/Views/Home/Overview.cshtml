@@ -12,20 +12,20 @@
     <script>
         Overview = {
             'objName': {
-                name_cht: "物件名稱",
-                json: @Html.Raw(Json.Serialize(Model.TableNameJson)),
+                'name_cht': "物件名稱",
+                'json': '@Html.Raw(Json.Serialize(Model.TableNameJson))',
             },
             'colName': {
-                name_cht: "欄位名稱",
-                json: @Html.Raw(Json.Serialize(Model.ColumnNameJson)),
+                'name_cht': "欄位名稱",
+                'json': '@Html.Raw(Json.Serialize(Model.ColumnNameJson))',
             },
             'description': {
-                name_cht: "中文名稱",
-                json: @Html.Raw(Json.Serialize(Model.DescriptionJson)),
+                'name_cht': "中文名稱",
+                'json': '@Html.Raw(Json.Serialize(Model.DescriptionJson))',
             },
             'remark': {
-                name_cht: "備註",
-                json: @Html.Raw(Json.Serialize(Model.RemarkJson)),
+                'name_cht': "備註",
+                'json': '@Html.Raw(Json.Serialize(Model.RemarkJson))',
             },
         };
     </script>

@@ -11,9 +11,9 @@ namespace SchemaNote.Models.Extensions
         public static List<T> ReadAll<T>(this SqlDataReader dr) where T : new()
         {
             PropertyInfo[] propInfos = typeof(T).GetProperties();
-            List<T> DTOs = new List<T>();
+            List<T> DTOs = [];
             int FieldCount = dr.FieldCount;
-            List<Mapper<T>> MappingRules = new List<Mapper<T>>();
+            List<Mapper<T>> MappingRules = [];
             for (int i = 0; i < FieldCount; i++)
             {
                 foreach (PropertyInfo propInfo in propInfos)
@@ -45,9 +45,9 @@ namespace SchemaNote.Models.Extensions
         public static List<T> ReadAll2<T>(this SqlDataReader dr) where T : new()
         {
             PropertyInfo[] propInfos = typeof(T).GetProperties();
-            List<T> DTOs = new List<T>();
+            List<T> DTOs = [];
             int FieldCount = dr.FieldCount;
-            List<MappingSetting<T>> MappingRules = new List<MappingSetting<T>>();
+            List<MappingSetting<T>> MappingRules = [];
             for (int i = 0; i < FieldCount; i++)
             {
                 foreach (PropertyInfo propInfo in propInfos)
@@ -77,7 +77,7 @@ namespace SchemaNote.Models.Extensions
 
         public static List<T> ReadAll3<T>(this SqlDataReader dr) where T : new()
         {
-            List<T> DTOs = new List<T>();
+            List<T> DTOs = [];
             PropertyInfo[] propInfos = typeof(T).GetProperties();
             int FieldCount = dr.FieldCount;
             string[] Fields = new string[FieldCount];
@@ -183,7 +183,7 @@ namespace SchemaNote.Models.Extensions
 
         public static List<T> ReadAll4<T>(this SqlDataReader dr) where T : new()
         {
-            List<T> DTOs = new List<T>();
+            List<T> DTOs = [];
             PropertyInfo[] propInfos = typeof(T).GetProperties();
             int FieldCount = dr.FieldCount;
             string[] Fields = new string[FieldCount];
@@ -302,10 +302,10 @@ namespace SchemaNote.Models.Extensions
             session.SetString(key, JsonConvert.SerializeObject(value));
         }
 
-        public static T GetObject<T>(this ISession session, string key)
+        public static T? GetObject<T>(this ISession session, string key)
         {
             var value = session.GetString(key);
-            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+            return value == null ? default : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }
