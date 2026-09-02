@@ -1,9 +1,6 @@
-﻿using SchemaNote.Models.DataTransferObject;
+﻿using Microsoft.Data.SqlClient;
+using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
 using System.Reflection;
 using System.Transactions;
 
