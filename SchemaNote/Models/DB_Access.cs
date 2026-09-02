@@ -1,4 +1,4 @@
-﻿#define 測試效能
+﻿//#define 測試效能
 using Microsoft.Data.SqlClient;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.DB_Tools;

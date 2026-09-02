@@ -1,39 +1,56 @@
-# 工具介紹
-SchemaNote（以下簡稱本平台）是用來檢視、編輯SQL Server上自定義註記之Web平台
+# SchemaNote
 
-# 基本畫面
+簡介
 
-![未命名](https://user-images.githubusercontent.com/29647567/127631405-e55df674-f299-4906-b072-db0a16e0a5ab.png)
+SchemaNote 是針對 Microsoft SQL Server 所開發的輕量 Web 工具（ASP.NET Core, Controllers + Razor Views），用來檢視與編輯資料表/欄位的說明（Extended Properties），並能匯出更新的 T‑SQL 腳本。
 
-### 物件層
+主要功能
 
-```
-  1. 物件名稱：資料表(Table)或檢視表(View)的名稱
-  2. 物件說明：資料表或檢視表的中文解釋名稱；系可編輯的擴充屬性之值（對應擴充屬性的Key為：MS_Description）
-  3. 物件類型：只有兩種，資料表或檢視表，也就是說其他的資料庫物件，例如預存程序、函數……先不考慮
-  4. 結構描述名稱：當前物件的結構描述名稱
-  5. 物件創建日期：當前物件創建日期
-  6. 物件修改日期：當前物件修改日期
-  7. 備註：資料表或檢視表的中文補充說明、備註；系可編輯的擴充屬性之值（對應擴充屬性的Key為：REMARK）
-  8. 筆數：當前物件之資料總筆數
-```
+- 列出資料庫的 Table、Column、Index 與建立/修改時間
+- 顯示與編輯 Table 與 Column 的擴充屬性（例如 MS_Description / REMARK）
+- 匯出整個資料庫或單一表格的擴充屬性更新腳本（T‑SQL）
+- 使用 /sql 目錄下的 .sql 檔案作為查詢與產生腳本的樣板（以 EmbeddedResource 嵌入）
 
-  ### 欄位層
-```
-  A. 欄位名稱：欄位(Column)的名稱
-  B. 欄位說明：欄位的中文解釋名稱；系可編輯的擴充屬性之值（對應擴充屬性的Key為：MS_Description）
-  C. 資料型態：欄位的資料型態，請注意格式應比照範例畫面，也就是要和T-SQL語法中，宣告該資料型態寫法一致，大小寫無所謂
-  D. 主鍵：欄位是否為Primary Key，使用核取方塊(checkbox)表現
-  E. 不為Null：欄位是否不允許NULL；換句話說，欄位是否為必填
-  F. 預設值：列出完整預設值表達式
-  G. 備註：欄位的中文補充說明、備註；系可編輯的擴充屬性之值（對應擴充屬性的Key為：REMARK）
-```
+注意：本專案僅操作 extended properties，不會變更資料表結構或欄位型別。
 
-# 原理說明
-本平台註記原理在於利用資料庫物件的[擴充屬性](https://docs.microsoft.com/sql/relational-databases/system-catalog-views/extended-properties-catalog-views-sys-extended-properties)
+需求
 
-# 注意事項
-- 建議使用SQL Server版本2008(含)以上，版本2005以下可使用另一套開源工具[DDC](https://blog.miniasp.com/post/2008/05/30/Useful-tools-Data-Dictionary-Creator)
-- 本平台僅異動擴充屬性，不能控制其他資料庫物件、結構
-- 目前只支援資料表(Table)、檢視表(View)這兩種物件
-- 目前尚未支援SSL的版本，連線字串傳送過程亦無受到保護，請於受保護的網路環境（e.g. 安全內網環境）使用
+- .NET 10
+- Microsoft SQL Server 2008 或更新版本（建議）
+
+快速啟動（Visual Studio）
+
+1. 以 Visual Studio 開啟 SchemaNote.sln
+2. 設定 SchemaNote 為啟動專案，執行（F5）
+3. 打開首頁，於輸入欄填入資料庫連線字串，例如：
+
+   Server=.;Database=YourDatabase;Trusted_Connection=True;
+
+4. 點選 Overview 取得資料庫物件清單；點選某一 Table 的 Details 可檢視/編輯欄位說明，編輯後按儲存以寫入 extended properties。
+
+快速啟動（命令列）
+
+1. 在專案根目錄執行：
+
+   dotnet run --project SchemaNote
+
+2. 開啟瀏覽器並前往顯示的 URL（例如 https://localhost:5001）
+
+設定與實作重點
+
+- 連線字串由使用者於首頁輸入，會儲存在伺服器記憶體的 Session（SchemaNote 的 SessionWrapper）中。
+- 資料存取層提供 ADO.NET 與 Dapper 兩種實作（SchemaNote/Models/DB_Tools）。
+- SQL 查詢與產生腳本置於 SchemaNote/sql/*.sql，程式以嵌入資源讀取。
+
+檔案重點
+
+- Controllers/HomeController.cs — 使用者流程與路由
+- Models/DB_Access.cs — 讀取 metadata、產生與儲存 extended properties 的核心邏輯
+- Models/DB_Tools/* — ADO.NET 與 Dapper 的具體實作
+- sql/*.sql — 查詢與產生腳本模板（已作為 EmbeddedResource）
+- Views/* — 使用者介面 (Razor Views)
+
+安全性與限制
+
+- 目前連線字串在傳輸過程未另外加密，請僅在受保護的網路環境中使用（開發 / 內網）。
+- 執行修改 extended properties 的帳號需具有相應權限。
