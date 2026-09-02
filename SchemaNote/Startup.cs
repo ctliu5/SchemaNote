@@ -1,5 +1,4 @@
-﻿using ElectronNET.API;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +41,7 @@ namespace SchemaNote {
       services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
       services.AddSingleton<ISessionWrapper, SessionWrapper>();
 
-      services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+      services.AddControllersWithViews();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,9 +64,6 @@ namespace SchemaNote {
         endpoints.MapControllers();
         endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
       });
-
-      // Open the Electron-Window here
-      Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
     }
   }
 }

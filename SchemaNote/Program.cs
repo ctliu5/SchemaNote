@@ -1,5 +1,4 @@
-﻿using ElectronNET.API;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Net;
@@ -13,7 +12,6 @@ namespace SchemaNote {
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseElectron(args);
                 webBuilder.UseStartup<Startup>();
             });
   }

@@ -14,16 +14,12 @@
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
     <PackageReference Include="Dapper" Version="2.1.79" />
-    <PackageReference Include="ElectronNET.API" Version="23.6.2" />
+    <!-- ElectronNET.API removed: application no longer targets Electron runtime -->
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="sql\*.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Update="electron.manifest.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <!-- Electron manifest removed -->
 </Project>
