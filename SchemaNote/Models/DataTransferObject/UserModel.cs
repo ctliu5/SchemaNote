@@ -15,7 +15,7 @@ namespace SchemaNote.Models.DataTransferObject
                 if (!_value.Contains("TrustServerCertificate", StringComparison.OrdinalIgnoreCase))
                 {
                     // if the connection string is not ending with ";", then add ";" to the connection string
-                    if (string.IsNullOrEmpty(_value) || _value.EndsWith(';'))
+                    if (_value.EndsWith(';'))
                     {
                         _value += "TrustServerCertificate=true;";
                     }
