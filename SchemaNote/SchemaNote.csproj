@@ -7,6 +7,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
 		<StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+		<InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
