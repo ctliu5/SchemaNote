@@ -1,22 +1,32 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace SchemaNote.Models.DataTransferObject
 {
     public class UserModel
     {
-        public const string SessionKeyName = "_Name";
-        public const string SessionKeyAge = "_Age";
-        const string SessionKeyTime = "_Time";
-        public string SessionInfo_Name { get; private set; }
-        public string SessionInfo_Age { get; private set; }
-        public string SessionInfo_CurrentTime { get; private set; }
-        public string SessionInfo_SessionTime { get; private set; }
         [JsonProperty]
-        public string SessionInfo_MiddlewareValue { get; private set; }
+        public string ConnectionString { get; private set; }
 
-        public void SetMiddlewareValue(string _value)
+        public void SetConnectionString(string _value)
         {
-            SessionInfo_MiddlewareValue = _value;
+            if (!string.IsNullOrEmpty(_value))
+            {
+                // check if the connection string is not including "TrustServerCertificate=true", then add "TrustServerCertificate=true" to the connection string
+                if (!_value.Contains("TrustServerCertificate", StringComparison.OrdinalIgnoreCase))
+                {
+                    // if the connection string is not ending with ";", then add ";" to the connection string
+                    if (string.IsNullOrEmpty(_value) || _value.EndsWith(';'))
+                    {
+                        _value += "TrustServerCertificate=true;";
+                    }
+                    else
+                    {
+                        _value += ";TrustServerCertificate=true;";
+                    }
+                }
+            }
+            ConnectionString = _value;
         }
     }
 }
