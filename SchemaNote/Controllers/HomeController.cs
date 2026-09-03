@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.ViewModels;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SchemaNote.Controllers
@@ -39,7 +37,7 @@ namespace SchemaNote.Controllers
                 UserModel userModel = new UserModel();
                 userModel.SetConnectionString(ConnectionString);
                 _sessionWapper.User = userModel;
-
+                if (_sessionWapper.User.ConnectionString is not null) ConnectionString = _sessionWapper.User.ConnectionString;
                 DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
                 if (Flag.ResultType != ExceResultType.Success)
                 {
