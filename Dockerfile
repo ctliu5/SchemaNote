@@ -21,13 +21,12 @@ WORKDIR /app
 # 控制是否在映像內部降低 OpenSSL 安全性（僅在極受控的測試環境使用）
 ARG INSECURE=0
 RUN if [ "$INSECURE" = "1" ]; then \
-	echo "*** WARNING: applying insecure OpenSSL settings (for testing only) ***"; \
-	sed -i '/^\[openssl_init\]/a ssl_conf = ssl_sect' /etc/ssl/openssl.cnf \
-	&& printf '\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1.0\nCipherString = DEFAULT@SECLEVEL=0\n' >> /etc/ssl/openssl.cnf \
-	&& cat /etc/ssl/openssl.cnf; \
+    echo "*** WARNING: applying insecure OpenSSL settings (for testing only) ***"; \
+    cp /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.bak && \
+    printf 'openssl_conf = default_conf\n\n[default_conf]\nssl_conf = ssl_sect\n\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1\nCipherString = DEFAULT:@SECLEVEL=0\nOptions = UnsafeLegacyRenegotiation\n' > /etc/ssl/openssl.cnf && \
+    cat /etc/ssl/openssl.cnf; \
 fi
 
-# Copy published app and set entrypoint
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:80
 
