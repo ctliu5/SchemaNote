@@ -18,6 +18,29 @@ SchemaNote（以下簡稱本平台）是用來檢視、編輯SQL Server上自定
   8. 筆數：當前物件之資料總筆數
 ```
 
+## Docker 建置與部署
+
+以下示範如何在本機建置、匯出並執行映像（範例皆為開發/測試用途）：
+
+範例指令：
+
+- 從 SchemaNote 資料夾（建議）：
+  docker build --no-cache --build-arg INSECURE=1 -f Dockerfiles/Dockerfile -t schemanote:local .
+
+- 從倉儲根目錄並指定上下文為 SchemaNote：
+  docker build --no-cache --build-arg INSECURE=1 -f SchemaNote/Dockerfiles/Dockerfile -t schemanote:local SchemaNote
+
+- 將本機映像匯出為 tar：
+  docker save schemanote:local -o schemanote_local.tar
+
+- 在本機啟動容器（範例綁定 host 5005 到 container 80）：
+  docker run -d --name schemanote_insec -p 5005:80 schemanote:local
+
+注意事項：
+- `INSECURE=1` 會修改映像內的 OpenSSL 設定以降低 TLS 要求，僅能在受控的測試環境使用，切勿在生產環境或公開網路使用。
+- 建議使用 `.dockerignore` 排除 bin/ obj/ .vs/ 等，以減少 build context 大小並加速建置。
+- 若要在 Docker 映像中啟用對外連線，請確保容器執行時設定 `ASPNETCORE_URLS=http://+:80`（Dockerfile 已設定）。
+
   ### 欄位層
 ```
   A. 欄位名稱：欄位(Column)的名稱

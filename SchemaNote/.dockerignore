@@ -1,0 +1,29 @@
+# Ignore build output and IDE files
+bin/
+obj/
+.vs/
+
+# Git and Dockerfiles not needed in build context
+.git
+.gitignore
+
+# Node/NPM
+node_modules/
+npm-debug.log
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.ide
+
+# Logs
+*.log
+
+# Docker build cache files
+**/.DS_Store
+**/Thumbs.db
+
+# Exclude large folders you don't want sent as context
+**/packages/
+**/dist/
