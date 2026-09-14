@@ -33,7 +33,7 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "計算結果儲存")]
         public bool IS_PERSISTED { get; set; }
 
-        [Display(Name = "公式")]
+        [Display(Name = "計算欄位公式")]
         public string? COMPUTED_DEFINITION { get; set; }
     }
 }
