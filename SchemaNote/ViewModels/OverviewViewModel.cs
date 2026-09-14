@@ -1,11 +1,20 @@
 ﻿using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace SchemaNote.ViewModels
 {
     public class OverviewViewModel : IConnString
     {
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            // Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = false
+        };
         public long ADO_dot_NET { get; set; }
         public long Dapper { get; set; }
         public long ADO_dot_NET2 { get; set; }
@@ -13,7 +22,7 @@ namespace SchemaNote.ViewModels
         public long ADO_dot_NET4 { get; set; }
 
         public List<Table> Tables { get; set; } = [];
-        public Dictionary<string, List<string>> TableNameJson
+        public string TableNameJson
         {
             get
             {
@@ -24,10 +33,10 @@ namespace SchemaNote.ViewModels
                     i++;
                     d.Add(Common.accordion + i, [t.NAME?.ToUpper() ?? string.Empty]);
                 });
-                return d;
+                return JsonSerializer.Serialize(d, JsonOptions);
             }
         }
-        public Dictionary<string, List<string>> ColumnNameJson
+        public string ColumnNameJson
         {
             get
             {
@@ -43,10 +52,10 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return d;
+                return JsonSerializer.Serialize(d, JsonOptions);
             }
         }
-        public Dictionary<string, List<string>> DescriptionJson
+        public string DescriptionJson
         {
             get
             {
@@ -65,10 +74,10 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return d;
+                return JsonSerializer.Serialize(d, JsonOptions);
             }
         }
-        public Dictionary<string, List<string>> RemarkJson
+        public string RemarkJson
         {
             get
             {
@@ -87,7 +96,7 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return d;
+                return JsonSerializer.Serialize(d, JsonOptions);
             }
         }
 
