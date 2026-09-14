@@ -40,6 +40,9 @@ namespace SchemaNote.ViewModels
     {
         public int SortNum { get; set; }
         public IndexDetail[] Indexes { get; set; } = [];
+
+        [Display(Name = "計算結果儲存")]
+        public string IS_PERSISTED_DESC { get { return IS_PERSISTED ? "是" : "否"; } }
     }
 
     public class IndexDetail : DTO_Index

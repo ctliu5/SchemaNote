@@ -2,10 +2,13 @@
 @model ColumnDetail
 @{
   bool HasIndex = Model.Indexes.Length > 0;
+  bool IsComputed = Model.IS_COMPUTED;
+  int ExtraRows = (HasIndex ? 1 : 0) + (IsComputed ? 1 : 0);
+  string RowSpan = (ExtraRows + 1).ToString();
   IndexDetail ind = new IndexDetail();
 }
 <tr>
-  <td rowspan="@(HasIndex ? "2": "1")">
+  <td rowspan="@RowSpan">
     @Html.DisplayFor(modelItem => modelItem.NAME)
     <input name="@("[" + Model.SortNum + "].COLUMN_ID")" value="@Model.COLUMN_ID" style="display:none;" />
   </td>
@@ -15,7 +18,7 @@
       data-column_id="@Model.COLUMN_ID"
       data-sortnum="@Model.SortNum"
       data-class="form-control"
-      rowspan="@(HasIndex ? "2": "1")">
+      rowspan="@RowSpan">
     @if (Model.MS_Description == Common.DefaultValue) {
       <code>
         @Html.DisplayFor(n => Model.MS_Description)
@@ -25,7 +28,7 @@
     }
     @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[" + Model.COLUMN_ID + "].MS_Description" })
   </td>
-  <td rowspan="@(HasIndex ? "2": "1")">
+  <td rowspan="@RowSpan">
     @Html.DisplayFor(modelItem => modelItem.TYPE)
   </td>
   <td>
@@ -53,6 +56,34 @@
     @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[" + Model.REMARK + "].REMARK" })
   </td>
 </tr>
+@if (IsComputed) {
+  <tr class="computed">
+    <td colspan="4">
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th>
+              @Html.DisplayNameFor(modelItem => Model.IS_PERSISTED_DESC)
+            </th>
+            <th>
+              @Html.DisplayNameFor(modelItem => Model.COMPUTED_DEFINITION)
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              @Html.DisplayFor(modelItem => Model.IS_PERSISTED_DESC)
+            </td>
+            <td>
+              @Html.DisplayFor(modelItem => Model.COMPUTED_DEFINITION)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+}
 @if (HasIndex) {
   <tr class="indexes">
     <td colspan="4">

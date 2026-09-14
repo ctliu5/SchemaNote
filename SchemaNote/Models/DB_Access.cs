@@ -245,6 +245,9 @@ namespace SchemaNote.Models
                         IS_PK = c.IS_PK,
                         DISALLOW_NULL = c.DISALLOW_NULL,
                         DEFUALT = c.DEFUALT,
+                        IS_COMPUTED = c.IS_COMPUTED,
+                        IS_PERSISTED = c.IS_PERSISTED,
+                        COMPUTED_DEFINITION = c.COMPUTED_DEFINITION,
                         MS_Description = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
                         REMARK = (pC.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
                         Indexes = [.. iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new IndexDetail()

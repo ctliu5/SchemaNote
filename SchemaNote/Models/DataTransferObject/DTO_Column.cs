@@ -27,5 +27,13 @@ namespace SchemaNote.Models.DataTransferObject
 
         [Display(Name = "預設值")]
         public string? DEFUALT { get; set; }
+
+        public bool IS_COMPUTED { get; set; }
+
+        [Display(Name = "計算結果儲存")]
+        public bool IS_PERSISTED { get; set; }
+
+        [Display(Name = "公式")]
+        public string? COMPUTED_DEFINITION { get; set; }
     }
 }
