@@ -1,11 +1,8 @@
 ﻿//#define 測試效能
+using Microsoft.Data.SqlClient;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.DB_Tools;
 using SchemaNote.ViewModels;
-using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -249,6 +246,9 @@ namespace SchemaNote.Models
                         IS_PK = c.IS_PK,
                         DISALLOW_NULL = c.DISALLOW_NULL,
                         DEFUALT = c.DEFUALT,
+                        IS_COMPUTED = c.IS_COMPUTED,
+                        IS_PERSISTED = c.IS_PERSISTED,
+                        COMPUTED_DEFINITION = c.COMPUTED_DEFINITION,
                         MS_Description = (pC.Where(p => p.NAME.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object ms_Description ? ms_Description.ToString() : null,
                         REMARK = (pC.Where(p => p.NAME.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.VALUE) is object remark ? remark.ToString() : null,
                         Indexes = iObj.Where(i => i.COLUMN_ID == c.COLUMN_ID).Select(i => new IndexDetail()

@@ -6,6 +6,7 @@ WITH sys_columns
                 ,c.[user_type_id]
                 ,c.[is_nullable]
                 ,c.[default_object_id]
+                ,c.[is_computed]
                 ,CAST(CASE -- int/decimal/numeric/real/float/money  
                         WHEN c.[system_type_id] IN(48, 52, 56, 59,
                                                    60, 62, 106, 108,
@@ -40,9 +41,15 @@ WITH sys_columns
                       ELSE CAST(1 AS BIT)
                     END                                                AS [DISALLOW_NULL]
                    ,ISNULL(OBJECT_DEFINITION(c.default_object_id), '') AS [DEFUALT]
+                   ,c.[is_computed]                                    AS [IS_COMPUTED]
+                   ,ISNULL(cc.[is_persisted], CAST(0 AS BIT))          AS [IS_PERSISTED]
+                   ,ISNULL(cc.[definition], '')                        AS [COMPUTED_DEFINITION]
               FROM sys_columns AS c
               LEFT JOIN sys.types AS ty ON ty.user_type_id = c.user_type_id
                                            AND c.[object_id] = @id
+              LEFT JOIN sys.computed_columns AS cc ON cc.[object_id] = c.[object_id]
+                                                      AND cc.[column_id] = c.[column_id]
+                                                      AND c.[object_id] = @id
               LEFT JOIN (SELECT ic.column_id
                                 ,k.parent_object_id
                            FROM sys.key_constraints k

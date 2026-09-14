@@ -1,6 +1,5 @@
 ﻿using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SchemaNote.ViewModels
@@ -22,8 +21,10 @@ namespace SchemaNote.ViewModels
         #endregion
 
         [Display(Name = "物件類型")]
-        public string TYPE_NAME {
-            get {
+        public string TYPE_NAME
+        {
+            get
+            {
                 switch (TYPE)
                 {
                     case "U":
@@ -42,13 +43,18 @@ namespace SchemaNote.ViewModels
     {
         public int SortNum { get; set; }
         public List<IndexDetail> Indexes { get; set; }
+
+        [Display(Name = "計算結果儲存")]
+        public string IS_PERSISTED_DESC { get { return IS_PERSISTED ? "是" : "否"; } }
     }
 
     public class IndexDetail : DTO_Index
     {
         [Display(Name = "索引類型")]
-        public string TYPE_NAME {
-            get {
+        public string TYPE_NAME
+        {
+            get
+            {
                 return TYPE.ToString();
             }
         }
