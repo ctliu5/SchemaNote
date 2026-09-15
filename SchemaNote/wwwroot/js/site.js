@@ -266,35 +266,29 @@ function changeElement(e) {
     document.getElementById('submit').style.cssText = 'display:initial;';
 }
 
+// 透過動態建立 form 送出 POST，讓瀏覽器原生處理檔案下載。
+// 後端以檔案（FileResult）回傳並帶 Content-Disposition，可正確處理文字與二進位檔案。
+function postDownload(url) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.style.display = 'none';
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
 function ExportExtendedPropScript() {
-    $.ajax({
-        url: "/Home/ExportExtendedPropScript",
-        type: "POST",
-        dataType: "text",
-        contentType: "text/plain;charset=UTF-8",
-        //contentType: "text/plain;charset=UTF-16LE",
-        success: function (data, textStatus, jqXHR) {
-            download('ExtendedPropScript_urlencoded_' + Date.now() + '.sql', data);
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            alert("ExportExtendedPropScript error: " + textStatus + " " + errorThrown);
-        }
-    })
+    postDownload('/Home/ExportExtendedPropScript');
 }
 
 function ExportMarkdown() {
-    $.ajax({
-        url: "/Home/ExportMarkdown",
-        type: "POST",
-        dataType: "text",
-        contentType: "text/plain;charset=UTF-8",
-        success: function (data, textStatus, jqXHR) {
-            download('Overview_' + Date.now() + '.md', data);
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            alert("ExportMarkdown error: " + textStatus + " " + errorThrown);
-        }
-    })
+    postDownload('/Home/ExportMarkdown');
+}
+
+function ExportExcel() {
+    postDownload('/Home/ExportExcel');
 }
 
 function download(filename, text) {

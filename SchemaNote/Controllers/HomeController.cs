@@ -86,8 +86,16 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return RedirectToAction("Overview");
             }
-            return Content(Flag.OBJ.ToString(), "text/plain", System.Text.Encoding.UTF8);
-            //return Content(Flag.OBJ.ToString(), "text/plain", System.Text.Encoding.Unicode);
+            byte[] content = Utf8WithBom(Flag.OBJ.ToString());
+            string fileName = $"ExtendedPropScript_urlencoded_{DateTime.Now:yyyyMMddHHmmss}.sql";
+            return File(content, "text/plain; charset=utf-8", fileName);
+        }
+
+        private static byte[] Utf8WithBom(string text)
+        {
+            // 前置 UTF-8 BOM，確保 Windows 上開啟檔案時能正確辨識為 UTF-8。
+            var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+            return encoding.GetPreamble().Concat(encoding.GetBytes(text)).ToArray();
         }
 
         [HttpPost]
@@ -110,7 +118,9 @@ namespace SchemaNote.Controllers
             }
 
             string markdown = BuildMarkdown(Flag.OBJ);
-            return Content(markdown, "text/markdown", System.Text.Encoding.UTF8);
+            byte[] content = Utf8WithBom(markdown);
+            string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.md";
+            return File(content, "text/markdown; charset=utf-8", fileName);
         }
 
         private static string BuildMarkdown(OverviewViewModel model)
