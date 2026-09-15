@@ -35,37 +35,39 @@
         window.onload = initialOption;
     </script>
 }
-<h1>Overview</h1>
-@if (Model.ADO_dot_NET > 0)
-{
-    <h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>
-    <h2>Dapper:@Model.Dapper 毫秒</h2>
-    <h2>ADO_dot_NET2:@Model.ADO_dot_NET2 毫秒</h2>
-    <h2>ADO_dot_NET3:@Model.ADO_dot_NET3 毫秒</h2>
-    <h2>ADO_dot_NET4:@Model.ADO_dot_NET4 毫秒</h2>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
-}
+<div class="overview-sticky-header">
+    <h1>Overview</h1>
+    @if (Model.ADO_dot_NET > 0)
+    {
+        <h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>
+        <h2>Dapper:@Model.Dapper 毫秒</h2>
+        <h2>ADO_dot_NET2:@Model.ADO_dot_NET2 毫秒</h2>
+        <h2>ADO_dot_NET3:@Model.ADO_dot_NET3 毫秒</h2>
+        <h2>ADO_dot_NET4:@Model.ADO_dot_NET4 毫秒</h2>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
+    }
 
-<div class="form-inline search">
-    <div class="form-group form-group-lg">
-        <label for="choose">搜尋項目</label>
-        <select id="choose" class="form-control"></select>
-    </div>
-    <div class="form-group form-group-lg">
-        <label for="switch">搜索方式</label>
-        <select id="switch" class="form-control">
-            <option value="fuzzy" selected>模糊搜索</option>
-            <option value="exact">精確搜索</option>
-        </select>
-    </div>
-    <div class="form-group form-group-lg">
-        <input id="SearchTextBox" type="text" class="form-control" placeholder="Enter key words..." />
-    </div>
-    <div class="form-group form-group-lg">
-        <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
+    <div class="form-inline search">
+        <div class="form-group form-group-lg">
+            <label for="choose">搜尋項目</label>
+            <select id="choose" class="form-control"></select>
+        </div>
+        <div class="form-group form-group-lg">
+            <label for="switch">搜索方式</label>
+            <select id="switch" class="form-control">
+                <option value="fuzzy" selected>模糊搜索</option>
+                <option value="exact">精確搜索</option>
+            </select>
+        </div>
+        <div class="form-group form-group-lg">
+            <input id="SearchTextBox" type="text" class="form-control" placeholder="Enter key words..." />
+        </div>
+        <div class="form-group form-group-lg">
+            <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
+        </div>
     </div>
 </div>
 <br />
