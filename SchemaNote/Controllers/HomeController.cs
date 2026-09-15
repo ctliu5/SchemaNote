@@ -67,6 +67,7 @@ namespace SchemaNote.Controllers
             return View(Flag.OBJ);
         }
 
+        #region 匯出相關
         [HttpPost]
         public ActionResult ExportExtendedPropScript()
         {
@@ -153,6 +154,173 @@ namespace SchemaNote.Controllers
 
             return sb.ToString();
         }
+
+        [HttpPost]
+        public ActionResult ExportExcel()
+        {
+            #region check Connection
+            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            #endregion
+
+            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Overview");
+            }
+
+            byte[] content = BuildExcel(Flag.OBJ);
+            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(content, contentType, fileName);
+        }
+
+        private static byte[] BuildExcel(OverviewViewModel model)
+        {
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+
+            // 樣式常數
+            var headerBackColor = ClosedXML.Excel.XLColor.FromHtml("#4472C4");
+            var headerFontColor = ClosedXML.Excel.XLColor.White;
+            var infoBackColor = ClosedXML.Excel.XLColor.FromHtml("#D9E1F2");
+
+            // 用於工作表名稱唯一與長度限制（Excel 上限 31 字元）
+            var usedSheetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (Table table in model.Tables)
+            {
+                string sheetName = BuildSheetName(table.NAME, usedSheetNames);
+                var ws = workbook.Worksheets.Add(sheetName);
+
+                int row = 1;
+
+                // 物件標題
+                ws.Cell(row, 1).Value = table.NAME;
+                ws.Range(row, 1, row, 7).Merge();
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                row++;
+
+                // 物件中文說明
+                ws.Cell(row, 1).Value = table.MS_Description;
+                ws.Range(row, 1, row, 7).Merge();
+                ws.Cell(row, 1).Style.Font.Italic = true;
+                row++;
+
+                // 物件資訊表頭
+                string[] infoHeaders = ["物件類型", "結構描述名稱", "物件創建日期", "物件修改日期", "筆數"];
+                for (int c = 0; c < infoHeaders.Length; c++)
+                {
+                    var cell = ws.Cell(row, c + 1);
+                    cell.Value = infoHeaders[c];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = infoBackColor;
+                }
+                row++;
+
+                // 物件資訊內容
+                ws.Cell(row, 1).Value = table.TYPE_NAME;
+                ws.Cell(row, 2).Value = table.SCHEMA_NAME;
+                ws.Cell(row, 3).Value = table.CREATE_DATE;
+                ws.Cell(row, 4).Value = table.MODIFY_DATE;
+                ws.Cell(row, 5).Value = table.QTY;
+                row++;
+
+                // 備註
+                ws.Cell(row, 1).Value = "備註";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
+                ws.Cell(row, 2).Value = table.REMARK;
+                ws.Range(row, 2, row, 7).Merge();
+                row += 2;
+
+                // 欄位表頭
+                string[] colHeaders = ["欄位名稱", "中文名稱", "資料型態", "主鍵", "不為Null", "預設值", "備註"];
+                int headerRow = row;
+                for (int c = 0; c < colHeaders.Length; c++)
+                {
+                    var cell = ws.Cell(headerRow, c + 1);
+                    cell.Value = colHeaders[c];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = headerFontColor;
+                    cell.Style.Fill.BackgroundColor = headerBackColor;
+                    cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                }
+                row++;
+
+                // 欄位內容
+                foreach (Column col in table.Columns)
+                {
+                    ws.Cell(row, 1).Value = col.NAME;
+                    ws.Cell(row, 2).Value = col.MS_Description;
+                    ws.Cell(row, 3).Value = col.TYPE;
+                    ws.Cell(row, 4).Value = col.IS_PK ? "✔" : string.Empty;
+                    ws.Cell(row, 5).Value = col.DISALLOW_NULL ? "✔" : string.Empty;
+                    ws.Cell(row, 6).Value = col.DEFUALT;
+                    ws.Cell(row, 7).Value = col.REMARK;
+                    row++;
+                }
+
+                // 欄位資料範圍加上框線
+                if (table.Columns.Count > 0)
+                {
+                    var dataRange = ws.Range(headerRow, 1, row - 1, colHeaders.Length);
+                    dataRange.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+                    // 主鍵/不為Null 置中
+                    ws.Range(headerRow + 1, 4, row - 1, 5).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                }
+
+                // 凍結表頭列並自動調整欄寬
+                ws.SheetView.FreezeRows(headerRow);
+                ws.Columns().AdjustToContents();
+            }
+
+            // 若沒有任何資料表，至少建立一個空白工作表避免例外
+            if (workbook.Worksheets.Count == 0)
+            {
+                workbook.Worksheets.Add("Overview");
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        private static string BuildSheetName(string? name, HashSet<string> usedNames)
+        {
+            // 移除 Excel 工作表名稱不允許的字元： \ / ? * [ ] :
+            string cleaned = string.IsNullOrWhiteSpace(name) ? "Sheet" : name;
+            foreach (char invalid in new[] { '\\', '/', '?', '*', '[', ']', ':' })
+            {
+                cleaned = cleaned.Replace(invalid, '_');
+            }
+
+            if (cleaned.Length > 31)
+            {
+                cleaned = cleaned[..31];
+            }
+
+            // 確保唯一
+            string candidate = cleaned;
+            int suffix = 1;
+            while (usedNames.Contains(candidate))
+            {
+                string suffixText = $"_{suffix++}";
+                int maxBase = 31 - suffixText.Length;
+                candidate = (cleaned.Length > maxBase ? cleaned[..maxBase] : cleaned) + suffixText;
+            }
+
+            usedNames.Add(candidate);
+            return candidate;
+        }
+        #endregion
 
         [HttpGet]
         public ActionResult Details(int? id)
