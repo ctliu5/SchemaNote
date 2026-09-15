@@ -282,6 +282,21 @@ function ExportExtendedPropScript() {
     })
 }
 
+function ExportMarkdown() {
+    $.ajax({
+        url: "/Home/ExportMarkdown",
+        type: "POST",
+        dataType: "text",
+        contentType: "text/plain;charset=UTF-8",
+        success: function (data, textStatus, jqXHR) {
+            download('Overview_' + Date.now() + '.md', data);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert("ExportMarkdown error: " + textStatus + " " + errorThrown);
+        }
+    })
+}
+
 function download(filename, text) {
 
     text = '\ufeff' + text; //for windows OS, convert『UTF-8』 to 『UTF-8 with bom』,see https://stackoverflow.com/questions/17879198/adding-utf-8-bom-to-string-blob

@@ -89,6 +89,71 @@ namespace SchemaNote.Controllers
             //return Content(Flag.OBJ.ToString(), "text/plain", System.Text.Encoding.Unicode);
         }
 
+        [HttpPost]
+        public ActionResult ExportMarkdown()
+        {
+            #region check Connection
+            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            #endregion
+
+            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Overview");
+            }
+
+            string markdown = BuildMarkdown(Flag.OBJ);
+            return Content(markdown, "text/markdown", System.Text.Encoding.UTF8);
+        }
+
+        private static string BuildMarkdown(OverviewViewModel model)
+        {
+            static string MdEscape(string? value)
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    return string.Empty;
+                }
+                return value.Replace("|", "\\|").Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>");
+            }
+
+            System.Text.StringBuilder sb = new();
+            sb.AppendLine("# Overview");
+            sb.AppendLine();
+
+            foreach (Table item in model.Tables)
+            {
+                sb.AppendLine($"## {MdEscape(item.NAME)}");
+                sb.AppendLine();
+                sb.AppendLine($"> {MdEscape(item.MS_Description)}");
+                sb.AppendLine();
+
+                sb.AppendLine("| 物件類型 | 結構描述名稱 | 物件創建日期 | 物件修改日期 | 筆數 |");
+                sb.AppendLine("| --- | --- | --- | --- | --- |");
+                sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
+                sb.AppendLine();
+
+                sb.AppendLine($"**備註：** {MdEscape(item.REMARK)}");
+                sb.AppendLine();
+
+                sb.AppendLine("| 欄位名稱 | 中文名稱 | 資料型態 | 主鍵 | 不為Null | 預設值 | 備註 |");
+                sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
+                foreach (Column col in item.Columns)
+                {
+                    sb.AppendLine($"| {MdEscape(col.NAME)} | {MdEscape(col.MS_Description)} | {MdEscape(col.TYPE)} | {(col.IS_PK ? "✔" : string.Empty)} | {(col.DISALLOW_NULL ? "✔" : string.Empty)} | {MdEscape(col.DEFUALT)} | {MdEscape(col.REMARK)} |");
+                }
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
         [HttpGet]
         public ActionResult Details(int? id)
         {
