@@ -1,0 +1,26 @@
+請先閱讀 #file:'D:\Link\Source\Repos\SchemaNote\SchemaNote\README.md' ，再閱讀下面我的需求，最後視情況閱讀我的程式碼。
+
+〈需求〉
+由於公司還有許多 DB 沒有套用 SchemaNote 的方式，管理Table(資料表)、View(檢視表)的中文解釋名稱與備註、及各欄位之中文解釋名稱與備註...等等資訊，換句話說那些 DB 的擴充屬性，都是沒有定義或空白的。
+請協助產出可以提供給 AI 的 Prompt，內容是可以將原本工程師管理 DB Schema 的 Excel 或 Word 最終轉成 SQL Script，而這 SQL Script 便是建立擴充屬性（Key為：MS_Description、REMARK）。
+
+我預期的步驟／階段如下（若有缺漏請自行補充）：
+1. 將原本工程師管理 DB Schema 的 Excel 或 Word ，轉成 Markdown 格式：originalSchema.md；不過請注意，不同系統分析師的寫作風格不同，有些系統分析師習慣把 DB Schema 混在系統規格書中，所已提供給 AI 的不一定是純粹的 DB Schema 
+2. 再將 originalSchema.md 整合轉成 SchemaNote 才需要的資訊欄位（MS_Description、REMARK），也是 Markdown 格式：sortedOutSchema.md；這步驟的目的在於原始的 Excel 或 Word 文件的備註可能不只寫在一處，所以需要整併，以及  SchemaNote 根本不需要關心的欄位，在這階段就可以拋棄，例如欄位型別與長度，因為 SchemaNote 站台會直接從 DB 抓取這類資訊
+3. 工程師提供目前 DB 的 Schema，使用 SQL Server Manager Studio 提供的腳本生成功能，把 Table 和 View 的 Create 指令（包含已存在的擴充屬性、但不包含各類索引，因為不需要）全部生成存為 originalSchema.sql
+4. 接著將 sortedOutSchema.md 和 originalSchema.sql 比對內容，依合理性再產出 Markdown 格式：originalSchema2.md；這步驟的目的有下：
+4.1 在於最新 DB Schema 文件（ Excel 或 Word）仍會存在與實際 DB 脫鉤，例如 DB 的某 Table 有11個欄位，而文件紀錄此 Table 只有 9 個欄位，但欄位名稱有匹配對應的只有 8 個欄位，這種情況就只要產出這 8 個欄位的擴充屬性，也就是取交集的概念；另外若遇到對應上的欄位存在些微可接受的落差一律以實際 DB 的 originalSchema.sql 為準，例如欄位名稱英文大小寫的差異
+4.2 另外由於 DB Schema 文件或系統規格文件幾乎都沒有在解釋說明 View 的欄位名稱與備註，但利用 originalSchema.sql 內 View 的 Create 指令則可以推敲出各欄位出自於那些 Table ，進而推算出的用途與意義，給定欄位名稱與備註
+5. 最後將 sortedOutSchema2.md 轉成可執行的 SQL Script：ForSchemaNote[資料庫名稱].Sql
+
+〈注意事項〉
+1. AI 並不真的需要認識 SchemaNote 系統，只要 您提供的 Prompt 可以引導 AI 產出建立擴充屬性（Key為：MS_Description、REMARK）的 SQL Script，內容為 Table、View 的中文解釋名稱與備註、與它們各欄位之中文解釋名稱與備註，那就大功告成了
+
+2. 關於與 AI 的互動方式，請 AI 並不需要真的像前述步驟那般、來回互動多次提供這些中繼檔案（originalSchema.md、sortedOutSchema.md、sortedOutSchema2.md），只要我一口氣提供關鍵的：
+a. 原本工程師管理 DB Schema 的 Excel 或 Word（也可能包含系統規格文件）
+b. 目前 DB 的 Schema，Table 和 View 的 Create 指令（包含已存在的擴充屬性）originalSchema.sql
+就請 AI 就直接產出最終的 ForSchemaNote[資料庫名稱].Sql，前述步驟僅是為了更清楚表達解析文件過程中，應注意的細節。
+
+3. 承前點，與 AI 的互動在以下狀況就不會直接產出最終的 ForSchemaNote[資料庫名稱].Sql：
+a. 前面提到由於 sortedOutSchema.md 和 originalSchema.sql 存在一定程度脫鉤，若脫鉤嚴重到讓人不經懷疑文件有寫錯，則 AI 應詢問清楚，而非直接產出 .Sql 檔案
+b. 工程師管理 DB Schema、系統規格文件 的 Excel 或 Word 等文件，就出現自相矛盾，且無法判斷何者為正確時，則 AI 應詢問清楚，而非直接產出 .Sql 檔案

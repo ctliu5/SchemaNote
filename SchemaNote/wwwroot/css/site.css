@@ -128,3 +128,24 @@
 .search > .form-group-lg {
     margin-right: 10px;
 }
+
+/* 讓 Connection String 面板固定在最上方 */
+.connstring-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background-color: #fff;
+    margin-bottom: 0;
+}
+
+/* 讓 Overview 標題與搜尋欄固定，緊接在 Connection String 面板下方 */
+.overview-sticky-header {
+    position: sticky;
+    top: 32px;
+    z-index: 1020;
+    background-color: #fff;
+    padding-top: 1px;
+    padding-bottom: 18px;
+    /* 底部加陰影/邊線，讓固定區與內容有區隔 */
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
