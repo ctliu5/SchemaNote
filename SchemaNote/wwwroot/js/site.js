@@ -286,9 +286,9 @@ function download(filename, text) {
 
     text = '\ufeff' + text; //for windows OS, convert『UTF-8』 to 『UTF-8 with bom』,see https://stackoverflow.com/questions/17879198/adding-utf-8-bom-to-string-blob
 
-    var blob = new Blob([text], { type: 'text/plain;charset=UTF-8' });
-    //var blob = new Blob([text], { type: 'text/plain;charset=UTF-16LE' });
-    var url = window.URL.createObjectURL(blob);
+    // 使用 data: URI 取代 blob: URL，避免瀏覽器在 HTTP 連線下發出
+    // 「loaded over an insecure connection」的安全警告。
+    var url = 'data:text/plain;charset=UTF-8,' + encodeURIComponent(text);
 
     var element = document.createElement('a');
 
