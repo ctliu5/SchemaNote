@@ -277,7 +277,7 @@ function ExportExtendedPropScript() {
             download('ExtendedPropScript_urlencoded_' + Date.now() + '.sql', data);
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            //todo
+            alert("ExportExtendedPropScript error: " + textStatus + " " + errorThrown);
         }
     })
 }
