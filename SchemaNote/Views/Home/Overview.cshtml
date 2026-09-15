@@ -54,25 +54,17 @@
         <div class="form-group form-group-lg">
             <label for="choose">搜尋項目</label>
             <select id="choose" class="form-control"></select>
-        </div>
-        <div class="form-group form-group-lg">
             <label for="switch">搜索方式</label>
             <select id="switch" class="form-control">
                 <option value="fuzzy" selected>模糊搜索</option>
                 <option value="exact">精確搜索</option>
             </select>
-        </div>
-        <div class="form-group form-group-lg">
             <input id="SearchTextBox" type="text" class="form-control" placeholder="Enter key words..." />
         </div>
-        <div class="form-group form-group-lg">
-            <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="匯出擴充屬性Script" />
-        </div>
-        <div class="form-group form-group-lg">
-            <input type="button" class="form-control" onclick="ExportMarkdown()" value="匯出為Markdown" />
-        </div>
-        <div class="form-group form-group-lg">
-            <input type="button" class="form-control" onclick="ExportExcel()" value="匯出為Excel" />
+        <div class="form-group form-group-lg pull-right">
+            <input type="button" class="form-control" onclick="ExportExcel()" value="Excel" />
+            <input type="button" class="form-control" onclick="ExportMarkdown()" value="Markdown" />
+            <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="擴充屬性SQL" />
         </div>
     </div>
 </div>
