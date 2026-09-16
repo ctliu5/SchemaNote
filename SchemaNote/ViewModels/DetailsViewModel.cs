@@ -20,6 +20,19 @@ namespace SchemaNote.ViewModels
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
         #endregion
 
+        #region FLAGS
+        [Display(Name = Common.PropFlags)]
+        public string FLAGS { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 依半形分號切分的標籤清單，保留標籤前後空白，僅濾除完全空字串。
+        /// </summary>
+        public List<string> FlagList =>
+            string.IsNullOrEmpty(FLAGS)
+                ? []
+                : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
+        #endregion
+
         [Display(Name = "物件類型")]
         public string TYPE_NAME
         {

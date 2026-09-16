@@ -100,6 +100,40 @@ namespace SchemaNote.ViewModels
             }
         }
 
+        /// <summary>
+        /// 每個 accordion 對應的標籤陣列（原始大小寫），供前端標籤過濾比對。
+        /// </summary>
+        public string FlagsJson
+        {
+            get
+            {
+                var d = new Dictionary<string, List<string>>();
+                int i = 0;
+                Tables.ForEach(t =>
+                {
+                    i++;
+                    d.Add(Common.accordion + i, t.FlagList);
+                });
+                return JsonSerializer.Serialize(d, JsonOptions);
+            }
+        }
+
+        /// <summary>
+        /// 所有物件出現過的標籤（去重、依名稱排序），供過濾下拉選單顯示。
+        /// </summary>
+        public string AllFlagsJson
+        {
+            get
+            {
+                var all = Tables
+                    .SelectMany(t => t.FlagList)
+                    .Distinct()
+                    .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                return JsonSerializer.Serialize(all, JsonOptions);
+            }
+        }
+
         public string? DATABASE_Name { get; set; }
 
         [Display(Name = Common.ConnString), Required]
@@ -120,6 +154,19 @@ namespace SchemaNote.ViewModels
         string? _REMARK;
         [Display(Name = Common.RropRemark)]
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
+        #endregion
+
+        #region FLAGS
+        [Display(Name = Common.PropFlags)]
+        public string FLAGS { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 依半形分號切分的標籤清單，保留標籤前後空白，僅濾除完全空字串。
+        /// </summary>
+        public List<string> FlagList =>
+            string.IsNullOrEmpty(FLAGS)
+                ? []
+                : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
         #endregion
 
         [Display(Name = "物件類型")]

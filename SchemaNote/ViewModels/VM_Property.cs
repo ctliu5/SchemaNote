@@ -9,5 +9,7 @@ namespace SchemaNote.ViewModels
         public string? MS_Description { get; set; }
         [DisplayFormat(ConvertEmptyStringToNull = false), StringLength(Models.Common.StrMaxLen)]
         public string? REMARK { get; set; }
+        [DisplayFormat(ConvertEmptyStringToNull = false), StringLength(Models.Common.StrMaxLen)]
+        public string? FLAGS { get; set; }
     }
 }

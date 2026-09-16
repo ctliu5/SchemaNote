@@ -14,6 +14,9 @@ namespace SchemaNote.Models
         public const int StrMaxLen = 4000;
         public const string MS_Desc = "MS_Description";
         public const string Remark = "REMARK";
+        public const string Flags = "FLAGS";
+        public const string PropFlags = "標籤";
+        public const char FlagsSeparator = ';';
         public const string CountTip = "注意！此為參考值，非準確值。";
         public const string accordion = "accordion";
     }

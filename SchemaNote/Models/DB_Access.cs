@@ -118,6 +118,7 @@ namespace SchemaNote.Models
                         QTY = t.QTY,
                         MS_Description = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
                         REMARK = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
+                        FLAGS = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Flags, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object flags ? flags.ToString() is string flags_str ? flags_str : string.Empty : string.Empty,
                         Columns = [.. cols.Where(c => c.OBJECT_ID == t.OBJECT_ID).Select(c =>
                         {
                             var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -231,6 +232,7 @@ namespace SchemaNote.Models
                 QTY = tbl.QTY,
                 MS_Description = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.MS_Desc, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object ms_Description ? ms_Description.ToString() is string ms_Description_str ? ms_Description_str : string.Empty : string.Empty,
                 REMARK = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Remark, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object remark ? remark.ToString() is string remark_str ? remark_str : string.Empty : string.Empty,
+                FLAGS = (pT.FirstOrDefault(p => p.NAME?.Equals(Common.Flags, StringComparison.OrdinalIgnoreCase) ?? false)?.VALUE) is object flags ? flags.ToString() is string flags_str ? flags_str : string.Empty : string.Empty,
                 Columns = [.. cols.Select(c =>
                 {
                     var pC = pObj.Where(p => p.MINOR_ID == c.COLUMN_ID);
@@ -333,6 +335,15 @@ namespace SchemaNote.Models
                         NAME = Common.Remark,
                         VALUE = vm.REMARK,
                     });
+
+                if (vm.FLAGS != null)
+                    dto_prop.Add(
+                    new DTO_prop
+                    {
+                        COLUMN_ID = vm.COLUMN_ID,
+                        NAME = Common.Flags,
+                        VALUE = vm.FLAGS,
+                    });
             }
 
             IEnumerable<DTO_prop> UnionProp = dto_prop.GroupJoin(
@@ -344,7 +355,9 @@ namespace SchemaNote.Models
                      COLUMN_ID = d.COLUMN_ID,
                      NAME = d.NAME,
                      VALUE = d.VALUE?.Trim(),
-                     Original_VALUE = (p.FirstOrDefault()?.VALUE) is object obj ? obj.ToString() is string obj_str ? obj_str.Trim() : string.Empty : string.Empty,
+                     Original_VALUE = p.Any()
+                        ? (p.First().VALUE?.ToString()?.Trim() ?? string.Empty)
+                        : null,
                  });
 
             List<DTO_prop> Properties = [];

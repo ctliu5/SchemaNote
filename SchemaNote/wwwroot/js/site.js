@@ -1,6 +1,10 @@
 ﻿function fuzzy(txt, compareStr) { return txt.indexOf(compareStr) > -1; }
 function exact(txt, compareStr) { return txt === compareStr; }
 var Overview = {}, CurrentIndex, CompareMethod = fuzzy, Iterator, SearchTextBox = document.getElementById('SearchTextBox')/*, counting*/;
+// 標籤過濾（Overview）：已選標籤（大寫）集合，以及各 accordion 對應的標籤（大寫）對照表
+var OverviewFlags = { byAccordion: {}, all: [] };
+var SelectedFlags = [];
+var FlagUpperByAccordion = {};
 function SetIndex() {
     CurrentIndex = this.value; Iterator();
 }
@@ -153,7 +157,6 @@ function Iterator_js_JsonObj() {
                     if (o[i]) {
                         //counting++;
                         if (CompareMethod(o[i], compareStr)) {
-                            document.getElementById(key).style.cssText = 'display:block;';
                             flag = false;
                         }
                     } else {
@@ -161,7 +164,10 @@ function Iterator_js_JsonObj() {
                         console.log(o[i]);
                     }
                 }
-                if (flag) {
+                // flag=false 代表文字符合；再套用標籤過濾（OR）
+                if (!flag && MatchFlags(key)) {
+                    document.getElementById(key).style.cssText = 'display:block;';
+                } else {
                     document.getElementById(key).style.cssText = 'display:none;';
                 }
             }
@@ -169,11 +175,98 @@ function Iterator_js_JsonObj() {
     } else {
         ForeachObj(Overview[CurrentIndex].json,
             function (obj, key) {
-                document.getElementById(key).style.cssText = 'display:block;';
+                document.getElementById(key).style.cssText = MatchFlags(key) ? 'display:block;' : 'display:none;';
             }
         );
     }
     //console.log(counting);
+}
+
+// 標籤過濾判斷：未選標籤時全部符合；已選標籤採 OR（含任一即符合）
+function MatchFlags(accordionKey) {
+    if (!SelectedFlags || SelectedFlags.length === 0) return true;
+    var flags = FlagUpperByAccordion[accordionKey] || [];
+    for (var i = 0; i < SelectedFlags.length; i++) {
+        if (flags.indexOf(SelectedFlags[i]) > -1) return true;
+    }
+    return false;
+}
+
+// 初始化 Overview 標籤過濾下拉選單（徽章 + Dropdown 核取）
+function initialFlagsFilter() {
+    if (typeof OverviewFlags === 'undefined') return;
+    // 建立各 accordion 的大寫標籤對照表
+    FlagUpperByAccordion = {};
+    ForeachObj(OverviewFlags.byAccordion, function (obj, key) {
+        FlagUpperByAccordion[key] = (obj[key] || []).map(function (f) { return f.toUpperCase(); });
+    });
+
+    var menu = document.getElementById('flags-menu');
+    if (!menu) return;
+    var all = OverviewFlags.all || [];
+    if (all.length === 0) {
+        menu.innerHTML = '<span class="dropdown-item-text text-muted">（無標籤）</span>';
+        return;
+    }
+    all.forEach(function (flag, idx) {
+        var id = 'flag-chk-' + idx;
+        var wrapper = document.createElement('div');
+        wrapper.className = 'form-check';
+        var chk = document.createElement('input');
+        chk.className = 'form-check-input';
+        chk.type = 'checkbox';
+        chk.id = id;
+        chk.value = flag;
+        chk.addEventListener('change', onFlagFilterChange);
+        var label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.setAttribute('for', id);
+        label.textContent = flag;
+        wrapper.appendChild(chk);
+        wrapper.appendChild(label);
+        menu.appendChild(wrapper);
+    });
+}
+
+function onFlagFilterChange() {
+    var menu = document.getElementById('flags-menu');
+    var checks = menu.querySelectorAll('input[type="checkbox"]');
+    SelectedFlags = [];
+    var selectedLabels = [];
+    for (var i = 0; i < checks.length; i++) {
+        if (checks[i].checked) {
+            SelectedFlags.push(checks[i].value.toUpperCase());
+            selectedLabels.push(checks[i].value);
+        }
+    }
+    renderSelectedFlagBadges(selectedLabels);
+    if (Iterator) Iterator();
+}
+
+function renderSelectedFlagBadges(labels) {
+    var container = document.getElementById('flags-selected');
+    if (!container) return;
+    container.innerHTML = '';
+    labels.forEach(function (label) {
+        var badge = document.createElement('span');
+        badge.className = 'badge bg-primary d-inline-flex align-items-center';
+        badge.textContent = label;
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'btn-close btn-close-white ms-1';
+        close.style.fontSize = '.6rem';
+        close.setAttribute('aria-label', 'remove');
+        close.addEventListener('click', function () {
+            var menu = document.getElementById('flags-menu');
+            var checks = menu.querySelectorAll('input[type="checkbox"]');
+            for (var i = 0; i < checks.length; i++) {
+                if (checks[i].value === label) { checks[i].checked = false; break; }
+            }
+            onFlagFilterChange();
+        });
+        badge.appendChild(close);
+        container.appendChild(badge);
+    });
 }
 
 function ForeachObj(obj, func) {

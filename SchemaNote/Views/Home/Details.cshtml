@@ -39,6 +39,57 @@
             }
         }
     </script>
+    <script>
+        // 標籤（FLAGS）編輯器：multiple select + 新增文字框，同步隱藏 input [0].FLAGS
+        (function () {
+            var SEP = ';';
+            var list = document.getElementById('flags-list');
+            var hidden = document.getElementById('flags-hidden');
+            var input = document.getElementById('flags-new');
+            var addBtn = document.getElementById('flags-add');
+            var removeBtn = document.getElementById('flags-remove');
+            if (!list || !hidden) return;
+
+            function showSubmit() {
+                var submit = document.getElementById('submit');
+                if (submit) submit.style.cssText = 'display:initial;';
+            }
+            function syncHidden() {
+                var values = [];
+                for (var i = 0; i < list.options.length; i++) {
+                    values.push(list.options[i].value);
+                }
+                hidden.value = values.join(SEP);
+                showSubmit();
+            }
+            function addFlag() {
+                // 保留標籤前後空白，只忽略完全空字串；避免包含分號
+                var val = input.value;
+                if (!val || val.indexOf(SEP) > -1) { input.value = ''; return; }
+                for (var i = 0; i < list.options.length; i++) {
+                    if (list.options[i].value === val) { input.value = ''; return; }
+                }
+                var opt = document.createElement('option');
+                opt.value = val;
+                opt.text = val;
+                opt.selected = true;
+                list.appendChild(opt);
+                input.value = '';
+                syncHidden();
+            }
+            function removeSelected() {
+                for (var i = list.options.length - 1; i >= 0; i--) {
+                    if (list.options[i].selected) list.remove(i);
+                }
+                syncHidden();
+            }
+            if (addBtn) addBtn.addEventListener('click', addFlag);
+            if (removeBtn) removeBtn.addEventListener('click', removeSelected);
+            if (input) input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); addFlag(); }
+            });
+        })();
+    </script>
 }
 <h2>Details</h2>
 @if (TempData["ErrorMessage"] != null)
@@ -112,6 +163,27 @@
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => Model.MODIFY_DATE)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => Model.FLAGS)
+                    </td>
+                    <td>
+                        <div id="flags-editor">
+                            <select id="flags-list" class="form-select" multiple size="4">
+                                @foreach (var flag in Model.FlagList)
+                                {
+                                    <option value="@flag" selected>@flag</option>
+                                }
+                            </select>
+                            <div class="input-group mt-1">
+                                <input id="flags-new" type="text" class="form-control" placeholder="輸入標籤後按新增" />
+                                <button id="flags-add" type="button" class="btn btn-outline-secondary">新增</button>
+                                <button id="flags-remove" type="button" class="btn btn-outline-danger">刪除選取</button>
+                            </div>
+                            <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
+                        </div>
                     </td>
                 </tr>
             </tbody>
