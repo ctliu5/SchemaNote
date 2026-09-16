@@ -148,6 +148,11 @@ code {
     border-radius: 4px;
 }
 
+.card > .card-header > h6 > a {
+    color: #333;
+    text-decoration: none;
+}
+
 a.description, a.remark {
     color: royalblue;
     text-decoration: none;
