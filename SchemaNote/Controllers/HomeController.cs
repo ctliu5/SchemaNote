@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.ViewModels;
@@ -38,7 +39,8 @@ namespace SchemaNote.Controllers
                     TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                     return RedirectToAction("Index");
                 }
-                return View(Flag.OBJ);
+                // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
+                return RedirectToAction("Overview");
             }
             else
             {
@@ -64,7 +66,28 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return View();
             }
+            SetCurrentConnectionViewData(this, ConnectionString);
             return View(Flag.OBJ);
+        }
+
+        // 從連線字串解析出 Server Address 與 Database Name，供前端比對 localStorage 中已儲存的連線。
+        private static void SetCurrentConnectionViewData(Controller controller, string connectionString)
+        {
+            string server = string.Empty;
+            string database = string.Empty;
+            try
+            {
+                SqlConnectionStringBuilder builder = new(connectionString);
+                server = builder.DataSource ?? string.Empty;
+                database = builder.InitialCatalog ?? string.Empty;
+            }
+            catch
+            {
+                // 無法解析時維持空字串，前端會視為沒有可比對的連線資訊。
+            }
+            controller.ViewData["CurrentServer"] = server;
+            controller.ViewData["CurrentDatabase"] = database;
+            controller.ViewData["CurrentConnectionString"] = connectionString;
         }
 
         #region 匯出相關

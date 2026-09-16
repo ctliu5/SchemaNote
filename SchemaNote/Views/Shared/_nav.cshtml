@@ -1,6 +1,12 @@
 ﻿@using SchemaNote.ViewModels;
 @model IConnString
 
+@{
+    string currentServer = ViewData["CurrentServer"] as string ?? string.Empty;
+    string currentDatabase = ViewData["CurrentDatabase"] as string ?? string.Empty;
+    string currentConnString = ViewData["CurrentConnectionString"] as string ?? string.Empty;
+}
+
 <div class="card connstring-sticky" role="tablist">
     <div class="card-header" role="tab" id="collapseListGroupHeading">
         <h6 class="mb-0">
@@ -18,9 +24,50 @@
                     <span asp-validation-for="ConnectionString" class="text-danger"></span>
                 </div>
                 <button type="submit" class="btn btn-outline-dark">確認</button>
-                <button style="color: darkgray; background-color: lightgray;" type="button" class="btn" onclick="document.getElementById('ConnectionString').value='Server=.;Database=AdventureWorks;Trusted_Connection=True'">自動填寫ConnectionString</button>
-                <button style="color: transparent; background-color: transparent;" type="button" class="btn" onclick="document.getElementById('ConnectionString').value='Server=linkliu.hopto.org;Initial Catalog=AdventureWorks;User ID=sa;Password=1234'">自動填寫ConnectionString</button>
+                @* 已儲存的連線（來自 localStorage），由 site.js 動態渲染；點按鈕直接連線，右上 x 可刪除 *@
+                <span id="savedConnList" class="d-inline-flex flex-wrap gap-2 align-items-center ms-2 align-middle"></span>
             </form>
+        </div>
+    </div>
+</div>
+
+@* 供 site.js 讀取目前成功連線的資訊，用來判斷是否需要彈出「記住DB連線」視窗 *@
+<div id="currentConnInfo"
+     data-server="@currentServer"
+     data-database="@currentDatabase"
+     data-connstring="@currentConnString"
+     hidden></div>
+
+@* 直接連線用的隱藏表單：點擊已儲存連線按鈕時，填入連線字串並送出（走 PRG） *@
+<form id="savedConnConnectForm" asp-controller="Home" asp-action="Overview" method="post" class="d-none">
+    <input type="hidden" name="ConnectionString" id="savedConnConnectInput" />
+</form>
+
+@* 記住DB連線 Modal 彈出視窗 *@
+<div class="modal fade" id="rememberDbModal" tabindex="-1" aria-labelledby="rememberDbModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rememberDbModalLabel">記住DB連線</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <small class="text-muted">
+                        Server：<span id="rememberDbServer"></span><br />
+                        Database：<span id="rememberDbDatabase"></span>
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <label for="rememberDbName" class="form-label">連線名稱</label>
+                    <input type="text" class="form-control" id="rememberDbName" required />
+                    <div class="invalid-feedback">請輸入連線名稱。</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">略過</button>
+                <button type="button" class="btn btn-primary" id="rememberDbSaveBtn">儲存</button>
+            </div>
         </div>
     </div>
 </div>

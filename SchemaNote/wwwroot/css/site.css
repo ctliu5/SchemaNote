@@ -260,3 +260,12 @@ a.description, a.remark {
     padding: 2px 0;
     background: transparent;
 }
+
+/* 已儲存的 DB 連線 chip */
+.saved-conn-chip {
+    vertical-align: middle;
+}
+.saved-conn-chip .saved-conn-remove {
+    font-weight: bold;
+    line-height: 1;
+}
