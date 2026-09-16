@@ -51,48 +51,12 @@ function testIterator() {
     }
     for (var cName in Overview) {
         if (Overview.hasOwnProperty(cName)) {
-            test(Iterator_jQuery, cName);// 4th ot 3nd
-            test(Iterator_js_querySelector, cName);// 3nd or 4th
+            test(Iterator_js_querySelector, cName);// 3nd
             test(Iterator_js_ClassName, cName);// 2rd
             test(Iterator_js_JsonObj, cName);// 1st
             console.log('================================');
         }
     }
-}
-
-function Iterator_jQuery() {
-    //counting = 0;
-    var compareStr = typeof SearchTextBox.value === 'string' ? SearchTextBox.value.trim() : '';
-    var className = '.' + CurrentIndex;
-    compareStr = compareStr.toUpperCase();
-    var htmlCollection = $('.accordion');
-    if (compareStr) {
-        var flag;
-        for (var i = 0, length = htmlCollection.length; i < length; i++) {
-            flag = true;
-            $(htmlCollection[i]).find(className).each(function () {
-                var text = $(this).text();
-                if (text) {
-                    //counting++;
-                    if (CompareMethod(text.trim().toUpperCase(), compareStr)) {
-                        $(htmlCollection[i]).css('display', 'block');
-                        flag = false;
-                        return false;
-                    }
-                } else {
-                    console.log($(this));
-                }
-            });
-            if (flag) {
-                $(htmlCollection[i]).css('display', 'none');
-            }
-        }
-    } else {
-        for (var i = 0, length = htmlCollection.length; i < length; i++) {
-            $(htmlCollection[i]).css('display', 'block');
-        }
-    }
-    //console.log(counting);
 }
 
 function Iterator_js_querySelector() {
