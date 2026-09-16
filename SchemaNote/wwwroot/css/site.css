@@ -214,3 +214,49 @@ a.description, a.remark {
     /* 底部加陰影/邊線，讓固定區與內容有區隔 */
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
 }
+
+/* FLAGS 標籤編輯器（Select2 tagging 風格） */
+.tag-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    cursor: text;
+    min-height: calc(1.5em + .75rem + 2px);
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: .875em;
+    line-height: 1.4;
+    white-space: pre;
+}
+
+.tag-chip-remove {
+    border: 0;
+    background: transparent;
+    color: #6c757d;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+    .tag-chip-remove:hover {
+        color: #dc3545;
+    }
+
+.tag-input-field {
+    border: 0;
+    outline: 0;
+    flex: 1 1 120px;
+    min-width: 120px;
+    padding: 2px 0;
+    background: transparent;
+}

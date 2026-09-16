@@ -40,53 +40,85 @@
         }
     </script>
     <script>
-        // 標籤（FLAGS）編輯器：multiple select + 新增文字框，同步隱藏 input [0].FLAGS
+        // 標籤（FLAGS）編輯器：Select2 tagging 風格的動態標籤建立（Vanilla JS）
         (function () {
             var SEP = ';';
-            var list = document.getElementById('flags-list');
+            var container = document.getElementById('flags-tags');
             var hidden = document.getElementById('flags-hidden');
             var input = document.getElementById('flags-new');
-            var addBtn = document.getElementById('flags-add');
-            var removeBtn = document.getElementById('flags-remove');
-            if (!list || !hidden) return;
+            if (!container || !hidden || !input) return;
 
             function showSubmit() {
                 var submit = document.getElementById('submit');
                 if (submit) submit.style.cssText = 'display:initial;';
             }
-            function syncHidden() {
+            function currentValues() {
                 var values = [];
-                for (var i = 0; i < list.options.length; i++) {
-                    values.push(list.options[i].value);
+                var chips = container.querySelectorAll('.tag-chip');
+                for (var i = 0; i < chips.length; i++) {
+                    values.push(chips[i].getAttribute('data-value'));
                 }
-                hidden.value = values.join(SEP);
+                return values;
+            }
+            function syncHidden() {
+                hidden.value = currentValues().join(SEP);
                 showSubmit();
             }
-            function addFlag() {
-                // 保留標籤前後空白，只忽略完全空字串；避免包含分號
-                var val = input.value;
-                if (!val || val.indexOf(SEP) > -1) { input.value = ''; return; }
-                for (var i = 0; i < list.options.length; i++) {
-                    if (list.options[i].value === val) { input.value = ''; return; }
-                }
-                var opt = document.createElement('option');
-                opt.value = val;
-                opt.text = val;
-                opt.selected = true;
-                list.appendChild(opt);
-                input.value = '';
-                syncHidden();
+            function createChip(val) {
+                var chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.setAttribute('data-value', val);
+                var text = document.createElement('span');
+                text.className = 'tag-chip-text';
+                text.textContent = val;
+                var remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'tag-chip-remove';
+                remove.setAttribute('aria-label', 'remove');
+                remove.innerHTML = '&times;';
+                chip.appendChild(text);
+                chip.appendChild(remove);
+                return chip;
             }
-            function removeSelected() {
-                for (var i = list.options.length - 1; i >= 0; i--) {
-                    if (list.options[i].selected) list.remove(i);
-                }
+            function addTag(rawVal) {
+                // 保留標籤前後空白，僅忽略完全空字串；避免包含分號
+                var val = rawVal;
+                if (!val || val.indexOf(SEP) > -1) return false;
+                if (currentValues().indexOf(val) > -1) return false;
+                container.insertBefore(createChip(val), input);
                 syncHidden();
+                return true;
             }
-            if (addBtn) addBtn.addEventListener('click', addFlag);
-            if (removeBtn) removeBtn.addEventListener('click', removeSelected);
-            if (input) input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') { e.preventDefault(); addFlag(); }
+            function removeLastTag() {
+                var chips = container.querySelectorAll('.tag-chip');
+                if (chips.length > 0) {
+                    container.removeChild(chips[chips.length - 1]);
+                    syncHidden();
+                }
+            }
+
+            // 點擊 ✕ 移除該標籤
+            container.addEventListener('click', function (e) {
+                if (e.target.classList.contains('tag-chip-remove')) {
+                    var chip = e.target.closest('.tag-chip');
+                    if (chip) { container.removeChild(chip); syncHidden(); }
+                } else {
+                    input.focus();
+                }
+            });
+
+            // Enter 或逗號建立標籤；Backspace（輸入框為空）刪除最後一個
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    if (addTag(input.value)) input.value = '';
+                } else if (e.key === 'Backspace' && input.value === '') {
+                    removeLastTag();
+                }
+            });
+            // 失焦時將殘留文字轉為標籤
+            input.addEventListener('blur', function () {
+                if (addTag(input.value)) input.value = '';
             });
         })();
     </script>
@@ -171,16 +203,15 @@
                     </td>
                     <td>
                         <div id="flags-editor">
-                            <select id="flags-list" class="form-select" multiple size="4">
+                            <div id="flags-tags" class="tag-input form-control h-auto">
                                 @foreach (var flag in Model.FlagList)
                                 {
-                                    <option value="@flag" selected>@flag</option>
+                                    <span class="tag-chip" data-value="@flag">
+                                        <span class="tag-chip-text">@flag</span>
+                                        <button type="button" class="tag-chip-remove" aria-label="remove">&times;</button>
+                                    </span>
                                 }
-                            </select>
-                            <div class="input-group mt-1">
-                                <input id="flags-new" type="text" class="form-control" placeholder="輸入標籤後按新增" />
-                                <button id="flags-add" type="button" class="btn btn-outline-secondary">新增</button>
-                                <button id="flags-remove" type="button" class="btn btn-outline-danger">刪除選取</button>
+                                <input id="flags-new" type="text" class="tag-input-field" placeholder="輸入標籤後按 Enter" autocomplete="off" />
                             </div>
                             <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
                         </div>
