@@ -169,7 +169,7 @@ namespace SchemaNote.ViewModels
                 : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
         #endregion
 
-        [Display(Name = "物件類型")]
+        [Display(Name = Common.ObjType)]
         public string TYPE_NAME
         {
             get

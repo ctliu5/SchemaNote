@@ -2,15 +2,17 @@
 using Microsoft.Data.SqlClient;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
+using SchemaNote.Services;
 using SchemaNote.ViewModels;
 using System.Diagnostics;
+using static SchemaNote.Models.Common;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController(ISessionWrapper sessionWapper, SchemaNote.Services.ICryptoService cryptoService) : Controller
+    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService) : Controller
     {
         private readonly ISessionWrapper _sessionWapper = sessionWapper;
-        private readonly SchemaNote.Services.ICryptoService _cryptoService = cryptoService;
+        private readonly ICryptoService _cryptoService = cryptoService;
         private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
 
         [HttpGet]
@@ -27,7 +29,7 @@ namespace SchemaNote.Controllers
             {
                 if (string.IsNullOrEmpty(ConnectionString))
                 {
-                    TempData["ErrorMessage"] = Common.ConnStringMissing;
+                    TempData["ErrorMessage"] = ConnStringMissing;
                     return RedirectToAction("Index");
                 }
                 // 由已儲存連線（localStorage）送來的字串為 AES 密文，需先在後端解密。
@@ -35,7 +37,7 @@ namespace SchemaNote.Controllers
                 {
                     if (!_cryptoService.TryDecrypt(ConnectionString, out string decrypted) || string.IsNullOrEmpty(decrypted))
                     {
-                        TempData["ErrorMessage"] = Common.ConnStringMissing;
+                        TempData["ErrorMessage"] = ConnStringMissing;
                         return RedirectToAction("Index");
                     }
                     ConnectionString = decrypted;
@@ -66,7 +68,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -110,7 +112,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -130,7 +132,7 @@ namespace SchemaNote.Controllers
         {
             // 前置 UTF-8 BOM，確保 Windows 上開啟檔案時能正確辨識為 UTF-8。
             var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
-            return encoding.GetPreamble().Concat(encoding.GetBytes(text)).ToArray();
+            return [.. encoding.GetPreamble(), .. encoding.GetBytes(text)];
         }
 
         // 依前端傳入的 OBJECT_ID 清單（搜尋/標籤過濾後仍顯示的項目）過濾要匯出的 Table/View。
@@ -153,7 +155,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -195,15 +197,15 @@ namespace SchemaNote.Controllers
                 sb.AppendLine($"> {MdEscape(item.MS_Description)}");
                 sb.AppendLine();
 
-                sb.AppendLine("| 物件類型 | 結構描述名稱 | 物件創建日期 | 物件修改日期 | 筆數 |");
+                sb.AppendLine($"| {ObjType} | {SchemaName} | {ObjCreateDate} | {ObjModifyDate} | 筆數 |");
                 sb.AppendLine("| --- | --- | --- | --- | --- |");
                 sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
                 sb.AppendLine();
 
-                sb.AppendLine($"**備註：** {MdEscape(item.REMARK)}");
+                sb.AppendLine($"**{RropRemark}：** {MdEscape(item.REMARK)}");
                 sb.AppendLine();
 
-                sb.AppendLine("| 欄位名稱 | 中文名稱 | 資料型別 | 主鍵 | 不為Null | 預設值 | 備註 |");
+                sb.AppendLine($"| {ObjType} | {PropDesc} | {PropType} | {PKey} | 不為Null | 預設值 | {RropRemark} |");
                 sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
                 foreach (Column col in item.Columns)
                 {
@@ -222,7 +224,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -275,7 +277,7 @@ namespace SchemaNote.Controllers
                 row++;
 
                 // 物件資訊表頭
-                string[] infoHeaders = ["物件類型", "結構描述名稱", "物件創建日期", "物件修改日期", "筆數"];
+                string[] infoHeaders = [ObjType, SchemaName, ObjCreateDate, ObjModifyDate, "筆數"];
                 for (int c = 0; c < infoHeaders.Length; c++)
                 {
                     var cell = ws.Cell(row, c + 1);
@@ -294,7 +296,7 @@ namespace SchemaNote.Controllers
                 row++;
 
                 // 備註
-                ws.Cell(row, 1).Value = "備註";
+                ws.Cell(row, 1).Value = RropRemark;
                 ws.Cell(row, 1).Style.Font.Bold = true;
                 ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
                 ws.Cell(row, 2).Value = table.REMARK;
@@ -302,7 +304,7 @@ namespace SchemaNote.Controllers
                 row += 2;
 
                 // 欄位表頭
-                string[] colHeaders = ["欄位名稱", "中文名稱", "資料型別", "主鍵", "不為Null", "預設值", "備註"];
+                string[] colHeaders = [ColName, PropDesc, PropType, PKey, "不為Null", "預設值", RropRemark];
                 int headerRow = row;
                 for (int c = 0; c < colHeaders.Length; c++)
                 {
@@ -391,7 +393,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -417,7 +419,7 @@ namespace SchemaNote.Controllers
             string? ConnectionString = _sessionWapper.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
-                TempData["ErrorMessage"] = Common.ConnStringMissing;
+                TempData["ErrorMessage"] = ConnStringMissing;
                 return RedirectToAction("Index");
             }
             #endregion
@@ -428,7 +430,7 @@ namespace SchemaNote.Controllers
             }
             else if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = Common.ValidationMsg;
+                TempData["ErrorMessage"] = ValidationMsg;
                 return Details(id);
             }
 

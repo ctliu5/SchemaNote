@@ -10,16 +10,16 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "欄位序碼")]
         public int COLUMN_ID { get; set; }
 
-        [Display(Name = "欄位名稱")]
+        [Display(Name = Common.ColName)]
         public string? NAME { get; set; }
 
-        [Display(Name = "資料型別")]
+        [Display(Name = Common.PropType)]
         public string? TYPE_NAME { get; set; }
 
         [Display(Name = "資料長度")]
         public string? LENGTH { get; set; }
 
-        [Display(Name = "主鍵")]
+        [Display(Name = Common.PKey)]
         public bool IS_PK { get; set; }
 
         [Display(Name = "不為Null")]

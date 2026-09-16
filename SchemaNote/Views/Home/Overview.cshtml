@@ -12,20 +12,20 @@
     <script>
         Overview = {
             'objName': {
-                'name_cht': "物件名稱",
-                'json': @Html.Raw(Model.TableNameJson),
+                'name_cht': '@Html.Raw(Common.ObjName)',
+                'json': (@Html.Raw(Model.TableNameJson)),
             },
             'colName': {
-                'name_cht': "欄位名稱",
-                'json': @Html.Raw(Model.ColumnNameJson),
+                'name_cht': '@Html.Raw(Common.ColName)',
+                'json': (@Html.Raw(Model.ColumnNameJson)),
             },
             'description': {
-                'name_cht': "中文名稱",
-                'json': @Html.Raw(Model.DescriptionJson),
+                'name_cht': '@Html.Raw(Common.PropDesc)',
+                'json': (@Html.Raw(Model.DescriptionJson)),
             },
             'remark': {
-                'name_cht': "備註",
-                'json': @Html.Raw(Model.RemarkJson),
+                'name_cht': '@Html.Raw(Common.RropRemark)',
+                'json': (@Html.Raw(Model.RemarkJson)),
             },
         };
         var OverviewFlags = {

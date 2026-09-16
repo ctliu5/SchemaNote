@@ -11,7 +11,7 @@
         /// </summary>
         public int OBJECT_ID { get; set; }
         /// <summary>
-        /// 資料表名
+        /// 物件名稱
         /// </summary>
         public string? NAME { get; set; }
         /// <summary>

@@ -25,7 +25,7 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "唯一")]
         public bool IS_UNIQUE { get; set; }
 
-        [Display(Name = "主鍵")]
+        [Display(Name = Common.PKey)]
         public bool IS_PK { get; set; }
 
         [Display(Name = "填滿因子")]

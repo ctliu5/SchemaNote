@@ -7,19 +7,19 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "物件識別碼")]
         public int OBJECT_ID { get; set; }
 
-        [Display(Name = "資料表名")]
+        [Display(Name = Common.ObjName)]
         public string? NAME { get; set; }
 
-        [Display(Name = "結構描述名稱")]
+        [Display(Name = Common.SchemaName)]
         public string? SCHEMA_NAME { get; set; }
 
-        [Display(Name = "物件類型")]
+        [Display(Name = Common.ObjType)]
         public string? TYPE { get; set; }
 
-        [Display(Name = "物件創建日期")]
+        [Display(Name = Common.ObjCreateDate)]
         public string? CREATE_DATE { get; set; }
 
-        [Display(Name = "物件修改日期")]
+        [Display(Name = Common.ObjModifyDate)]
         public string? MODIFY_DATE { get; set; }
 
         [Display(Name = "筆數")]

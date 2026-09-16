@@ -398,23 +398,29 @@ namespace SchemaNote.Models
             var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
             List<DTO_Object_prop> object_props = [];
-            string scriptTemp = ForDeleteEmptyData ? SQLScripts.DeleteScript_Extended_prop : SQLScripts.SavingScript_Extended_prop, newLine = Environment.NewLine;
+            string scriptTemp = string.Empty;
             StringBuilder stringBuilder = new(
-                "DECLARE @id int," + newLine +
-                "        @col_id int," + newLine +
-                "        @name sysname," + newLine +
-                "        @value sql_variant," + newLine +
-                "        @level0name sysname," + newLine +
-                "        @level1type sysname," + newLine +
-                "        @level1name sysname," + newLine +
-                "        @level2name sysname," + newLine +
-                "        @propQty int;" + newLine
-                );
+"""
+------ 變數宣告 BEGIN ------
+DECLARE
+@id int,
+@col_id int,
+@name sysname,
+@value sql_variant,
+@level0name sysname,
+@level1type sysname,
+@level1name sysname,
+@level2name sysname,
+@propQty int;
+------ 變數宣告 END ------
+""");
 
             #region 匯出擴充屬性資料
             try
             {
                 if (ForDeleteEmptyData)
+                {
+                    scriptTemp = SQLScripts.DeleteScript_Extended_prop;
                     switch (db_Tool)
                     {
                         case DB_tool.Dapper:
@@ -426,7 +432,10 @@ namespace SchemaNote.Models
                             ADO.GetObjectExtendedProp_emptyValue(ref object_props);
                             break;
                     }
+                }
                 else
+                {
+                    scriptTemp = SQLScripts.SavingScript_Extended_prop;
                     switch (db_Tool)
                     {
                         case DB_tool.Dapper:
@@ -438,6 +447,7 @@ namespace SchemaNote.Models
                             ADO.GetObjectExtendedProp(ref object_props);
                             break;
                     }
+                }
                 if (object_props.Count < 1)
                 {
                     ObjFlag.ErrorMessages.Append("找不到擴充屬性");
