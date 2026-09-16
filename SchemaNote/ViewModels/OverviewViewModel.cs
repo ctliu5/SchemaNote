@@ -198,7 +198,7 @@ namespace SchemaNote.ViewModels
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
         #endregion
 
-        [Display(Name = "資料型態")]
+        [Display(Name = "資料型別")]
         public string TYPE { get { return TYPE_NAME + LENGTH; } }
     }
 }

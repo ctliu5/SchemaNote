@@ -191,7 +191,7 @@ namespace SchemaNote.Controllers
                 sb.AppendLine($"**備註：** {MdEscape(item.REMARK)}");
                 sb.AppendLine();
 
-                sb.AppendLine("| 欄位名稱 | 中文名稱 | 資料型態 | 主鍵 | 不為Null | 預設值 | 備註 |");
+                sb.AppendLine("| 欄位名稱 | 中文名稱 | 資料型別 | 主鍵 | 不為Null | 預設值 | 備註 |");
                 sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
                 foreach (Column col in item.Columns)
                 {
@@ -290,7 +290,7 @@ namespace SchemaNote.Controllers
                 row += 2;
 
                 // 欄位表頭
-                string[] colHeaders = ["欄位名稱", "中文名稱", "資料型態", "主鍵", "不為Null", "預設值", "備註"];
+                string[] colHeaders = ["欄位名稱", "中文名稱", "資料型別", "主鍵", "不為Null", "預設值", "備註"];
                 int headerRow = row;
                 for (int c = 0; c < colHeaders.Length; c++)
                 {

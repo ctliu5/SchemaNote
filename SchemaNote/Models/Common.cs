@@ -1,21 +1,19 @@
-﻿using System;
-
-namespace SchemaNote.Models
+﻿namespace SchemaNote.Models
 {
     public static class Common
     {
-        public const string CurrentVersion = "Version: 0.1.3";
+        public const string CurrentVersion = "Version: 1.0.0";
         public const string DefaultValue = "null";
         public const string ConnString = "Connection String";
-        public const string PropDesc = "欄位說明";
-        public const string RropRemark = "備註";
-        public const string ConnStringMissing = "Your connection string is missing!";
-        public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
-        public const int StrMaxLen = 4000;
         public const string MS_Desc = "MS_Description";
         public const string Remark = "REMARK";
         public const string Flags = "FLAGS";
+        public const string PropDesc = "中文名稱";
+        public const string RropRemark = "備註";
         public const string PropFlags = "標籤";
+        public const string ConnStringMissing = "Your connection string is missing!";
+        public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
+        public const int StrMaxLen = 4000;
         public const char FlagsSeparator = ';';
         public const string CountTip = "注意！此為參考值，非準確值。";
         public const string accordion = "accordion";
