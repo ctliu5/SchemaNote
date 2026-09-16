@@ -169,14 +169,20 @@ a.description, a.remark {
         background-color: #f5f5f5 !important;
     }
 
+        /* 內部 table 自我完整描邊，不依賴外部儲存格借線，避免左緣「破洞」 */
         .inners > td > table > tbody > tr > td, .inners > td > table > thead > tr > th {
             border-style: solid;
             border-width: 1px 0px 0px 1px;
             border-color: #ddd;
         }
 
-            .inners > td > table > tbody > tr > td:nth-child(1), .inners > td > table > thead > tr > th:nth-child(1) {
-                border-width: 1px 0px 0px 0px;
+            /* 最右欄補右框線、最後一列補下框線，使內部 table 四周閉合 */
+            .inners > td > table > tbody > tr > td:last-child, .inners > td > table > thead > tr > th:last-child {
+                border-right-width: 1px;
+            }
+
+            .inners > td > table > tbody > tr:last-child > td {
+                border-bottom-width: 1px;
             }
 
 .search > .form-group-lg {
