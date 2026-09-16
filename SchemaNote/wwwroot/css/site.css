@@ -111,6 +111,27 @@
     font-weight: 500;
 }
 
+code {
+    font-size: .875em;
+    color: #d63384;
+    word-wrap: break-word;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+}
+
+a.description, a.remark {
+    color: royalblue;
+    text-decoration: none;
+}
+
+    a.description:focus, a.remark:focus, a.description:hover, a.remark:hover {
+        text-decoration: underline;
+    }
+
+    a.description > code, a.remark > code {
+        color: #d63384;
+    }
+
 .inners > td {
     padding: 0 !important;
 }
