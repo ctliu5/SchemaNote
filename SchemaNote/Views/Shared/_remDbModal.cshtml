@@ -1,6 +1,7 @@
-﻿@* 直接連線用的隱藏表單：點擊已儲存連線按鈕時，填入連線字串並送出（走 PRG） *@
+﻿@* 直接連線用的隱藏表單：點擊已儲存連線按鈕時，填入 AES 密文並送出（走 PRG，後端解密後連線） *@
 <form id="savedConnConnectForm" asp-controller="Home" asp-action="Overview" method="post" class="d-none">
     <input type="hidden" name="ConnectionString" id="savedConnConnectInput" />
+    <input type="hidden" name="encrypted" value="true" />
 </form>
 
 @* 記住DB連線 Modal 彈出視窗 *@

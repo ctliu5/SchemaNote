@@ -1,4 +1,5 @@
 ﻿using SchemaNote.Models;
+using SchemaNote.Services;
 
 namespace SchemaNote
 {
@@ -33,6 +34,7 @@ namespace SchemaNote
             //採Singleton模式，使用強型別
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ISessionWrapper, SessionWrapper>();
+            services.AddSingleton<ICryptoService, AesCryptoService>();
 
             services.AddControllersWithViews();
 

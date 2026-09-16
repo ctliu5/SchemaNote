@@ -7,9 +7,10 @@ using System.Diagnostics;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController(ISessionWrapper sessionWapper) : Controller
+    public class HomeController(ISessionWrapper sessionWapper, SchemaNote.Services.ICryptoService cryptoService) : Controller
     {
         private readonly ISessionWrapper _sessionWapper = sessionWapper;
+        private readonly SchemaNote.Services.ICryptoService _cryptoService = cryptoService;
         private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
 
         [HttpGet]
@@ -20,7 +21,7 @@ namespace SchemaNote.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Overview(string ConnectionString)
+        public ActionResult Overview(string ConnectionString, bool encrypted = false)
         {
             if (ModelState.IsValid)
             {
@@ -28,6 +29,16 @@ namespace SchemaNote.Controllers
                 {
                     TempData["ErrorMessage"] = Common.ConnStringMissing;
                     return RedirectToAction("Index");
+                }
+                // 由已儲存連線（localStorage）送來的字串為 AES 密文，需先在後端解密。
+                if (encrypted)
+                {
+                    if (!_cryptoService.TryDecrypt(ConnectionString, out string decrypted) || string.IsNullOrEmpty(decrypted))
+                    {
+                        TempData["ErrorMessage"] = Common.ConnStringMissing;
+                        return RedirectToAction("Index");
+                    }
+                    ConnectionString = decrypted;
                 }
                 UserModel userModel = new();
                 userModel.SetConnectionString(ConnectionString);
@@ -66,12 +77,13 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return View();
             }
-            SetCurrentConnectionViewData(this, ConnectionString);
+            SetCurrentConnectionViewData(ConnectionString);
             return View(Flag.OBJ);
         }
 
-        // 從連線字串解析出 Server Address 與 Database Name，供前端比對 localStorage 中已儲存的連線。
-        private static void SetCurrentConnectionViewData(Controller controller, string connectionString)
+        // 從連線字串解析出 Server Address 與 Database Name（供前端比對 localStorage），
+        // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
+        private void SetCurrentConnectionViewData(string connectionString)
         {
             string server = string.Empty;
             string database = string.Empty;
@@ -85,9 +97,9 @@ namespace SchemaNote.Controllers
             {
                 // 無法解析時維持空字串，前端會視為沒有可比對的連線資訊。
             }
-            controller.ViewData["CurrentServer"] = server;
-            controller.ViewData["CurrentDatabase"] = database;
-            controller.ViewData["CurrentConnectionString"] = connectionString;
+            ViewData["CurrentServer"] = server;
+            ViewData["CurrentDatabase"] = database;
+            ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
         }
 
         #region 匯出相關

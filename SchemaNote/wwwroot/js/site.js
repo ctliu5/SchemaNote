@@ -482,7 +482,7 @@ function renderSavedConnections() {
     }
 }
 
-// 按下已儲存連線 => 直接以其連線字串送出（走 PRG）。
+// 按下已儲存連線 => 直接以其（AES 密文）連線字串送出，後端解密後連線（走 PRG）。
 function connectSavedConnection(conn) {
     var form = document.getElementById('savedConnConnectForm');
     var input = document.getElementById('savedConnConnectInput');
@@ -506,7 +506,7 @@ function maybePromptRememberConnection() {
     if (!info) return;
     var server = info.getAttribute('data-server') || '';
     var database = info.getAttribute('data-database') || '';
-    var connString = info.getAttribute('data-connstring') || '';
+    var connString = info.getAttribute('data-connstring') || ''; // AES 密文，前端只儲存密文
     if (!connString) return; // 沒有目前連線就不處理
 
     if (findSavedConnection(server, database)) return; // 已存在則不彈出
