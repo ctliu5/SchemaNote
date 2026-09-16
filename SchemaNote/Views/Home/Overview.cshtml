@@ -50,21 +50,21 @@
         <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
     }
 
-    <div class="form-inline search">
-        <div class="form-group form-group-lg">
+    <div class="d-flex flex-wrap align-items-center gap-2 search">
+        <div class="d-flex align-items-center gap-2">
             <label for="choose">搜尋項目</label>
-            <select id="choose" class="form-control"></select>
+            <select id="choose" class="form-select w-auto"></select>
             <label for="switch">搜索方式</label>
-            <select id="switch" class="form-control">
+            <select id="switch" class="form-select w-auto">
                 <option value="fuzzy" selected>模糊搜索</option>
                 <option value="exact">精確搜索</option>
             </select>
-            <input id="SearchTextBox" type="text" class="form-control" placeholder="Enter key words..." />
+            <input id="SearchTextBox" type="text" class="form-control w-auto" placeholder="Enter key words..." />
         </div>
-        <div class="form-group form-group-lg pull-right">
-            <input type="button" class="form-control" onclick="ExportExcel()" value="Excel" />
-            <input type="button" class="form-control" onclick="ExportMarkdown()" value="Markdown" />
-            <input type="button" class="form-control" onclick="ExportExtendedPropScript()" value="擴充屬性SQL" />
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <input type="button" class="btn btn-outline-secondary" onclick="ExportExcel()" value="💾Excel" />
+            <input type="button" class="btn btn-outline-secondary" onclick="ExportMarkdown()" value="💾Markdown" />
+            <input type="button" class="btn btn-outline-secondary" onclick="ExportExtendedPropScript()" value="💾擴充屬性SQL" />
         </div>
     </div>
 </div>
@@ -72,16 +72,16 @@
 @foreach (var item in Model.Tables)
 {
     i++;
-    <div class="panel-group accordion" id="@Html.Raw(Common.accordion + i)" role="tablist" aria-multiselectable="true">
-        <div class="panel panel-default ">
-            <div class="panel-heading" role="tab">
-                <span class="panel-title" role="button" data-toggle="collapse" data-parent="#@Html.Raw(Common.accordion + i)" href="#@Html.Raw("collapse" + i)" aria-expanded="false" aria-controls="@Html.Raw("collapse" + i)">
-                    <span class="caret"></span>
+    <div class="card accordion mb-2" id="@Html.Raw(Common.accordion + i)" role="tablist" aria-multiselectable="true">
+        <div class="card">
+            <div class="card-header cus_panel-heading" role="tab">
+                <span class="panel-title" role="button" data-bs-toggle="collapse" data-bs-target="#@Html.Raw("collapse" + i)" aria-expanded="false" aria-controls="@Html.Raw("collapse" + i)">
+                    <span class="me-1">▸</span>
                     <strong class="objName">
                         @Html.DisplayFor(modelItem => item.NAME)
                     </strong>
                 </span>
-                <a class="description text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                <a class="description text-primary" asp-action="Details" asp-route-id="@item.OBJECT_ID">
                     @if (item.MS_Description == Common.DefaultValue)
                     {
                         <code>
@@ -93,11 +93,11 @@
                         @Html.DisplayFor(modelItem => item.MS_Description)
                     }
                 </a>
-                <span class="count" data-toggle="tooltip" data-placement="top" title="@Common.CountTip">
-                    @Html.DisplayNameFor(model => t.QTY):<strong class="text-info">@Html.DisplayFor(modelItem => item.QTY)</strong>
+                <span class="count" data-bs-toggle="tooltip" data-bs-placement="top" title="@Common.CountTip">
+                    @Html.DisplayNameFor(model => t.QTY):<strong class="text-primary">@Html.DisplayFor(modelItem => item.QTY)</strong>
                 </span>
             </div>
-            <div id="@Html.Raw("collapse" + i)" class="panel-body panel-collapse collapse tabDetail" role="tabpanel">
+            <div id="@Html.Raw("collapse" + i)" class="card-body collapse tabDetail" role="tabpanel">
                 <table class="tabDetail_left">
                     <tbody>
                         <tr>
@@ -139,7 +139,7 @@
                         @Html.DisplayNameFor(model => t.REMARK)
                     </div>
                     <div>
-                        <a class="remark text-info" asp-action="Details" asp-route-id="@item.OBJECT_ID">
+                        <a class="remark text-primary" asp-action="Details" asp-route-id="@item.OBJECT_ID">
                             @if (item.REMARK == Common.DefaultValue)
                             {
                                 <code>

@@ -38,7 +38,7 @@
                 </span>
             </td>
             <td>
-                <a class="description text-info" asp-action="Details" asp-route-id="@col.OBJECT_ID">
+                <a class="description text-primary" asp-action="Details" asp-route-id="@col.OBJECT_ID">
                     @if (col.MS_Description == Common.DefaultValue)
                     {
                         <code>
@@ -64,7 +64,7 @@
                 @Html.DisplayFor(modelItem => col.DEFUALT)
             </td>
             <td>
-                <a class="remark text-info" asp-action="Details" asp-route-id="@col.OBJECT_ID">
+                <a class="remark text-primary" asp-action="Details" asp-route-id="@col.OBJECT_ID">
                     @if (col.REMARK == Common.DefaultValue)
                     {
                         <code>

@@ -1,28 +1,26 @@
 ﻿@using SchemaNote.ViewModels;
 @model IConnString
 
-<div class="panel-group connstring-sticky" role="tablist">
-    <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="collapseListGroupHeading">
-            <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" href="#collapseListGroup" aria-expanded="false" aria-controls="collapseListGroup">
-                    Let's Connect
-                </a>
-            </h4>
-        </div>
-        <div id="collapseListGroup" class="panel-collapse collapse" role="tabpanel" aria-labelledby="collapseListGroupHeading" aria-expanded="false" style="height: 0px;">
-            <div class="well">
-                <form asp-controller="Home" asp-action="Overview" method="post">
-                    <div class="form-group">
-                        <label asp-for="ConnectionString" class="control-label"></label>
-                        <input asp-for="ConnectionString" class="form-control" />
-                        <span asp-validation-for="ConnectionString" class="text-danger"></span>
-                    </div>
-                    <button type="submit" class="btn btn-default">確認</button>
-                    <button style="color: darkgray; background-color: lightgray;" type="button" class="btn" onclick="$('#ConnectionString').val('Server=.;Database=AdventureWorks;Trusted_Connection=True')">自動填寫ConnectionString</button>
-                    <button style="color: transparent; background-color: transparent;" type="button" class="btn" onclick="$('#ConnectionString').val('Server=linkliu.hopto.org;Initial Catalog=AdventureWorks;User ID=sa;Password=1234')">自動填寫ConnectionString</button>
-                </form>
-            </div>
+<div class="card connstring-sticky" role="tablist">
+    <div class="card-header" role="tab" id="collapseListGroupHeading">
+        <h4 class="mb-0">
+            <a class="collapsed" role="button" data-bs-toggle="collapse" href="#collapseListGroup" aria-expanded="false" aria-controls="collapseListGroup">
+                Let's Connect
+            </a>
+        </h4>
+    </div>
+    <div id="collapseListGroup" class="collapse" role="tabpanel" aria-labelledby="collapseListGroupHeading">
+        <div class="card-body">
+            <form asp-controller="Home" asp-action="Overview" method="post">
+                <div class="mb-3">
+                    <label asp-for="ConnectionString" class="form-label"></label>
+                    <input asp-for="ConnectionString" class="form-control" required />
+                    <span asp-validation-for="ConnectionString" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-outline-dark">確認</button>
+                <button style="color: darkgray; background-color: lightgray;" type="button" class="btn" onclick="document.getElementById('ConnectionString').value='Server=.;Database=AdventureWorks;Trusted_Connection=True'">自動填寫ConnectionString</button>
+                <button style="color: transparent; background-color: transparent;" type="button" class="btn" onclick="document.getElementById('ConnectionString').value='Server=linkliu.hopto.org;Initial Catalog=AdventureWorks;User ID=sa;Password=1234'">自動填寫ConnectionString</button>
+            </form>
         </div>
     </div>
 </div>

@@ -15,7 +15,13 @@ function SetMethod() {
 
 function initialOption() {
     Iterator = Iterator_js_JsonObj;
-    $('[data-toggle="tooltip"]').tooltip();
+    // Bootstrap 5 原生 Tooltip 初始化（不再依賴 jQuery）
+    if (window.bootstrap && bootstrap.Tooltip) {
+        var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        Array.prototype.slice.call(tooltipTriggerList).forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
+    }
     var i = 0;
     var choose = document.getElementById('choose');
     choose.addEventListener("change", SetIndex, false);
