@@ -69,7 +69,7 @@ namespace SchemaNote.Controllers
 
         #region 匯出相關
         [HttpPost]
-        public ActionResult ExportExtendedPropScript()
+        public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
         {
             #region check Connection
             string? ConnectionString = _sessionWapper.User.ConnectionString;
@@ -80,7 +80,7 @@ namespace SchemaNote.Controllers
             }
             #endregion
 
-            DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool);
+            DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
             if (Flag.ResultType != ExceResultType.Success)
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
@@ -98,8 +98,21 @@ namespace SchemaNote.Controllers
             return encoding.GetPreamble().Concat(encoding.GetBytes(text)).ToArray();
         }
 
+        // 依前端傳入的 OBJECT_ID 清單（搜尋/標籤過濾後仍顯示的項目）過濾要匯出的 Table/View。
+        // 未提供清單時（例如直接呼叫或無過濾），維持匯出全部。
+        private static void FilterTablesByObjectIds(OverviewViewModel model, int[]? objectIds)
+        {
+            if (model is null || objectIds is null || objectIds.Length == 0)
+            {
+                return;
+            }
+
+            var idSet = new HashSet<int>(objectIds);
+            model.Tables = [.. model.Tables.Where(t => idSet.Contains(t.OBJECT_ID))];
+        }
+
         [HttpPost]
-        public ActionResult ExportMarkdown()
+        public ActionResult ExportMarkdown(int[]? objectIds = null)
         {
             #region check Connection
             string? ConnectionString = _sessionWapper.User.ConnectionString;
@@ -116,6 +129,8 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return RedirectToAction("Overview");
             }
+
+            FilterTablesByObjectIds(Flag.OBJ, objectIds);
 
             string markdown = BuildMarkdown(Flag.OBJ);
             byte[] content = Utf8WithBom(markdown);
@@ -166,7 +181,7 @@ namespace SchemaNote.Controllers
         }
 
         [HttpPost]
-        public ActionResult ExportExcel()
+        public ActionResult ExportExcel(int[]? objectIds = null)
         {
             #region check Connection
             string? ConnectionString = _sessionWapper.User.ConnectionString;
@@ -183,6 +198,8 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return RedirectToAction("Overview");
             }
+
+            FilterTablesByObjectIds(Flag.OBJ, objectIds);
 
             byte[] content = BuildExcel(Flag.OBJ);
             const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

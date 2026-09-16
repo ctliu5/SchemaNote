@@ -89,7 +89,7 @@
 @foreach (var item in Model.Tables)
 {
     i++;
-    <div class="card accordion mb-2" id="@Html.Raw(Common.accordion + i)" role="tablist" aria-multiselectable="true">
+    <div class="card accordion mb-2" id="@Html.Raw(Common.accordion + i)" data-object-id="@item.OBJECT_ID" role="tablist" aria-multiselectable="true">
         <div class="card">
             <div class="card-header cus_panel-heading" role="tab">
                 <span class="panel-title" role="button" data-bs-toggle="collapse" data-bs-target="#@Html.Raw("collapse" + i)" aria-expanded="false" aria-controls="@Html.Raw("collapse" + i)">

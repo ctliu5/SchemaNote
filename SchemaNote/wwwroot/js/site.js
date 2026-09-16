@@ -337,9 +337,35 @@ function postDownload(url) {
     form.action = url;
     form.style.display = 'none';
 
+    // 收集目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID，僅匯出這些項目。
+    var objectIds = getVisibleObjectIds();
+    for (var i = 0; i < objectIds.length; i++) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'objectIds';
+        input.value = objectIds[i];
+        form.appendChild(input);
+    }
+
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
+}
+
+// 取得目前畫面上（未被搜尋/標籤過濾隱藏）的 accordion 對應之 OBJECT_ID 陣列。
+function getVisibleObjectIds() {
+    var ids = [];
+    var accordions = document.querySelectorAll('.accordion[data-object-id]');
+    for (var i = 0; i < accordions.length; i++) {
+        var ele = accordions[i];
+        if (ele.style.display !== 'none') {
+            var id = ele.getAttribute('data-object-id');
+            if (id !== null && id !== '') {
+                ids.push(id);
+            }
+        }
+    }
+    return ids;
 }
 
 function ExportExtendedPropScript() {
