@@ -154,7 +154,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered table-hover subTable" border="1">
+            <table class="table table-hover subTable">
                 <partial name="_OverviewColumns" model="item.Columns" view-data="@(new ViewDataDictionary(ViewData) { { "TYPE", item.TYPE } })" />
                 @*  ↓↓↓equal↓↓↓↓
                     @{await Html.RenderPartialAsync("_OverviewColumns", item.Columns);}
