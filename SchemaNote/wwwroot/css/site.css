@@ -165,7 +165,7 @@ a.description, a.remark {
     padding: 0 !important;
 }
 
-    .inners > td > table {
+    .inners > td > .table > :not(caption) > * > * {
         background-color: #f5f5f5 !important;
     }
 
