@@ -46,10 +46,14 @@
             // Excel 工作表（Sheet）名稱限制：最多 31 字元，且不可包含下列特殊字元 \ / ? * [ ] :
             var MAX_LEN = @Common.SheetNameMaxLen;
             var INVALID_CHARS = @Html.Raw(Json.Serialize(Common.SheetNameInvalidChars));
+            // 資料庫中所有物件出現過的標籤，供下拉建議清單使用
+            var ALL_FLAGS = @Html.Raw(Model.AllFlagsJson);
             var container = document.getElementById('flags-tags');
             var hidden = document.getElementById('flags-hidden');
             var input = document.getElementById('flags-new');
             var errorBox = document.getElementById('flags-error');
+            var suggestBox = document.getElementById('flags-suggest');
+            var activeIndex = -1;
             if (!container || !hidden || !input) return;
 
             function showError(msg) {
@@ -59,9 +63,6 @@
                 }
             }
             function validateTag(val) {
-                if (!val) {
-                    return '標籤不可為空白。';
-                }
                 if (val.indexOf(SEP) > -1) {
                     return '標籤不可包含分號（' + SEP + '）。';
                 }
@@ -109,8 +110,9 @@
                 return chip;
             }
             function addTag(rawVal) {
-                // 保留標籤前後空白，僅忽略完全空字串；避免包含分號
+                // 保留標籤前後空白，僅忽略完全空字串（允許沒有標籤，空值靜默略過不報錯）
                 var val = rawVal;
+                if (!val) { showError(''); return false; }
                 var err = validateTag(val);
                 if (err) { showError(err); return false; }
                 if (currentValues().indexOf(val) > -1) {
@@ -130,28 +132,96 @@
                 }
             }
 
+            // ===== 下拉建議清單（Select2 風格）=====
+            function hideSuggest() {
+                if (suggestBox) { suggestBox.style.display = 'none'; suggestBox.innerHTML = ''; }
+                activeIndex = -1;
+            }
+            function filteredFlags() {
+                var selected = currentValues();
+                var q = input.value.toUpperCase();
+                return ALL_FLAGS.filter(function (f) {
+                    // 排除已選取的；依輸入文字過濾（大小寫不敏感）
+                    if (selected.indexOf(f) > -1) return false;
+                    return q === '' || f.toUpperCase().indexOf(q) > -1;
+                });
+            }
+            function renderSuggest() {
+                if (!suggestBox) return;
+                var items = filteredFlags();
+                if (items.length === 0) { hideSuggest(); return; }
+                suggestBox.innerHTML = '';
+                items.forEach(function (f, idx) {
+                    var item = document.createElement('div');
+                    item.className = 'tag-suggest-item';
+                    item.setAttribute('data-value', f);
+                    item.setAttribute('data-index', idx);
+                    item.textContent = f;
+                    // 用 mousedown 避免 input blur 先觸發導致點選失效
+                    item.addEventListener('mousedown', function (e) {
+                        e.preventDefault();
+                        if (addTag(f)) input.value = '';
+                        renderSuggest();
+                        input.focus();
+                    });
+                    suggestBox.appendChild(item);
+                });
+                activeIndex = -1;
+                suggestBox.style.display = 'block';
+            }
+            function moveActive(delta) {
+                var items = suggestBox ? suggestBox.querySelectorAll('.tag-suggest-item') : [];
+                if (items.length === 0) return;
+                if (activeIndex > -1 && items[activeIndex]) items[activeIndex].classList.remove('active');
+                activeIndex += delta;
+                if (activeIndex < 0) activeIndex = items.length - 1;
+                if (activeIndex >= items.length) activeIndex = 0;
+                items[activeIndex].classList.add('active');
+                items[activeIndex].scrollIntoView({ block: 'nearest' });
+            }
+
             // 點擊 ✕ 移除該標籤
             container.addEventListener('click', function (e) {
                 if (e.target.classList.contains('tag-chip-remove')) {
                     var chip = e.target.closest('.tag-chip');
-                    if (chip) { container.removeChild(chip); syncHidden(); }
+                    if (chip) { container.removeChild(chip); syncHidden(); renderSuggest(); }
                 } else {
                     input.focus();
                 }
             });
 
-            // Enter 或逗號建立標籤；Backspace（輸入框為空）刪除最後一個
+            // 聚焦即顯示下拉建議
+            input.addEventListener('focus', renderSuggest);
+            // 輸入時即時過濾建議
+            input.addEventListener('input', function () { showError(''); renderSuggest(); });
+
+            // Enter/逗號建立標籤；上下鍵導航建議；Backspace 刪除最後一個標籤；Esc 關閉建議
             input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ',') {
+                var items = suggestBox ? suggestBox.querySelectorAll('.tag-suggest-item') : [];
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault(); moveActive(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault(); moveActive(-1);
+                } else if (e.key === 'Enter' || e.key === ',') {
                     e.preventDefault();
-                    if (addTag(input.value)) input.value = '';
+                    if (activeIndex > -1 && items[activeIndex]) {
+                        // 選取建議清單中被標記的項目
+                        if (addTag(items[activeIndex].getAttribute('data-value'))) input.value = '';
+                    } else if (addTag(input.value)) {
+                        input.value = '';
+                    }
+                    renderSuggest();
+                } else if (e.key === 'Escape') {
+                    hideSuggest();
                 } else if (e.key === 'Backspace' && input.value === '') {
                     removeLastTag();
+                    renderSuggest();
                 }
             });
-            // 失焦時將殘留文字轉為標籤
+            // 失焦時將殘留文字轉為標籤，並關閉建議
             input.addEventListener('blur', function () {
                 if (addTag(input.value)) input.value = '';
+                hideSuggest();
             });
         })();
     </script>
@@ -230,31 +300,27 @@
                         @Html.DisplayFor(modelItem => Model.MODIFY_DATE)
                     </td>
                 </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.FLAGS)
-                    </td>
-                    <td>
-                        <div id="flags-editor">
-                            <div id="flags-tags" class="tag-input form-control h-auto">
-                                @foreach (var flag in Model.FlagList)
-                                {
-                                    <span class="tag-chip" data-value="@flag">
-                                        <span class="tag-chip-text">@flag</span>
-                                        <button type="button" class="tag-chip-remove" aria-label="remove">&times;</button>
-                                    </span>
-                                }
-                                <input id="flags-new" type="text" class="tag-input-field" maxlength="@Common.SheetNameMaxLen" placeholder="輸入標籤後按 Enter" autocomplete="off" />
-                            </div>
-                            <div id="flags-error" class="text-danger small" style="display:none;"></div>
-                            <small class="form-text text-muted">最多 @Common.SheetNameMaxLen 個字元，且不可為 @Common.SheetNameInvalidChars</small>
-                            <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
-                        </div>
-                    </td>
-                </tr>
             </tbody>
         </table>
         <div class="tabDetail_right">
+            <div>
+                @Html.DisplayNameFor(model => Model.FLAGS)
+            </div>
+            <div id="flags-editor">
+                <div id="flags-tags" class="tag-input form-control h-auto">
+                    @foreach (var flag in Model.FlagList)
+                    {
+                        <span class="tag-chip" data-value="@flag">
+                            <span class="tag-chip-text">@flag</span>
+                            <button type="button" class="tag-chip-remove" aria-label="remove">&times;</button>
+                        </span>
+                    }
+                    <input id="flags-new" type="text" class="tag-input-field" maxlength="@Common.SheetNameMaxLen" placeholder="輸入標籤後按 Enter" autocomplete="off" />
+                </div>
+                <div id="flags-suggest" class="tag-suggest" style="display:none;"></div>
+                <div id="flags-error" class="text-danger small" style="display:none;"></div>
+                <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
+            </div>
             <div>
                 @Html.DisplayNameFor(model => Model.REMARK)
             </div>

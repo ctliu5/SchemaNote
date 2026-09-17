@@ -50,7 +50,7 @@
 
 .tabDetail_left {
     display: inline-block;
-    width: 40%;
+    width: 220px;
 }
 
     .tabDetail_left > tbody > tr > td:first-child {
@@ -64,9 +64,26 @@
     }
 
 .tabDetail_right {
-    width: 60%;
-    float: right
+    width: 66%;
+    float: right;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    column-gap: 10px;
+    row-gap: 8px;
+    align-items: start;
 }
+
+    /* 奇數子元素為標題：靠右、粗體，對齊 tabDetail_left 樣式 */
+    .tabDetail_right > div:nth-child(odd) {
+        padding: 0 10px;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    /* 偶數子元素為內容：靠左 */
+    .tabDetail_right > div:nth-child(even) {
+        text-align: left;
+    }
 
 .cus_panel-heading {
     color: #333;
@@ -216,6 +233,10 @@ a.description, a.remark {
 }
 
 /* FLAGS 標籤編輯器（Select2 tagging 風格） */
+#flags-editor {
+    position: relative;
+}
+
 .tag-input {
     display: flex;
     flex-wrap: wrap;
@@ -260,6 +281,34 @@ a.description, a.remark {
     padding: 2px 0;
     background: transparent;
 }
+
+/* 標籤下拉建議清單 */
+.tag-suggest {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 1000;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
+}
+
+.tag-suggest-item {
+    padding: 4px 10px;
+    cursor: pointer;
+    white-space: pre;
+}
+
+    .tag-suggest-item:hover,
+    .tag-suggest-item.active {
+        background-color: #0d6efd;
+        color: #fff;
+    }
 
 /* 已儲存的 DB 連線 chip */
 .saved-conn-chip {

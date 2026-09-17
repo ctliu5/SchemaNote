@@ -221,7 +221,7 @@ namespace SchemaNote.Models
             var pT = pObj.Where(p => p.MINOR_ID == 0);
             var iObj = indexes.Where(i => i.OBJECT_ID == tbl.OBJECT_ID);
             int SortNum = 0;
-            Flag.OBJ = new DetailsViewModel()
+            Flag.OBJ = new DetailsViewModel
             {
                 OBJECT_ID = tbl.OBJECT_ID,
                 NAME = tbl.NAME,
@@ -265,8 +265,16 @@ namespace SchemaNote.Models
                             FILL_FACTOR = i.FILL_FACTOR,
                         })]
                     };
-                })]
+                })],
+                // 彙整資料庫中所有物件出現過的標籤（去重、排序），供標籤輸入框下拉建議
+                AllFlags = [.. props
+                    .Where(p => p.MINOR_ID == 0 && (p.NAME?.Equals(Common.Flags, StringComparison.OrdinalIgnoreCase) ?? false))
+                    .SelectMany(p => (p.VALUE?.ToString() ?? string.Empty).Split(Common.FlagsSeparator))
+                    .Where(f => f.Length > 0)
+                    .Distinct()
+                    .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)]
             };
+
             return Flag;
         }
 

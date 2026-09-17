@@ -1,11 +1,20 @@
 ﻿using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace SchemaNote.ViewModels
 {
     public class DetailsViewModel : DTO_Table, IProperties, IConnString
     {
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = false
+        };
+
         public List<ColumnDetail> Columns { get; set; } = [];
 
         #region MS_Description
@@ -31,6 +40,13 @@ namespace SchemaNote.ViewModels
             string.IsNullOrEmpty(FLAGS)
                 ? []
                 : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
+
+        /// <summary>
+        /// 資料庫中所有物件出現過的標籤（去重、依名稱排序），供標籤輸入框的下拉建議清單使用。
+        /// </summary>
+        public List<string> AllFlags { get; set; } = [];
+
+        public string AllFlagsJson => JsonSerializer.Serialize(AllFlags, JsonOptions);
         #endregion
 
         [Display(Name = Common.OBJ_Type)]
