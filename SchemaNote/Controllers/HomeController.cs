@@ -305,6 +305,10 @@ namespace SchemaNote.Controllers
             var headerFontColor = ClosedXML.Excel.XLColor.White;
             var infoBackColor = ClosedXML.Excel.XLColor.FromHtml("#D9E1F2");
 
+            // 匯出 Excel 時，不存在的擴充屬性呈現空白（而非 "null"）。
+            static string Blank(string? value) =>
+                string.IsNullOrEmpty(value) || value == Common.DefaultValue ? string.Empty : value;
+
             // 依標籤（FLAGS）將 Table/View 分組；相同標籤集中於同一工作表。
             // 沒有標籤（或標籤即為 "-none-"）的物件集中於名稱為 "-none-" 的工作表。
             // 以標籤第一次出現的順序保持工作表順序。
@@ -357,7 +361,7 @@ namespace SchemaNote.Controllers
                     row++;
 
                     // 物件中文說明
-                    ws.Cell(row, 1).Value = table.MS_Description;
+                    ws.Cell(row, 1).Value = Blank(table.MS_Description);
                     ws.Range(row, 1, row, 7).Merge();
                     ws.Cell(row, 1).Style.Font.Italic = true;
                     row++;
@@ -385,7 +389,7 @@ namespace SchemaNote.Controllers
                     ws.Cell(row, 1).Value = OBJ_COL_Remark;
                     ws.Cell(row, 1).Style.Font.Bold = true;
                     ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
-                    ws.Cell(row, 2).Value = table.REMARK;
+                    ws.Cell(row, 2).Value = Blank(table.REMARK);
                     ws.Range(row, 2, row, 7).Merge();
                     row += 2;
 
@@ -407,12 +411,12 @@ namespace SchemaNote.Controllers
                     foreach (Column col in table.Columns)
                     {
                         ws.Cell(row, 1).Value = col.NAME;
-                        ws.Cell(row, 2).Value = col.MS_Description;
+                        ws.Cell(row, 2).Value = Blank(col.MS_Description);
                         ws.Cell(row, 3).Value = col.TYPE;
                         ws.Cell(row, 4).Value = col.IS_PK ? "✔" : string.Empty;
                         ws.Cell(row, 5).Value = col.DISALLOW_NULL ? "✔" : string.Empty;
-                        ws.Cell(row, 6).Value = col.DEFUALT;
-                        ws.Cell(row, 7).Value = col.REMARK;
+                        ws.Cell(row, 6).Value = Blank(col.DEFUALT);
+                        ws.Cell(row, 7).Value = Blank(col.REMARK);
                         row++;
                     }
 
