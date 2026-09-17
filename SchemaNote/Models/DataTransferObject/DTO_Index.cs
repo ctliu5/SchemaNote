@@ -4,7 +4,7 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Index
     {
-        [Display(Name = "物件識別碼")]
+        [Display(Name = Common.OBJ_COL_ID)]
         public int OBJECT_ID { get; set; }
 
         [Display(Name = "索引序碼")]
@@ -25,7 +25,7 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "唯一")]
         public bool IS_UNIQUE { get; set; }
 
-        [Display(Name = Common.PKey)]
+        [Display(Name = Common.P_Key)]
         public bool IS_PK { get; set; }
 
         [Display(Name = "填滿因子")]

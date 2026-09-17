@@ -10,18 +10,18 @@ namespace SchemaNote.ViewModels
 
         #region MS_Description
         string? _MS_Description;
-        [Display(Name = Common.PropDesc)]
+        [Display(Name = Common.COL_ChineseName)]
         public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 
         #region REMARK
         string? _REMARK;
-        [Display(Name = Common.RropRemark)]
+        [Display(Name = Common.OBJ_COL_Remark)]
         public string REMARK { get { return string.IsNullOrEmpty(_REMARK) ? Common.DefaultValue : _REMARK; } set { _REMARK = value; } }
         #endregion
 
         #region FLAGS
-        [Display(Name = Common.PropFlags)]
+        [Display(Name = Common.OBJ_Flags)]
         public string FLAGS { get; set; } = string.Empty;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace SchemaNote.ViewModels
                 : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
         #endregion
 
-        [Display(Name = Common.ObjType)]
+        [Display(Name = Common.OBJ_Type)]
         public string TYPE_NAME
         {
             get

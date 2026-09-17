@@ -4,22 +4,22 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Table
     {
-        [Display(Name = "物件識別碼")]
+        [Display(Name = Common.OBJ_COL_ID)]
         public int OBJECT_ID { get; set; }
 
-        [Display(Name = Common.ObjName)]
+        [Display(Name = Common.OBJ_Name)]
         public string? NAME { get; set; }
 
-        [Display(Name = Common.SchemaName)]
+        [Display(Name = Common.OBJ_SchemaName)]
         public string? SCHEMA_NAME { get; set; }
 
-        [Display(Name = Common.ObjType)]
+        [Display(Name = Common.OBJ_Type)]
         public string? TYPE { get; set; }
 
-        [Display(Name = Common.ObjCreateDate)]
+        [Display(Name = Common.OBJ_CreateDate)]
         public string? CREATE_DATE { get; set; }
 
-        [Display(Name = Common.ObjModifyDate)]
+        [Display(Name = Common.OBJ_ModifyDate)]
         public string? MODIFY_DATE { get; set; }
 
         [Display(Name = "筆數")]

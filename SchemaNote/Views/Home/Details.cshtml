@@ -156,6 +156,7 @@
         })();
     </script>
 }
+<br />
 <h2>Details</h2>
 @if (TempData["ErrorMessage"] != null)
 {
@@ -247,7 +248,7 @@
                                 <input id="flags-new" type="text" class="tag-input-field" maxlength="@Common.SheetNameMaxLen" placeholder="輸入標籤後按 Enter" autocomplete="off" />
                             </div>
                             <div id="flags-error" class="text-danger small" style="display:none;"></div>
-                            <small class="form-text text-muted">標籤即 Excel 工作表名稱：最多 @Common.SheetNameMaxLen 個字元，且不可包含 @Common.SheetNameInvalidChars 等字元。</small>
+                            <small class="form-text text-muted">最多 @Common.SheetNameMaxLen 個字元，且不可為 @Common.SheetNameInvalidChars</small>
                             <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
                         </div>
                     </td>

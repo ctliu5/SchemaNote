@@ -4,22 +4,22 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Column
     {
-        [Display(Name = "物件識別碼")]
+        [Display(Name = Common.OBJ_COL_ID)]
         public int OBJECT_ID { get; set; }
 
         [Display(Name = "欄位序碼")]
         public int COLUMN_ID { get; set; }
 
-        [Display(Name = Common.ColName)]
+        [Display(Name = Common.COL_Name)]
         public string? NAME { get; set; }
 
-        [Display(Name = Common.PropType)]
+        [Display(Name = Common.COL_Type)]
         public string? TYPE_NAME { get; set; }
 
         [Display(Name = "資料長度")]
         public string? LENGTH { get; set; }
 
-        [Display(Name = Common.PKey)]
+        [Display(Name = Common.P_Key)]
         public bool IS_PK { get; set; }
 
         [Display(Name = "不為Null")]

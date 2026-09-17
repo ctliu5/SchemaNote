@@ -186,31 +186,83 @@ namespace SchemaNote.Controllers
                 return value.Replace("|", "\\|").Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>");
             }
 
+            // <summary> 內容為 HTML 內文，需轉義 HTML 特殊字元避免破版。
+            static string HtmlEscape(string? value)
+            {
+                return string.IsNullOrEmpty(value)
+                    ? string.Empty
+                    : System.Net.WebUtility.HtmlEncode(value);
+            }
+
             System.Text.StringBuilder sb = new();
             sb.AppendLine("# Overview");
             sb.AppendLine();
 
-            foreach (Table item in model.Tables)
+            // 依標籤（FLAGS）將 Table/View 分組；相同標籤集中於同一個區塊（Accordion）。
+            // 沒有標籤（或標籤即為 "-none-"）的物件集中於名稱為 "-none-" 的區塊。
+            // 以標籤第一次出現的順序保持區塊順序。
+            var groups = new Dictionary<string, List<Table>>(StringComparer.Ordinal);
+            var groupOrder = new List<string>();
+
+            void AddToGroup(string flag, Table table)
             {
-                sb.AppendLine($"## {MdEscape(item.NAME)}");
-                sb.AppendLine();
-                sb.AppendLine($"> {MdEscape(item.MS_Description)}");
-                sb.AppendLine();
-
-                sb.AppendLine($"| {ObjType} | {SchemaName} | {ObjCreateDate} | {ObjModifyDate} | 筆數 |");
-                sb.AppendLine("| --- | --- | --- | --- | --- |");
-                sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
-                sb.AppendLine();
-
-                sb.AppendLine($"**{RropRemark}：** {MdEscape(item.REMARK)}");
-                sb.AppendLine();
-
-                sb.AppendLine($"| {ObjType} | {PropDesc} | {PropType} | {PKey} | 不為Null | 預設值 | {RropRemark} |");
-                sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
-                foreach (Column col in item.Columns)
+                if (!groups.TryGetValue(flag, out var list))
                 {
-                    sb.AppendLine($"| {MdEscape(col.NAME)} | {MdEscape(col.MS_Description)} | {MdEscape(col.TYPE)} | {(col.IS_PK ? "✔" : string.Empty)} | {(col.DISALLOW_NULL ? "✔" : string.Empty)} | {MdEscape(col.DEFUALT)} | {MdEscape(col.REMARK)} |");
+                    list = [];
+                    groups[flag] = list;
+                    groupOrder.Add(flag);
                 }
+                list.Add(table);
+            }
+
+            foreach (Table table in model.Tables)
+            {
+                if (table.FlagList.Count == 0)
+                {
+                    AddToGroup(NoneSheetName, table);
+                }
+                else
+                {
+                    foreach (string flag in table.FlagList)
+                    {
+                        AddToGroup(string.IsNullOrEmpty(flag) ? NoneSheetName : flag, table);
+                    }
+                }
+            }
+
+            foreach (string flag in groupOrder)
+            {
+                // 以 <details>/<summary> 產生可摺疊的 Accordion 區塊。
+                // <summary> 為 HTML 內文，需 HTML 轉義；空一行讓內部 Markdown 正確解析。
+                sb.AppendLine("<details>");
+                sb.AppendLine($"<summary>{HtmlEscape(flag)}</summary>");
+                sb.AppendLine();
+
+                foreach (Table item in groups[flag])
+                {
+                    sb.AppendLine($"### {MdEscape(item.NAME)}");
+                    sb.AppendLine();
+                    sb.AppendLine($"> {MdEscape(item.MS_Description)}");
+                    sb.AppendLine();
+
+                    sb.AppendLine($"| {OBJ_Type} | {OBJ_SchemaName} | {OBJ_CreateDate} | {OBJ_ModifyDate} | 筆數 |");
+                    sb.AppendLine("| --- | --- | --- | --- | --- |");
+                    sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
+                    sb.AppendLine();
+
+                    sb.AppendLine($"**{OBJ_COL_Remark}：** {MdEscape(item.REMARK)}");
+                    sb.AppendLine();
+
+                    sb.AppendLine($"| {OBJ_Type} | {COL_ChineseName} | {COL_Type} | {P_Key} | 不為Null | 預設值 | {OBJ_COL_Remark} |");
+                    sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
+                    foreach (Column col in item.Columns)
+                    {
+                        sb.AppendLine($"| {MdEscape(col.NAME)} | {MdEscape(col.MS_Description)} | {MdEscape(col.TYPE)} | {(col.IS_PK ? "✔" : string.Empty)} | {(col.DISALLOW_NULL ? "✔" : string.Empty)} | {MdEscape(col.DEFUALT)} | {MdEscape(col.REMARK)} |");
+                    }
+                    sb.AppendLine();
+                }
+
+                sb.AppendLine("</details>");
                 sb.AppendLine();
             }
 
@@ -311,7 +363,7 @@ namespace SchemaNote.Controllers
                     row++;
 
                     // 物件資訊表頭
-                    string[] infoHeaders = [ObjType, SchemaName, ObjCreateDate, ObjModifyDate, "筆數"];
+                    string[] infoHeaders = [OBJ_Type, OBJ_SchemaName, OBJ_CreateDate, OBJ_ModifyDate, "筆數"];
                     for (int c = 0; c < infoHeaders.Length; c++)
                     {
                         var cell = ws.Cell(row, c + 1);
@@ -330,7 +382,7 @@ namespace SchemaNote.Controllers
                     row++;
 
                     // 備註
-                    ws.Cell(row, 1).Value = RropRemark;
+                    ws.Cell(row, 1).Value = OBJ_COL_Remark;
                     ws.Cell(row, 1).Style.Font.Bold = true;
                     ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
                     ws.Cell(row, 2).Value = table.REMARK;
@@ -338,7 +390,7 @@ namespace SchemaNote.Controllers
                     row += 2;
 
                     // 欄位表頭
-                    string[] colHeaders = [ColName, PropDesc, PropType, PKey, "不為Null", "預設值", RropRemark];
+                    string[] colHeaders = [COL_Name, COL_ChineseName, COL_Type, P_Key, "不為Null", "預設值", OBJ_COL_Remark];
                     int headerRow = row;
                     for (int c = 0; c < colHeaders.Length; c++)
                     {
