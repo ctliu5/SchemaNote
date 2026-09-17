@@ -36,7 +36,7 @@
 
     <script>
         //初始化下拉選單
-        window.onload = function () {
+        window.onload = function() {
             initialOption();
             initialFlagsFilter();
         };
@@ -79,9 +79,15 @@
             <input id="SearchTextBox" type="text" class="form-control w-auto" placeholder="Enter key words..." />
         </div>
         <div class="d-flex align-items-center gap-2 ms-auto">
-            <input type="button" class="btn btn-outline-secondary" onclick="ExportExcel()" value="💾Excel" />
-            <input type="button" class="btn btn-outline-secondary" onclick="ExportMarkdown()" value="💾Markdown" />
-            <input type="button" class="btn btn-outline-secondary" onclick="ExportExtendedPropScript()" value="💾擴充屬性SQL" />
+            <span class="count" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@Common.ToolTip擴充屬性Excel">
+                <input type="button" class="btn btn-outline-secondary" onclick="ExportExcel()" value="💾Excel" />
+            </span>
+            <span class="count" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@Common.ToolTip擴充屬性Markdown">
+                <input type="button" class="btn btn-outline-secondary" onclick="ExportMarkdown()" value="💾Markdown" />
+            </span>
+            <span class="count" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@Common.ToolTip擴充屬性SQL">
+                <input type="button" class="btn btn-outline-secondary" onclick="ExportExtendedPropScript()" value="💾擴充屬性SQL" />
+            </span>
         </div>
     </div>
 </div>

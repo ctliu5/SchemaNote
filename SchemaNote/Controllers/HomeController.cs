@@ -451,7 +451,7 @@ namespace SchemaNote.Controllers
             }
             else if (Flag_prop.ResultType != ExceResultType.Success)
             {
-                ViewData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
+                TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
             }
             return View(Flag.OBJ);
         }

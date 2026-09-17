@@ -412,7 +412,20 @@ DECLARE
 @level1name sysname,
 @level2name sysname,
 @propQty int;
+
+DECLARE @props TABLE
+(
+    [name] sysname,
+    [value] sql_variant,
+    [level0name] sysname,
+    [level1type] sysname,
+    [level1name] sysname,
+    [level2name] sysname
+);
 ------ 變數宣告 END ------
+
+------ 擴充屬性資料 BEGIN ------
+
 """);
 
             #region 匯出擴充屬性資料
@@ -471,15 +484,20 @@ DECLARE
                 foreach (var op in object_props)
                 {
                     stringBuilder.Append(
-                    string.Format(scriptTemp,
-                        op.PROP_NAME,
+                    string.Format("INSERT INTO @props VALUES (N'{0}', N'{1}', N'{2}', N'{3}', N'{4}', N'{5}');{6}",
+                        op.PROP_NAME?.Replace("'", "''"),
                         op.PROP_VALUE?.ToString()?.Replace("'", "''") ?? string.Empty,
-                        op.SCHEMA_NAME,
+                        op.SCHEMA_NAME?.Replace("'", "''"),
                         op.TYPE,
-                        op.NAME,
-                        op.COLUMN_NAME
-                        ));
+                        op.NAME?.Replace("'", "''"),
+                        op.COLUMN_NAME?.Replace("'", "''"),
+                        Environment.NewLine));
                 }
+
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("------ 擴充屬性資料 END ------");
+                stringBuilder.AppendLine();
+                stringBuilder.Append(scriptTemp);
                 ObjFlag.OBJ = stringBuilder;
             }
             catch (SqlException ex)
