@@ -1,20 +1,12 @@
-﻿using SchemaNote.Models;
+using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace SchemaNote.ViewModels
 {
     public class OverviewViewModel : IConnString
     {
-        private static readonly JsonSerializerOptions JsonOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            // Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = false
-        };
         public long ADO_dot_NET { get; set; }
         public long Dapper { get; set; }
         public long ADO_dot_NET2 { get; set; }
@@ -33,7 +25,7 @@ namespace SchemaNote.ViewModels
                     i++;
                     d.Add(Common.accordion + i, [t.NAME?.ToUpper() ?? string.Empty]);
                 });
-                return JsonSerializer.Serialize(d, JsonOptions);
+                return JsonSerializer.Serialize(d, Common.JsonOptions);
             }
         }
         public string ColumnNameJson
@@ -52,7 +44,7 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return JsonSerializer.Serialize(d, JsonOptions);
+                return JsonSerializer.Serialize(d, Common.JsonOptions);
             }
         }
         public string DescriptionJson
@@ -74,7 +66,7 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return JsonSerializer.Serialize(d, JsonOptions);
+                return JsonSerializer.Serialize(d, Common.JsonOptions);
             }
         }
         public string RemarkJson
@@ -96,7 +88,7 @@ namespace SchemaNote.ViewModels
                     });
                     d.Add(Common.accordion + i, l);
                 });
-                return JsonSerializer.Serialize(d, JsonOptions);
+                return JsonSerializer.Serialize(d, Common.JsonOptions);
             }
         }
 
@@ -114,7 +106,7 @@ namespace SchemaNote.ViewModels
                     i++;
                     d.Add(Common.accordion + i, t.FlagList);
                 });
-                return JsonSerializer.Serialize(d, JsonOptions);
+                return JsonSerializer.Serialize(d, Common.JsonOptions);
             }
         }
 
@@ -130,7 +122,7 @@ namespace SchemaNote.ViewModels
                     .Distinct()
                     .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
                     .ToList();
-                return JsonSerializer.Serialize(all, JsonOptions);
+                return JsonSerializer.Serialize(all, Common.JsonOptions);
             }
         }
 

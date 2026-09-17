@@ -1,20 +1,12 @@
 ﻿using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace SchemaNote.ViewModels
 {
     public class DetailsViewModel : DTO_Table, IProperties, IConnString
     {
-        private static readonly JsonSerializerOptions JsonOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = false
-        };
-
         public List<ColumnDetail> Columns { get; set; } = [];
 
         #region MS_Description
@@ -46,7 +38,7 @@ namespace SchemaNote.ViewModels
         /// </summary>
         public List<string> AllFlags { get; set; } = [];
 
-        public string AllFlagsJson => JsonSerializer.Serialize(AllFlags, JsonOptions);
+        public string AllFlagsJson => JsonSerializer.Serialize(AllFlags, Common.JsonOptions);
         #endregion
 
         [Display(Name = Common.OBJ_Type)]

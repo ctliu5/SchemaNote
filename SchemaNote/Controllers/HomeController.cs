@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
@@ -9,10 +9,11 @@ using static SchemaNote.Models.Common;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService) : Controller
+    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService, IExportService exportService) : Controller
     {
         private readonly ISessionWrapper _sessionWapper = sessionWapper;
         private readonly ICryptoService _cryptoService = cryptoService;
+        private readonly IExportService _exportService = exportService;
         private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
 
         [HttpGet]
@@ -123,29 +124,9 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return RedirectToAction("Overview");
             }
-            byte[] content = Utf8WithBom(Flag.OBJ.ToString());
+            byte[] content = _exportService.Utf8WithBom(Flag.OBJ.ToString());
             string fileName = $"ExtendedPropScript_urlencoded_{DateTime.Now:yyyyMMddHHmmss}.sql";
             return File(content, "text/plain; charset=utf-8", fileName);
-        }
-
-        private static byte[] Utf8WithBom(string text)
-        {
-            // 前置 UTF-8 BOM，確保 Windows 上開啟檔案時能正確辨識為 UTF-8。
-            var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
-            return [.. encoding.GetPreamble(), .. encoding.GetBytes(text)];
-        }
-
-        // 依前端傳入的 OBJECT_ID 清單（搜尋/標籤過濾後仍顯示的項目）過濾要匯出的 Table/View。
-        // 未提供清單時（例如直接呼叫或無過濾），維持匯出全部。
-        private static void FilterTablesByObjectIds(OverviewViewModel model, int[]? objectIds)
-        {
-            if (model is null || objectIds is null || objectIds.Length == 0)
-            {
-                return;
-            }
-
-            var idSet = new HashSet<int>(objectIds);
-            model.Tables = [.. model.Tables.Where(t => idSet.Contains(t.OBJECT_ID))];
         }
 
         [HttpPost]
@@ -167,106 +148,12 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Overview");
             }
 
-            FilterTablesByObjectIds(Flag.OBJ, objectIds);
+            _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
 
-            string markdown = BuildMarkdown(Flag.OBJ);
-            byte[] content = Utf8WithBom(markdown);
+            string markdown = _exportService.BuildMarkdown(Flag.OBJ);
+            byte[] content = _exportService.Utf8WithBom(markdown);
             string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.md";
             return File(content, "text/markdown; charset=utf-8", fileName);
-        }
-
-        private static string BuildMarkdown(OverviewViewModel model)
-        {
-            static string MdEscape(string? value)
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    return string.Empty;
-                }
-                return value.Replace("|", "\\|").Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>");
-            }
-
-            // <summary> 內容為 HTML 內文，需轉義 HTML 特殊字元避免破版。
-            static string HtmlEscape(string? value)
-            {
-                return string.IsNullOrEmpty(value)
-                    ? string.Empty
-                    : System.Net.WebUtility.HtmlEncode(value);
-            }
-
-            System.Text.StringBuilder sb = new();
-            sb.AppendLine("# Overview");
-            sb.AppendLine();
-
-            // 依標籤（FLAGS）將 Table/View 分組；相同標籤集中於同一個區塊（Accordion）。
-            // 沒有標籤（或標籤即為 "-none-"）的物件集中於名稱為 "-none-" 的區塊。
-            // 以標籤第一次出現的順序保持區塊順序。
-            var groups = new Dictionary<string, List<Table>>(StringComparer.Ordinal);
-            var groupOrder = new List<string>();
-
-            void AddToGroup(string flag, Table table)
-            {
-                if (!groups.TryGetValue(flag, out var list))
-                {
-                    list = [];
-                    groups[flag] = list;
-                    groupOrder.Add(flag);
-                }
-                list.Add(table);
-            }
-
-            foreach (Table table in model.Tables)
-            {
-                if (table.FlagList.Count == 0)
-                {
-                    AddToGroup(NoneSheetName, table);
-                }
-                else
-                {
-                    foreach (string flag in table.FlagList)
-                    {
-                        AddToGroup(string.IsNullOrEmpty(flag) ? NoneSheetName : flag, table);
-                    }
-                }
-            }
-
-            foreach (string flag in groupOrder)
-            {
-                // 以 <details>/<summary> 產生可摺疊的 Accordion 區塊。
-                // <summary> 為 HTML 內文，需 HTML 轉義；空一行讓內部 Markdown 正確解析。
-                sb.AppendLine("<details>");
-                sb.AppendLine($"<summary>{HtmlEscape(flag)}</summary>");
-                sb.AppendLine();
-
-                foreach (Table item in groups[flag])
-                {
-                    sb.AppendLine($"### {MdEscape(item.NAME)}");
-                    sb.AppendLine();
-                    sb.AppendLine($"> {MdEscape(item.MS_Description)}");
-                    sb.AppendLine();
-
-                    sb.AppendLine($"| {OBJ_Type} | {OBJ_SchemaName} | {OBJ_CreateDate} | {OBJ_ModifyDate} | {OBJ_RowCount} |");
-                    sb.AppendLine("| --- | --- | --- | --- | --- |");
-                    sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
-                    sb.AppendLine();
-
-                    sb.AppendLine($"**{OBJ_COL_Remark}：** {MdEscape(item.REMARK)}");
-                    sb.AppendLine();
-
-                    sb.AppendLine($"| {COL_Name} | {OBJ_COL_ChineseName} | {COL_Type} | {P_Key} | {COL_NotNull} | {COL_DefaultVal} | {OBJ_COL_Remark} |");
-                    sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
-                    foreach (Column col in item.Columns)
-                    {
-                        sb.AppendLine($"| {MdEscape(col.NAME)} | {MdEscape(col.MS_Description)} | {MdEscape(col.TYPE)} | {(col.IS_PK ? "✔" : string.Empty)} | {(col.DISALLOW_NULL ? "✔" : string.Empty)} | {MdEscape(col.DEFUALT)} | {MdEscape(col.REMARK)} |");
-                    }
-                    sb.AppendLine();
-                }
-
-                sb.AppendLine("</details>");
-                sb.AppendLine();
-            }
-
-            return sb.ToString();
         }
 
         [HttpPost]
@@ -288,194 +175,12 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Overview");
             }
 
-            FilterTablesByObjectIds(Flag.OBJ, objectIds);
+            _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
 
-            byte[] content = BuildExcel(Flag.OBJ);
+            byte[] content = _exportService.BuildExcel(Flag.OBJ);
             const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
             return File(content, contentType, fileName);
-        }
-
-        private static byte[] BuildExcel(OverviewViewModel model)
-        {
-            using var workbook = new ClosedXML.Excel.XLWorkbook();
-
-            // 樣式常數
-            var headerBackColor = ClosedXML.Excel.XLColor.FromHtml("#4472C4");
-            var headerFontColor = ClosedXML.Excel.XLColor.White;
-            var infoBackColor = ClosedXML.Excel.XLColor.FromHtml("#D9E1F2");
-
-            // 匯出 Excel 時，不存在的擴充屬性呈現空白（而非 "null"）。
-            static string Blank(string? value) =>
-                string.IsNullOrEmpty(value) || value == Common.DefaultValue ? string.Empty : value;
-
-            // 依標籤（FLAGS）將 Table/View 分組；相同標籤集中於同一工作表。
-            // 沒有標籤（或標籤即為 "-none-"）的物件集中於名稱為 "-none-" 的工作表。
-            // 以標籤第一次出現的順序保持工作表順序。
-            var groups = new Dictionary<string, List<Table>>(StringComparer.Ordinal);
-            var groupOrder = new List<string>();
-
-            void AddToGroup(string flag, Table table)
-            {
-                if (!groups.TryGetValue(flag, out var list))
-                {
-                    list = [];
-                    groups[flag] = list;
-                    groupOrder.Add(flag);
-                }
-                list.Add(table);
-            }
-
-            foreach (Table table in model.Tables)
-            {
-                if (table.FlagList.Count == 0)
-                {
-                    AddToGroup(NoneSheetName, table);
-                }
-                else
-                {
-                    foreach (string flag in table.FlagList)
-                    {
-                        AddToGroup(string.IsNullOrEmpty(flag) ? NoneSheetName : flag, table);
-                    }
-                }
-            }
-
-            // 用於工作表名稱唯一與長度限制（Excel 上限 31 字元）
-            var usedSheetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string flag in groupOrder)
-            {
-                string sheetName = BuildSheetName(flag, usedSheetNames);
-                var ws = workbook.Worksheets.Add(sheetName);
-
-                int row = 1;
-
-                foreach (Table table in groups[flag])
-                {
-                    // 物件標題
-                    ws.Cell(row, 1).Value = table.NAME;
-                    ws.Range(row, 1, row, 7).Merge();
-                    ws.Cell(row, 1).Style.Font.Bold = true;
-                    ws.Cell(row, 1).Style.Font.FontSize = 14;
-                    row++;
-
-                    // 物件中文說明
-                    ws.Cell(row, 1).Value = Blank(table.MS_Description);
-                    ws.Range(row, 1, row, 7).Merge();
-                    ws.Cell(row, 1).Style.Font.Italic = true;
-                    row++;
-
-                    // 物件資訊表頭
-                    string[] infoHeaders = [OBJ_Type, OBJ_SchemaName, OBJ_CreateDate, OBJ_ModifyDate, OBJ_RowCount];
-                    for (int c = 0; c < infoHeaders.Length; c++)
-                    {
-                        var cell = ws.Cell(row, c + 1);
-                        cell.Value = infoHeaders[c];
-                        cell.Style.Font.Bold = true;
-                        cell.Style.Fill.BackgroundColor = infoBackColor;
-                    }
-                    row++;
-
-                    // 物件資訊內容
-                    ws.Cell(row, 1).Value = table.TYPE_NAME;
-                    ws.Cell(row, 2).Value = table.SCHEMA_NAME;
-                    ws.Cell(row, 3).Value = table.CREATE_DATE;
-                    ws.Cell(row, 4).Value = table.MODIFY_DATE;
-                    ws.Cell(row, 5).Value = table.QTY;
-                    row++;
-
-                    // 備註
-                    ws.Cell(row, 1).Value = OBJ_COL_Remark;
-                    ws.Cell(row, 1).Style.Font.Bold = true;
-                    ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
-                    ws.Cell(row, 2).Value = Blank(table.REMARK);
-                    ws.Range(row, 2, row, 7).Merge();
-                    row += 2;
-
-                    // 欄位表頭
-                    string[] colHeaders = [COL_Name, OBJ_COL_ChineseName, COL_Type, P_Key, COL_NotNull, COL_DefaultVal, OBJ_COL_Remark];
-                    int headerRow = row;
-                    for (int c = 0; c < colHeaders.Length; c++)
-                    {
-                        var cell = ws.Cell(headerRow, c + 1);
-                        cell.Value = colHeaders[c];
-                        cell.Style.Font.Bold = true;
-                        cell.Style.Font.FontColor = headerFontColor;
-                        cell.Style.Fill.BackgroundColor = headerBackColor;
-                        cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                    }
-                    row++;
-
-                    // 欄位內容
-                    foreach (Column col in table.Columns)
-                    {
-                        ws.Cell(row, 1).Value = col.NAME;
-                        ws.Cell(row, 2).Value = Blank(col.MS_Description);
-                        ws.Cell(row, 3).Value = col.TYPE;
-                        ws.Cell(row, 4).Value = col.IS_PK ? "✔" : string.Empty;
-                        ws.Cell(row, 5).Value = col.DISALLOW_NULL ? "✔" : string.Empty;
-                        ws.Cell(row, 6).Value = Blank(col.DEFUALT);
-                        ws.Cell(row, 7).Value = Blank(col.REMARK);
-                        row++;
-                    }
-
-                    // 欄位資料範圍加上框線
-                    if (table.Columns.Count > 0)
-                    {
-                        var dataRange = ws.Range(headerRow, 1, row - 1, colHeaders.Length);
-                        dataRange.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-                        dataRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-
-                        // 主鍵/不為Null 置中
-                        ws.Range(headerRow + 1, 4, row - 1, 5).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                    }
-
-                    // 各物件之間空一列
-                    row++;
-                }
-
-                // 自動調整欄寬
-                ws.Columns().AdjustToContents();
-            }
-
-            // 若沒有任何資料表，至少建立一個空白工作表避免例外
-            if (workbook.Worksheets.Count == 0)
-            {
-                workbook.Worksheets.Add("Overview");
-            }
-
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            return stream.ToArray();
-        }
-
-        private static string BuildSheetName(string? name, HashSet<string> usedNames)
-        {
-            // 移除 Excel 工作表名稱不允許的字元： \ / ? * [ ] :
-            string cleaned = string.IsNullOrWhiteSpace(name) ? NoneSheetName : name;
-            foreach (char invalid in SheetNameInvalidChars)
-            {
-                cleaned = cleaned.Replace(invalid, '_');
-            }
-
-            if (cleaned.Length > SheetNameMaxLen)
-            {
-                cleaned = cleaned[..SheetNameMaxLen];
-            }
-
-            // 確保唯一
-            string candidate = cleaned;
-            int suffix = 1;
-            while (usedNames.Contains(candidate))
-            {
-                string suffixText = $"_{suffix++}";
-                int maxBase = SheetNameMaxLen - suffixText.Length;
-                candidate = (cleaned.Length > maxBase ? cleaned[..maxBase] : cleaned) + suffixText;
-            }
-
-            usedNames.Add(candidate);
-            return candidate;
         }
         #endregion
 

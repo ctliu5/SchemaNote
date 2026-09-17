@@ -1,7 +1,21 @@
-﻿namespace SchemaNote.Models
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
+
+namespace SchemaNote.Models
 {
     public static class Common
     {
+        #region JSON 序列化設定
+        /// <summary>
+        /// 共用的 JSON 序列化設定：camelCase 命名、寬鬆跳脫、不縮排。
+        /// </summary>
+        public static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = false
+        };
+        #endregion
         #region 擴充屬性 Keys
         public const string MS_Desc = "MS_Description";
         public const string Remark = "REMARK";

@@ -35,6 +35,7 @@ namespace SchemaNote
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ISessionWrapper, SessionWrapper>();
             services.AddSingleton<ICryptoService, AesCryptoService>();
+            services.AddSingleton<IExportService, ExportService>();
 
             services.AddControllersWithViews();
 
