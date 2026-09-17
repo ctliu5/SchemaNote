@@ -6,7 +6,9 @@
 
 我預期的步驟／階段如下（若有缺漏請自行補充）：
 1. 將原本工程師管理 DB Schema 的 Excel 或 Word ，轉成 Markdown 格式：originalSchema.md；不過請注意，不同系統分析師的寫作風格不同，有些系統分析師習慣把 DB Schema 混在系統規格書中，所已提供給 AI 的不一定是純粹的 DB Schema 
-2. 再將 originalSchema.md 整合轉成 SchemaNote 才需要的資訊欄位（MS_Description、REMARK），也是 Markdown 格式：sortedOutSchema.md；這步驟的目的在於原始的 Excel 或 Word 文件的備註可能不只寫在一處，所以需要整併，以及  SchemaNote 根本不需要關心的欄位，在這階段就可以拋棄，例如欄位型別與長度，因為 SchemaNote 站台會直接從 DB 抓取這類資訊
+2. 再將 originalSchema.md 整合轉成 SchemaNote 才需要的資訊欄位（MS_Description、REMARK、FLAGS），也是 Markdown 格式：sortedOutSchema.md；這步驟的目的在於原始的 Excel 或 Word 文件的備註可能不只寫在一處，所以需要整併，以及  SchemaNote 根本不需要關心的欄位，在這階段就可以拋棄，例如欄位型別與長度，因為 SchemaNote 站台會直接從 DB 抓取這類資訊。
+2.1 除了 MS_Description（中文解釋名稱）與 REMARK（備註）外，SchemaNote 還新增了第三種擴充屬性 FLAGS（分類標籤），此標籤只存在於物件層（Table、View），欄位層沒有；同一物件可有多個標籤，多值之間以分號（;）分隔。
+2.2 特別注意：若來源文件為 Excel，請將各 Table/View 所在的「工作表(Sheet)名稱」轉為 SchemaNote 的 FLAGS 標籤（一個 Sheet 名稱＝一個標籤）；若同一物件跨多個 Sheet，則其標籤為多值。若來源沒有明確的分類概念，可略過 FLAGS，不要臆造。
 3. 工程師提供目前 DB 的 Schema，使用 SQL Server Manager Studio 提供的腳本生成功能，把 Table 和 View 的 Create 指令（包含已存在的擴充屬性、但不包含各類索引，因為不需要）全部生成存為 originalSchema.sql
 4. 接著將 sortedOutSchema.md 和 originalSchema.sql 比對內容，依合理性再產出 Markdown 格式：originalSchema2.md；這步驟的目的有下：
 4.1 在於最新 DB Schema 文件（ Excel 或 Word）仍會存在與實際 DB 脫鉤，例如 DB 的某 Table 有11個欄位，而文件紀錄此 Table 只有 9 個欄位，但欄位名稱有匹配對應的只有 8 個欄位，這種情況就只要產出這 8 個欄位的擴充屬性，也就是取交集的概念；另外若遇到對應上的欄位存在些微可接受的落差一律以實際 DB 的 originalSchema.sql 為準，例如欄位名稱英文大小寫的差異
@@ -14,7 +16,7 @@
 5. 最後將 sortedOutSchema2.md 轉成可執行的 SQL Script：ForSchemaNote[資料庫名稱].Sql
 
 〈注意事項〉
-1. AI 並不真的需要認識 SchemaNote 系統，只要 您提供的 Prompt 可以引導 AI 產出建立擴充屬性（Key為：MS_Description、REMARK）的 SQL Script，內容為 Table、View 的中文解釋名稱與備註、與它們各欄位之中文解釋名稱與備註，那就大功告成了
+1. AI 並不真的需要認識 SchemaNote 系統，只要 您提供的 Prompt 可以引導 AI 產出建立擴充屬性（Key為：MS_Description、REMARK、FLAGS）的 SQL Script，內容為 Table、View 的中文解釋名稱與備註、與它們各欄位之中文解釋名稱與備註，以及物件層的分類標籤(FLAGS)，那就大功告成了
 
 2. 關於與 AI 的互動方式，請 AI 並不需要真的像前述步驟那般、來回互動多次提供這些中繼檔案（originalSchema.md、sortedOutSchema.md、sortedOutSchema2.md），只要我一口氣提供關鍵的：
 a. 原本工程師管理 DB Schema 的 Excel 或 Word（也可能包含系統規格文件）

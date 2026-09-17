@@ -3,9 +3,10 @@
 
 # 目標
 根據我提供的兩份輸入，直接產出一份可執行的 SQL Script，檔名為 `ForSchemaNote[資料庫名稱].sql`。
-此 Script 的唯一用途是為 SQL Server 的 **資料表(Table)** 與 **檢視表(View)** 及其 **欄位(Column)**，建立／更新兩種擴充屬性：
+此 Script 的唯一用途是為 SQL Server 的 **資料表(Table)** 與 **檢視表(View)** 及其 **欄位(Column)**，建立／更新以下擴充屬性：
 - `MS_Description`：中文解釋名稱（物件層＝該表/檢視的中文名稱；欄位層＝該欄位的中文名稱）
 - `REMARK`：中文補充說明／備註（物件層與欄位層皆有各自的備註）
+- `FLAGS`：分類標籤（**僅物件層 Table/View 才有，欄位層沒有**）。可同時有多個標籤，多值之間以分號 `;` 分隔（例如 `N'銷售模組;主檔'`）。SchemaNote 站台會依此標籤將相同標籤的 Table/View 分組顯示與匯出。
 
 除了擴充屬性之外，**不得**產生任何會變更資料庫結構或資料的指令（不得 CREATE/ALTER/DROP 資料表、檢視、索引、欄位、資料等）。
 
@@ -22,6 +23,10 @@
 
 ## 步驟 A：解析來源文件
 - 從來源文件中抽取每個 Table/View 的中文名稱、備註，以及各欄位的中文名稱、備註。
+- **辨識分類標籤（FLAGS，僅物件層）**：
+  - 若來源文件為 **Excel**，請將每個 Table/View 所在的 **工作表(Sheet)名稱**轉為該物件的 `FLAGS` 標籤（一個 Sheet 名稱＝一個標籤）。同一物件若出現在多個 Sheet，則其標籤為多值，以分號 `;` 併列。
+  - 若來源為 Word／規格書等，且文件中有明確的模組、子系統、分類、章節等分組概念，可據此推敲合理的標籤；若無明確分類，則不要臆造標籤（該物件的 FLAGS 可略過）。
+  - 標籤只套用在物件層（Table/View），**欄位層不產生 FLAGS**。
 - 丟棄 SchemaNote 不需要的資訊（例如：資料型別、長度、精度、是否 PK、是否 NULL、預設值等），因為這些會由 SchemaNote 站台直接從 DB 讀取。
 
 ## 步驟 B：以 originalSchema.sql 為準做比對與交集
@@ -39,8 +44,9 @@
 - level0 / level1 / level2 對應如下：
   - 物件層（Table/View）：`@level0type='SCHEMA', @level0name='<schema>', @level1type='TABLE'或'VIEW', @level1name='<物件名>'`
   - 欄位層：在物件層基礎上再加 `@level2type='COLUMN', @level2name='<欄位名>'`
-- 每個擴充屬性 (`MS_Description`、`REMARK`) 各自處理。
-- 若來源沒有 REMARK 內容，可略過該 REMARK（不要塞空字串），或依我後續指示。
+- 每個擴充屬性 (`MS_Description`、`REMARK`、`FLAGS`) 各自處理。
+- `FLAGS` 僅在物件層（Table/View）產生；欄位層不得產生 `FLAGS`。多個標籤以分號 `;` 併為單一字串值（例如 `N'銷售模組;主檔'`）。
+- 若來源沒有 REMARK 內容，可略過該 REMARK（不要塞空字串），或依我後續指示。同理，若無法判定標籤，可略過 `FLAGS`。
 - 所有中文字串以 `N'...'` 表示（Unicode）。字串中的單引號需正確跳脫。
 - 物件與欄位名稱以中括號 `[...]` 包覆。
 - 適當加入註解分段（例如以物件名稱分區塊），提升可讀性。
@@ -80,6 +86,23 @@ ELSE
         @level2type=N'COLUMN', @level2name=N'CustNo';
 ```
 > 註：View 請將 `@level1type` 改為 `N'VIEW'`。
+
+```sql
+-- 範例：Table 物件層 FLAGS（分類標籤，多值以分號分隔；僅物件層有，欄位層沒有）
+IF NOT EXISTS (
+    SELECT 1 FROM sys.fn_listextendedproperty(
+        N'FLAGS', N'SCHEMA', N'dbo', N'TABLE', N'MyTable', NULL, NULL))
+    EXEC sys.sp_addextendedproperty
+        @name=N'FLAGS', @value=N'銷售模組;主檔',
+        @level0type=N'SCHEMA', @level0name=N'dbo',
+        @level1type=N'TABLE',  @level1name=N'MyTable';
+ELSE
+    EXEC sys.sp_updateextendedproperty
+        @name=N'FLAGS', @value=N'銷售模組;主檔',
+        @level0type=N'SCHEMA', @level0name=N'dbo',
+        @level1type=N'TABLE',  @level1name=N'MyTable';
+```
+> 註：FLAGS 只在物件層（Table/View）設定，切勿加上 `@level2type='COLUMN'`。
 
 # 何時「不要」直接產出 SQL，而要先向我提問
 在下列情況，請**停止產出 .sql**，改為條列你發現的疑點並向我提問，待我釐清後再產出：

@@ -50,7 +50,32 @@ SchemaNote（以下簡稱本平台）是用來檢視、編輯SQL Server上自定
   E. 不為Null：欄位是否不允許NULL；換句話說，欄位是否為必填
   F. 預設值：列出完整預設值表達式
   G. 備註：欄位的中文補充說明、備註；系可編輯的擴充屬性之值（對應擴充屬性的Key為：REMARK）
+  H. 計算欄位：若欄位為計算欄位(Computed Column)，會標示其計算公式(COMPUTED_DEFINITION)，並顯示是否為 PERSISTED（實體化保存）
 ```
+
+# 功能特色
+
+## 記住 DB 連線（localStorage）
+- 可將成功的資料庫連線命名後暫存於瀏覽器的 localStorage，方便日後快速重新連線
+- 進入 Overview 時，若目前連線尚未儲存，會提示是否「記住DB連線」
+- 已儲存的連線會列在輸入區旁，可直接點選連線或刪除；以 Server Address 與 Database Name 作為唯一判斷依據（不分大小寫）
+
+> 連線資訊僅儲存在使用者本機的瀏覽器中，請於受信任的裝置使用。
+
+## 搜尋與標籤過濾
+- 支援以關鍵字搜尋物件，並提供「模糊搜索」與「精確搜索」兩種模式
+- 可依標籤(Flags)分組並過濾顯示的資料表 / 檢視表；搜尋或標籤過濾後的結果會反映在匯出範圍
+
+## 匯出功能
+Overview 畫面提供三種匯出格式，匯出內容會依當前搜尋 / 標籤過濾後仍顯示的物件為範圍：
+
+```
+  1. 💾Excel：匯出為格式化的 Excel 檔案，包含物件層與欄位層資訊
+  2. 💾Markdown：匯出為 Markdown 檔案，依標籤分組並以可摺疊區塊(<details>)呈現
+  3. 💾擴充屬性SQL：匯出重建擴充屬性的 SQL 腳本，方便於其他環境套用相同註記
+```
+
+> 匯出的文字檔（Markdown、SQL）皆帶有 UTF-8 BOM，確保在 Windows 上開啟時能正確辨識編碼。
 
 # 原理說明
 本平台註記原理在於利用資料庫物件的[擴充屬性](https://docs.microsoft.com/sql/relational-databases/system-catalog-views/extended-properties-catalog-views-sys-extended-properties)
