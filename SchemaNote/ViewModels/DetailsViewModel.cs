@@ -10,7 +10,7 @@ namespace SchemaNote.ViewModels
 
         #region MS_Description
         string? _MS_Description;
-        [Display(Name = Common.COL_ChineseName)]
+        [Display(Name = Common.OBJ_COL_ChineseName)]
         public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 
@@ -34,18 +34,7 @@ namespace SchemaNote.ViewModels
         #endregion
 
         [Display(Name = Common.OBJ_Type)]
-        public string TYPE_NAME
-        {
-            get
-            {
-                return TYPE switch
-                {
-                    "U" => "資料表",
-                    "V" => "檢視",
-                    _ => "（無法辨識類型）",
-                };
-            }
-        }
+        public string TYPE_NAME { get => Common.OBJ_TypeDesc(TYPE); }
         public string ConnectionString { get; set; } = string.Empty;
     }
 
@@ -54,13 +43,13 @@ namespace SchemaNote.ViewModels
         public int SortNum { get; set; }
         public IndexDetail[] Indexes { get; set; } = [];
 
-        [Display(Name = "計算結果儲存")]
+        [Display(Name = Common.COL_IsPersisted)]
         public string IS_PERSISTED_DESC { get { return IS_PERSISTED ? "是" : "否"; } }
     }
 
     public class IndexDetail : DTO_Index
     {
-        [Display(Name = "索引類型")]
+        [Display(Name = Common.COL_IndexType)]
         public string TYPE_NAME
         {
             get

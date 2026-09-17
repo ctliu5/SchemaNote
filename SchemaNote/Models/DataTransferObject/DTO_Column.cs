@@ -4,10 +4,10 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Column
     {
-        [Display(Name = Common.OBJ_COL_ID)]
+        [Display(Name = Common.OBJ_COL_Id)]
         public int OBJECT_ID { get; set; }
 
-        [Display(Name = "欄位序碼")]
+        [Display(Name = Common.COL_SeqId)]
         public int COLUMN_ID { get; set; }
 
         [Display(Name = Common.COL_Name)]
@@ -22,15 +22,15 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = Common.P_Key)]
         public bool IS_PK { get; set; }
 
-        [Display(Name = "不為Null")]
+        [Display(Name = Common.COL_NotNull)]
         public bool DISALLOW_NULL { get; set; }
 
-        [Display(Name = "預設值")]
+        [Display(Name = Common.COL_DefaultVal)]
         public string? DEFUALT { get; set; }
 
         public bool IS_COMPUTED { get; set; }
 
-        [Display(Name = "計算結果儲存")]
+        [Display(Name = Common.COL_IsPersisted)]
         public bool IS_PERSISTED { get; set; }
 
         [Display(Name = "計算欄位公式")]

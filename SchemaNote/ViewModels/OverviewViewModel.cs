@@ -146,7 +146,7 @@ namespace SchemaNote.ViewModels
 
         #region MS_Description
         string? _MS_Description;
-        [Display(Name = Common.COL_ChineseName)]
+        [Display(Name = Common.OBJ_COL_ChineseName)]
         public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 
@@ -170,25 +170,14 @@ namespace SchemaNote.ViewModels
         #endregion
 
         [Display(Name = Common.OBJ_Type)]
-        public string TYPE_NAME
-        {
-            get
-            {
-                return TYPE switch
-                {
-                    "U" => "資料表",
-                    "V" => "檢視",
-                    _ => "（無法辨識類型）",
-                };
-            }
-        }
+        public string TYPE_NAME { get => Common.OBJ_TypeDesc(TYPE); }
     }
 
     public class Column : DTO_Column, IProperties
     {
         #region MS_Description
         string? _MS_Description;
-        [Display(Name = Common.COL_ChineseName)]
+        [Display(Name = Common.OBJ_COL_ChineseName)]
         public string MS_Description { get { return string.IsNullOrEmpty(_MS_Description) ? Common.DefaultValue : _MS_Description; } set { _MS_Description = value; } }
         #endregion
 

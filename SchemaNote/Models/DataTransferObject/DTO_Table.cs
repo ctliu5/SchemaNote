@@ -4,7 +4,7 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Table
     {
-        [Display(Name = Common.OBJ_COL_ID)]
+        [Display(Name = Common.OBJ_COL_Id)]
         public int OBJECT_ID { get; set; }
 
         [Display(Name = Common.OBJ_Name)]
@@ -22,7 +22,7 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = Common.OBJ_ModifyDate)]
         public string? MODIFY_DATE { get; set; }
 
-        [Display(Name = "筆數")]
+        [Display(Name = Common.OBJ_RowCount)]
         public long QTY { get; set; }
     }
 }

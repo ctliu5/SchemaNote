@@ -4,7 +4,7 @@ namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Index
     {
-        [Display(Name = Common.OBJ_COL_ID)]
+        [Display(Name = Common.OBJ_COL_Id)]
         public int OBJECT_ID { get; set; }
 
         [Display(Name = "索引序碼")]
@@ -13,10 +13,10 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = "索引名稱")]
         public string? NAME { get; set; }
 
-        [Display(Name = "欄位序碼")]
+        [Display(Name = Common.COL_SeqId)]
         public int COLUMN_ID { get; set; }
 
-        [Display(Name = "索引類型")]
+        [Display(Name = Common.COL_IndexType)]
         public IndexType TYPE { get; set; }
 
         [Display(Name = "類型描述")]

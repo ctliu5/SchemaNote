@@ -9,16 +9,22 @@
         #endregion
         #region 表格 Headers
         public const string OBJ_Flags = "標籤";
-        public const string OBJ_COL_ID = "物件識別碼";
-        public const string OBJ_Name = "物件名稱";
-        public const string OBJ_SchemaName = "結構描述名稱";
-        public const string OBJ_Type = "物件類型";
-        public const string OBJ_CreateDate = "物件創建日期";
-        public const string OBJ_ModifyDate = "物件修改日期";
-        public const string COL_Name = "欄位名稱";
-        public const string COL_ChineseName = "中文名稱";
+        public const string OBJ_COL_Id = "物件識別碼";
+        public const string OBJ_COL_ChineseName = "中文名稱";
         public const string OBJ_COL_Remark = "備註";
+        public const string OBJ_Name = "表格名稱";
+        public const string OBJ_SchemaName = "結構描述名稱";
+        public const string OBJ_Type = "表格類型";
+        public const string OBJ_CreateDate = "表格創建日期";
+        public const string OBJ_ModifyDate = "表格修改日期";
+        public const string OBJ_RowCount = "筆數";
+        public const string COL_Name = "欄位名稱";
         public const string COL_Type = "資料型別";
+        public const string COL_NotNull = "不為Null";
+        public const string COL_DefaultVal = "預設值";
+        public const string COL_SeqId = "欄位序碼";
+        public const string COL_IsPersisted = "計算結果儲存";
+        public const string COL_IndexType = "索引類型";
         public const string P_Key = "主鍵";
         #endregion
         #region 系統值
@@ -40,8 +46,18 @@
         public const string ToolTip擴充屬性Excel = "相同標籤的 Table/View，會集中在同一個工作表（Sheet）內。不存在的擴充屬性呈現空白";
         public const string ToolTip擴充屬性Markdown = "相同標籤的 Table/View，會集中在同一個區塊（Accordion）內。不存在的擴充屬性呈現 null";
         #endregion
-    }
 
+        public static string OBJ_TypeDesc(string? typeId)
+        {
+            return (typeId ?? string.Empty) switch
+            {
+                "U" => "資料表",
+                "V" => "檢視表",
+                _ => "（無法辨識類型）",
+            };
+        }
+    }
+    #region enum
     public enum IndexType
     {
         堆積,
@@ -76,4 +92,5 @@
         ADO_dot_NET,
         Dapper,
     }
+    #endregion
 }

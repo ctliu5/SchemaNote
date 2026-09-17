@@ -245,7 +245,7 @@ namespace SchemaNote.Controllers
                     sb.AppendLine($"> {MdEscape(item.MS_Description)}");
                     sb.AppendLine();
 
-                    sb.AppendLine($"| {OBJ_Type} | {OBJ_SchemaName} | {OBJ_CreateDate} | {OBJ_ModifyDate} | 筆數 |");
+                    sb.AppendLine($"| {OBJ_Type} | {OBJ_SchemaName} | {OBJ_CreateDate} | {OBJ_ModifyDate} | {OBJ_RowCount} |");
                     sb.AppendLine("| --- | --- | --- | --- | --- |");
                     sb.AppendLine($"| {MdEscape(item.TYPE_NAME)} | {MdEscape(item.SCHEMA_NAME)} | {MdEscape(item.CREATE_DATE)} | {MdEscape(item.MODIFY_DATE)} | {item.QTY} |");
                     sb.AppendLine();
@@ -253,7 +253,7 @@ namespace SchemaNote.Controllers
                     sb.AppendLine($"**{OBJ_COL_Remark}：** {MdEscape(item.REMARK)}");
                     sb.AppendLine();
 
-                    sb.AppendLine($"| {OBJ_Type} | {COL_ChineseName} | {COL_Type} | {P_Key} | 不為Null | 預設值 | {OBJ_COL_Remark} |");
+                    sb.AppendLine($"| {COL_Name} | {OBJ_COL_ChineseName} | {COL_Type} | {P_Key} | {COL_NotNull} | {COL_DefaultVal} | {OBJ_COL_Remark} |");
                     sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
                     foreach (Column col in item.Columns)
                     {
@@ -367,7 +367,7 @@ namespace SchemaNote.Controllers
                     row++;
 
                     // 物件資訊表頭
-                    string[] infoHeaders = [OBJ_Type, OBJ_SchemaName, OBJ_CreateDate, OBJ_ModifyDate, "筆數"];
+                    string[] infoHeaders = [OBJ_Type, OBJ_SchemaName, OBJ_CreateDate, OBJ_ModifyDate, OBJ_RowCount];
                     for (int c = 0; c < infoHeaders.Length; c++)
                     {
                         var cell = ws.Cell(row, c + 1);
@@ -394,7 +394,7 @@ namespace SchemaNote.Controllers
                     row += 2;
 
                     // 欄位表頭
-                    string[] colHeaders = [COL_Name, COL_ChineseName, COL_Type, P_Key, "不為Null", "預設值", OBJ_COL_Remark];
+                    string[] colHeaders = [COL_Name, OBJ_COL_ChineseName, COL_Type, P_Key, COL_NotNull, COL_DefaultVal, OBJ_COL_Remark];
                     int headerRow = row;
                     for (int c = 0; c < colHeaders.Length; c++)
                     {
