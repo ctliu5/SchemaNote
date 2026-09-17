@@ -253,96 +253,133 @@ namespace SchemaNote.Controllers
             var headerFontColor = ClosedXML.Excel.XLColor.White;
             var infoBackColor = ClosedXML.Excel.XLColor.FromHtml("#D9E1F2");
 
-            // 用於工作表名稱唯一與長度限制（Excel 上限 31 字元）
-            var usedSheetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // 依標籤（FLAGS）將 Table/View 分組；相同標籤集中於同一工作表。
+            // 沒有標籤（或標籤即為 "-none-"）的物件集中於名稱為 "-none-" 的工作表。
+            // 以標籤第一次出現的順序保持工作表順序。
+            var groups = new Dictionary<string, List<Table>>(StringComparer.Ordinal);
+            var groupOrder = new List<string>();
+
+            void AddToGroup(string flag, Table table)
+            {
+                if (!groups.TryGetValue(flag, out var list))
+                {
+                    list = [];
+                    groups[flag] = list;
+                    groupOrder.Add(flag);
+                }
+                list.Add(table);
+            }
 
             foreach (Table table in model.Tables)
             {
-                string sheetName = BuildSheetName(table.NAME, usedSheetNames);
+                if (table.FlagList.Count == 0)
+                {
+                    AddToGroup(NoneSheetName, table);
+                }
+                else
+                {
+                    foreach (string flag in table.FlagList)
+                    {
+                        AddToGroup(string.IsNullOrEmpty(flag) ? NoneSheetName : flag, table);
+                    }
+                }
+            }
+
+            // 用於工作表名稱唯一與長度限制（Excel 上限 31 字元）
+            var usedSheetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string flag in groupOrder)
+            {
+                string sheetName = BuildSheetName(flag, usedSheetNames);
                 var ws = workbook.Worksheets.Add(sheetName);
 
                 int row = 1;
 
-                // 物件標題
-                ws.Cell(row, 1).Value = table.NAME;
-                ws.Range(row, 1, row, 7).Merge();
-                ws.Cell(row, 1).Style.Font.Bold = true;
-                ws.Cell(row, 1).Style.Font.FontSize = 14;
-                row++;
-
-                // 物件中文說明
-                ws.Cell(row, 1).Value = table.MS_Description;
-                ws.Range(row, 1, row, 7).Merge();
-                ws.Cell(row, 1).Style.Font.Italic = true;
-                row++;
-
-                // 物件資訊表頭
-                string[] infoHeaders = [ObjType, SchemaName, ObjCreateDate, ObjModifyDate, "筆數"];
-                for (int c = 0; c < infoHeaders.Length; c++)
+                foreach (Table table in groups[flag])
                 {
-                    var cell = ws.Cell(row, c + 1);
-                    cell.Value = infoHeaders[c];
-                    cell.Style.Font.Bold = true;
-                    cell.Style.Fill.BackgroundColor = infoBackColor;
-                }
-                row++;
+                    // 物件標題
+                    ws.Cell(row, 1).Value = table.NAME;
+                    ws.Range(row, 1, row, 7).Merge();
+                    ws.Cell(row, 1).Style.Font.Bold = true;
+                    ws.Cell(row, 1).Style.Font.FontSize = 14;
+                    row++;
 
-                // 物件資訊內容
-                ws.Cell(row, 1).Value = table.TYPE_NAME;
-                ws.Cell(row, 2).Value = table.SCHEMA_NAME;
-                ws.Cell(row, 3).Value = table.CREATE_DATE;
-                ws.Cell(row, 4).Value = table.MODIFY_DATE;
-                ws.Cell(row, 5).Value = table.QTY;
-                row++;
+                    // 物件中文說明
+                    ws.Cell(row, 1).Value = table.MS_Description;
+                    ws.Range(row, 1, row, 7).Merge();
+                    ws.Cell(row, 1).Style.Font.Italic = true;
+                    row++;
 
-                // 備註
-                ws.Cell(row, 1).Value = RropRemark;
-                ws.Cell(row, 1).Style.Font.Bold = true;
-                ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
-                ws.Cell(row, 2).Value = table.REMARK;
-                ws.Range(row, 2, row, 7).Merge();
-                row += 2;
+                    // 物件資訊表頭
+                    string[] infoHeaders = [ObjType, SchemaName, ObjCreateDate, ObjModifyDate, "筆數"];
+                    for (int c = 0; c < infoHeaders.Length; c++)
+                    {
+                        var cell = ws.Cell(row, c + 1);
+                        cell.Value = infoHeaders[c];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = infoBackColor;
+                    }
+                    row++;
 
-                // 欄位表頭
-                string[] colHeaders = [ColName, PropDesc, PropType, PKey, "不為Null", "預設值", RropRemark];
-                int headerRow = row;
-                for (int c = 0; c < colHeaders.Length; c++)
-                {
-                    var cell = ws.Cell(headerRow, c + 1);
-                    cell.Value = colHeaders[c];
-                    cell.Style.Font.Bold = true;
-                    cell.Style.Font.FontColor = headerFontColor;
-                    cell.Style.Fill.BackgroundColor = headerBackColor;
-                    cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                }
-                row++;
+                    // 物件資訊內容
+                    ws.Cell(row, 1).Value = table.TYPE_NAME;
+                    ws.Cell(row, 2).Value = table.SCHEMA_NAME;
+                    ws.Cell(row, 3).Value = table.CREATE_DATE;
+                    ws.Cell(row, 4).Value = table.MODIFY_DATE;
+                    ws.Cell(row, 5).Value = table.QTY;
+                    row++;
 
-                // 欄位內容
-                foreach (Column col in table.Columns)
-                {
-                    ws.Cell(row, 1).Value = col.NAME;
-                    ws.Cell(row, 2).Value = col.MS_Description;
-                    ws.Cell(row, 3).Value = col.TYPE;
-                    ws.Cell(row, 4).Value = col.IS_PK ? "✔" : string.Empty;
-                    ws.Cell(row, 5).Value = col.DISALLOW_NULL ? "✔" : string.Empty;
-                    ws.Cell(row, 6).Value = col.DEFUALT;
-                    ws.Cell(row, 7).Value = col.REMARK;
+                    // 備註
+                    ws.Cell(row, 1).Value = RropRemark;
+                    ws.Cell(row, 1).Style.Font.Bold = true;
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = infoBackColor;
+                    ws.Cell(row, 2).Value = table.REMARK;
+                    ws.Range(row, 2, row, 7).Merge();
+                    row += 2;
+
+                    // 欄位表頭
+                    string[] colHeaders = [ColName, PropDesc, PropType, PKey, "不為Null", "預設值", RropRemark];
+                    int headerRow = row;
+                    for (int c = 0; c < colHeaders.Length; c++)
+                    {
+                        var cell = ws.Cell(headerRow, c + 1);
+                        cell.Value = colHeaders[c];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Font.FontColor = headerFontColor;
+                        cell.Style.Fill.BackgroundColor = headerBackColor;
+                        cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                    }
+                    row++;
+
+                    // 欄位內容
+                    foreach (Column col in table.Columns)
+                    {
+                        ws.Cell(row, 1).Value = col.NAME;
+                        ws.Cell(row, 2).Value = col.MS_Description;
+                        ws.Cell(row, 3).Value = col.TYPE;
+                        ws.Cell(row, 4).Value = col.IS_PK ? "✔" : string.Empty;
+                        ws.Cell(row, 5).Value = col.DISALLOW_NULL ? "✔" : string.Empty;
+                        ws.Cell(row, 6).Value = col.DEFUALT;
+                        ws.Cell(row, 7).Value = col.REMARK;
+                        row++;
+                    }
+
+                    // 欄位資料範圍加上框線
+                    if (table.Columns.Count > 0)
+                    {
+                        var dataRange = ws.Range(headerRow, 1, row - 1, colHeaders.Length);
+                        dataRange.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                        dataRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+                        // 主鍵/不為Null 置中
+                        ws.Range(headerRow + 1, 4, row - 1, 5).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                    }
+
+                    // 各物件之間空一列
                     row++;
                 }
 
-                // 欄位資料範圍加上框線
-                if (table.Columns.Count > 0)
-                {
-                    var dataRange = ws.Range(headerRow, 1, row - 1, colHeaders.Length);
-                    dataRange.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-                    dataRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-
-                    // 主鍵/不為Null 置中
-                    ws.Range(headerRow + 1, 4, row - 1, 5).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                }
-
-                // 凍結表頭列並自動調整欄寬
-                ws.SheetView.FreezeRows(headerRow);
+                // 自動調整欄寬
                 ws.Columns().AdjustToContents();
             }
 
@@ -360,15 +397,15 @@ namespace SchemaNote.Controllers
         private static string BuildSheetName(string? name, HashSet<string> usedNames)
         {
             // 移除 Excel 工作表名稱不允許的字元： \ / ? * [ ] :
-            string cleaned = string.IsNullOrWhiteSpace(name) ? "Sheet" : name;
-            foreach (char invalid in new[] { '\\', '/', '?', '*', '[', ']', ':' })
+            string cleaned = string.IsNullOrWhiteSpace(name) ? NoneSheetName : name;
+            foreach (char invalid in SheetNameInvalidChars)
             {
                 cleaned = cleaned.Replace(invalid, '_');
             }
 
-            if (cleaned.Length > 31)
+            if (cleaned.Length > SheetNameMaxLen)
             {
-                cleaned = cleaned[..31];
+                cleaned = cleaned[..SheetNameMaxLen];
             }
 
             // 確保唯一
@@ -377,7 +414,7 @@ namespace SchemaNote.Controllers
             while (usedNames.Contains(candidate))
             {
                 string suffixText = $"_{suffix++}";
-                int maxBase = 31 - suffixText.Length;
+                int maxBase = SheetNameMaxLen - suffixText.Length;
                 candidate = (cleaned.Length > maxBase ? cleaned[..maxBase] : cleaned) + suffixText;
             }
 

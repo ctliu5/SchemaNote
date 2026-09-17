@@ -43,10 +43,38 @@
         // 標籤（FLAGS）編輯器：Select2 tagging 風格的動態標籤建立（Vanilla JS）
         (function () {
             var SEP = ';';
+            // Excel 工作表（Sheet）名稱限制：最多 31 字元，且不可包含下列特殊字元 \ / ? * [ ] :
+            var MAX_LEN = @Common.SheetNameMaxLen;
+            var INVALID_CHARS = @Html.Raw(Json.Serialize(Common.SheetNameInvalidChars));
             var container = document.getElementById('flags-tags');
             var hidden = document.getElementById('flags-hidden');
             var input = document.getElementById('flags-new');
+            var errorBox = document.getElementById('flags-error');
             if (!container || !hidden || !input) return;
+
+            function showError(msg) {
+                if (errorBox) {
+                    errorBox.textContent = msg;
+                    errorBox.style.display = msg ? 'block' : 'none';
+                }
+            }
+            function validateTag(val) {
+                if (!val) {
+                    return '標籤不可為空白。';
+                }
+                if (val.indexOf(SEP) > -1) {
+                    return '標籤不可包含分號（' + SEP + '）。';
+                }
+                for (var i = 0; i < INVALID_CHARS.length; i++) {
+                    if (val.indexOf(INVALID_CHARS[i]) > -1) {
+                        return '標籤（Excel 工作表名稱）不可包含下列字元：' + INVALID_CHARS;
+                    }
+                }
+                if (val.length > MAX_LEN) {
+                    return '標籤（Excel 工作表名稱）長度不可超過 ' + MAX_LEN + ' 個字元。';
+                }
+                return '';
+            }
 
             function showSubmit() {
                 var submit = document.getElementById('submit');
@@ -83,8 +111,13 @@
             function addTag(rawVal) {
                 // 保留標籤前後空白，僅忽略完全空字串；避免包含分號
                 var val = rawVal;
-                if (!val || val.indexOf(SEP) > -1) return false;
-                if (currentValues().indexOf(val) > -1) return false;
+                var err = validateTag(val);
+                if (err) { showError(err); return false; }
+                if (currentValues().indexOf(val) > -1) {
+                    showError('標籤已存在。');
+                    return false;
+                }
+                showError('');
                 container.insertBefore(createChip(val), input);
                 syncHidden();
                 return true;
@@ -211,8 +244,10 @@
                                         <button type="button" class="tag-chip-remove" aria-label="remove">&times;</button>
                                     </span>
                                 }
-                                <input id="flags-new" type="text" class="tag-input-field" placeholder="輸入標籤後按 Enter" autocomplete="off" />
+                                <input id="flags-new" type="text" class="tag-input-field" maxlength="@Common.SheetNameMaxLen" placeholder="輸入標籤後按 Enter" autocomplete="off" />
                             </div>
+                            <div id="flags-error" class="text-danger small" style="display:none;"></div>
+                            <small class="form-text text-muted">標籤即 Excel 工作表名稱：最多 @Common.SheetNameMaxLen 個字元，且不可包含 @Common.SheetNameInvalidChars 等字元。</small>
                             <input id="flags-hidden" name="[0].FLAGS" type="hidden" value="@Model.FLAGS" />
                         </div>
                     </td>

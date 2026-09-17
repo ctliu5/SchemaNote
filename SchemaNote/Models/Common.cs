@@ -23,6 +23,11 @@
         public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
         public const int StrMaxLen = 4000;
         public const char FlagsSeparator = ';';
+        // Excel 工作表（Sheet）名稱限制：最多 31 字元，且不可包含下列特殊字元。
+        public const int SheetNameMaxLen = 31;
+        public const string SheetNameInvalidChars = @"\/?*[]:";
+        // 沒有設定標籤（或標籤值即為此字串）的 Table/View 集中放置的工作表名稱。
+        public const string NoneSheetName = "-none-";
         public const string CountTip = "注意！此為參考值，非準確值。";
         public const string ToolTip擴充屬性SQL = "此SQL腳本寫入行為是「Upsert」；若物件欄位不存在，會採取跳過不報錯策略。";
         public const string ToolTip擴充屬性Excel = "相同標籤的 Table/View，會集中在同一個工作表（Sheet）內。";
