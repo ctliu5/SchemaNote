@@ -19,11 +19,9 @@
         <div class="card-body">
             <form asp-controller="Home" asp-action="Overview" method="post">
                 <div class="mb-3">
-                    <label asp-for="ConnectionString" class="form-label"></label>
-                    <input asp-for="ConnectionString" class="form-control" required />
+                    <input asp-for="ConnectionString" class="form-control" required placeholder="請輸入連線字串" />
                     <span asp-validation-for="ConnectionString" class="text-danger"></span>
                 </div>
-                <button type="submit" class="btn btn-outline-dark">確認</button>
                 @* 已儲存的連線（來自 localStorage），由 site.js 動態渲染；點按鈕直接連線，右上 x 可刪除 *@
                 <span id="savedConnList" class="d-inline-flex flex-wrap gap-2 align-items-center ms-2 align-middle"></span>
             </form>
