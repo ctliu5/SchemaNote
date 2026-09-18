@@ -9,39 +9,19 @@
 
 @section Scripts
 {
-    <script>
-        Overview = {
-            'objName': {
-                'name_cht': '@Html.Raw(Common.OBJ_Name)',
-                'json': (@Html.Raw(Model.TableNameJson)),
-            },
-            'colName': {
-                'name_cht': '@Html.Raw(Common.COL_Name)',
-                'json': (@Html.Raw(Model.ColumnNameJson)),
-            },
-            'description': {
-                'name_cht': '@Html.Raw(Common.OBJ_COL_ChineseName)',
-                'json': (@Html.Raw(Model.DescriptionJson)),
-            },
-            'remark': {
-                'name_cht': '@Html.Raw(Common.OBJ_COL_Remark)',
-                'json': (@Html.Raw(Model.RemarkJson)),
-            },
-        };
-        var OverviewFlags = {
-            'byAccordion': @Html.Raw(Model.FlagsJson),
-            'all': @Html.Raw(Model.AllFlagsJson),
-        };
-    </script>
-
-    <script>
-        //初始化下拉選單
-        window.onload = function() {
-            initialOption();
-            initialFlagsFilter();
-        };
-    </script>
+    <script src="~/js/overview.js" asp-append-version="true"></script>
 }
+<div id="overview-data"
+     data-objname-label="@Common.OBJ_Name"
+     data-objname-json="@Model.TableNameJson"
+     data-colname-label="@Common.COL_Name"
+     data-colname-json="@Model.ColumnNameJson"
+     data-description-label="@Common.OBJ_COL_ChineseName"
+     data-description-json="@Model.DescriptionJson"
+     data-remark-label="@Common.OBJ_COL_Remark"
+     data-remark-json="@Model.RemarkJson"
+     data-flags="@Model.FlagsJson"
+     data-allflags="@Model.AllFlagsJson"></div>
 <div class="overview-sticky-header">
     <h1>Overview</h1>
     @if (Model.ADO_dot_NET > 0)

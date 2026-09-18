@@ -15,5 +15,38 @@
       "renameLocals": true
     },
     "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/connections.min.js",
+    "inputFiles": [
+      "wwwroot/js/connections.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/overview.min.js",
+    "inputFiles": [
+      "wwwroot/js/overview.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/details.min.js",
+    "inputFiles": [
+      "wwwroot/js/details.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
   }
 ]
