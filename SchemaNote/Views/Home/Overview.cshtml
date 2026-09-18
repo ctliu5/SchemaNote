@@ -22,8 +22,8 @@
      data-remark-json="@Model.RemarkJson"
      data-flags="@Model.FlagsJson"
      data-allflags="@Model.AllFlagsJson"></div>
-<div class="overview-sticky-header">
-    <div class="d-flex align-items-baseline gap-2 mb-3 flex-wrap">
+<div class="overview-sticky-header mb-2">
+    <div class="d-flex align-items-baseline gap-2 mb-2 mt-3 flex-wrap">
         <h2 class="mb-0">Overview</h2>
         @{
             string ovServer = ViewData["CurrentServer"] as string ?? string.Empty;
@@ -81,7 +81,6 @@
         </div>
     </div>
 </div>
-<br />
 @foreach (var item in Model.Tables)
 {
     i++;
