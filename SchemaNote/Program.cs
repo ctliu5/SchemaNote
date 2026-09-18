@@ -1,5 +1,4 @@
-﻿using SchemaNote.Models;
-using SchemaNote.Services;
+﻿using SchemaNote.Services;
 
 namespace SchemaNote
 {
@@ -36,6 +35,7 @@ namespace SchemaNote
             services.AddSingleton<ISessionWrapper, SessionWrapper>();
             services.AddSingleton<ICryptoService, AesCryptoService>();
             services.AddSingleton<IExportService, ExportService>();
+            services.AddSingleton<IConnectionInfoService, ConnectionInfoService>();
 
             services.AddControllersWithViews();
 

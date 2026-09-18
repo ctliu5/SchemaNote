@@ -1,7 +1,7 @@
 ﻿using SchemaNote.Models.DataTransferObject;
 using static SchemaNote.Models.Extensions.Extensions;
 
-namespace SchemaNote.Models
+namespace SchemaNote.Services
 {
     public interface ISessionWrapper
     {

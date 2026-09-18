@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Services;
@@ -9,11 +8,12 @@ using static SchemaNote.Models.Common;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService, IExportService exportService) : Controller
+    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService, IExportService exportService, IConnectionInfoService connectionInfoService) : Controller
     {
         private readonly ISessionWrapper _sessionWapper = sessionWapper;
         private readonly ICryptoService _cryptoService = cryptoService;
         private readonly IExportService _exportService = exportService;
+        private readonly IConnectionInfoService _connectionInfoService = connectionInfoService;
         private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
 
         [HttpGet]
@@ -88,18 +88,7 @@ namespace SchemaNote.Controllers
         // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
         private void SetCurrentConnectionViewData(string connectionString)
         {
-            string server = string.Empty;
-            string database = string.Empty;
-            try
-            {
-                SqlConnectionStringBuilder builder = new(connectionString);
-                server = builder.DataSource ?? string.Empty;
-                database = builder.InitialCatalog ?? string.Empty;
-            }
-            catch
-            {
-                // 無法解析時維持空字串，前端會視為沒有可比對的連線資訊。
-            }
+            var (server, database) = _connectionInfoService.Parse(connectionString);
             ViewData["CurrentServer"] = server;
             ViewData["CurrentDatabase"] = database;
             ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
