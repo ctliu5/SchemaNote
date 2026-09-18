@@ -1,0 +1,41 @@
+@model SchemaNote.Models.DataTransferObject.DTO_Table
+@*
+    物件基本資訊表格（型別 / 結構描述 / 建立日期 / 修改日期）。
+    Overview 與 Details 共用；以基底 DTO_Table 為 model。
+*@
+<table class="tabDetail_left">
+    <tbody>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.TYPE_NAME)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.TYPE_NAME)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.SCHEMA_NAME)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.SCHEMA_NAME)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.CREATE_DATE)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.CREATE_DATE)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.MODIFY_DATE)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.MODIFY_DATE)
+            </td>
+        </tr>
+    </tbody>
+</table>

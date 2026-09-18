@@ -17,6 +17,9 @@ namespace SchemaNote.Models.DataTransferObject
         [Display(Name = Common.OBJ_Type)]
         public string? TYPE { get; set; }
 
+        [Display(Name = Common.OBJ_Type)]
+        public string TYPE_NAME { get => Common.OBJ_TypeDesc(TYPE); }
+
         [Display(Name = Common.OBJ_CreateDate)]
         public string? CREATE_DATE { get; set; }
 

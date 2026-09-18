@@ -161,9 +161,6 @@ namespace SchemaNote.ViewModels
                 ? []
                 : [.. FLAGS.Split(Common.FlagsSeparator).Where(f => f.Length > 0)];
         #endregion
-
-        [Display(Name = Common.OBJ_Type)]
-        public string TYPE_NAME { get => Common.OBJ_TypeDesc(TYPE); }
     }
 
     public class Column : DTO_Column, IProperties

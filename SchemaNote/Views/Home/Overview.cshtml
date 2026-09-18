@@ -85,74 +85,21 @@
                     </strong>
                 </span>
                 <a class="description text-primary" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                    @if (item.MS_Description == Common.DefaultValue)
-                    {
-                        <code>
-                            @Html.DisplayFor(modelItem => item.MS_Description)
-                        </code>
-                    }
-                    else
-                    {
-                        @Html.DisplayFor(modelItem => item.MS_Description)
-                    }
+                    <partial name="_ValueOrDefault" model="item.MS_Description" />
                 </a>
                 <span class="count" data-bs-toggle="tooltip" data-bs-placement="top" title="@Common.CountTip">
                     @Html.DisplayNameFor(model => t.QTY):<strong class="text-primary">@Html.DisplayFor(modelItem => item.QTY)</strong>
                 </span>
             </div>
             <div id="@Html.Raw("collapse" + i)" class="card-body collapse tabDetail" role="tabpanel">
-                <table class="tabDetail_left">
-                    <tbody>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.TYPE_NAME)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.TYPE_NAME)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.SCHEMA_NAME)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.SCHEMA_NAME)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.CREATE_DATE)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.CREATE_DATE)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                @Html.DisplayNameFor(model => t.MODIFY_DATE)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.MODIFY_DATE)
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <partial name="_ObjectMetaTable" model="item" />
                 <div class="tabDetail_right">
                     <div>
                         @Html.DisplayNameFor(model => t.REMARK)
                     </div>
                     <div>
                         <a class="remark text-primary" asp-action="Details" asp-route-id="@item.OBJECT_ID">
-                            @if (item.REMARK == Common.DefaultValue)
-                            {
-                                <code>
-                                    @Html.DisplayFor(modelItem => item.REMARK)
-                                </code>
-                            }
-                            else
-                            {
-                                @Html.DisplayFor(modelItem => item.REMARK)
-                            }
+                            <partial name="_ValueOrDefault" model="item.REMARK" />
                         </a>
                     </div>
                 </div>

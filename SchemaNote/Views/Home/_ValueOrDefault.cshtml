@@ -1,0 +1,13 @@
+@model string
+@*
+    值顯示：等於預設值（未註記）時以 <code> 呈現，否則直接顯示。
+    以字串為 model，供 MS_Description / REMARK 等欄位共用。
+*@
+@if (Model == Common.DefaultValue)
+{
+    <code>@Model</code>
+}
+else
+{
+    @Model
+}

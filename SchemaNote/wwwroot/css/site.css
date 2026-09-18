@@ -152,7 +152,7 @@
     display: inline
 }
 
-.table > :not(caption) > * > .NoteField {
+.NoteField, .table > :not(caption) > * > .NoteField {
     color: royalblue;
     font-weight: 500;
 }

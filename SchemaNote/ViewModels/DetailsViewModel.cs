@@ -42,8 +42,6 @@ namespace SchemaNote.ViewModels
         public string AllFlagsJson => JsonSerializer.Serialize(AllFlags, Common.JsonOptions);
         #endregion
 
-        [Display(Name = Common.OBJ_Type)]
-        public string TYPE_NAME { get => Common.OBJ_TypeDesc(TYPE); }
         public string ConnectionString { get; set; } = string.Empty;
     }
 

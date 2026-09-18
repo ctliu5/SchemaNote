@@ -31,16 +31,7 @@
               data-column_id="0"
               data-sortnum="0"
               data-class="form-control tabMS_Description">
-            @if (Model.MS_Description == Common.DefaultValue)
-            {
-                <code>
-                    @Html.DisplayFor(n => Model.MS_Description)
-                </code>
-            }
-            else
-            {
-                @Html.DisplayFor(n => Model.MS_Description)
-            }
+            <partial name="_ValueOrDefault" model="Model.MS_Description" />
             @Html.ValidationMessageFor(model => model.MS_Description, null, new { data_valmsg_for = "[0].MS_Description" })
         </sapn>
         <button type="submit" id="submit" class="btn btn-primary" style="display:none;">提交</button>
@@ -49,42 +40,7 @@
         </span>
     </div>
     <div class="card-body">
-        <table class="tabDetail_left">
-            <tbody>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.TYPE_NAME)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.TYPE_NAME)
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.SCHEMA_NAME)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.SCHEMA_NAME)
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.CREATE_DATE)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.CREATE_DATE)
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @Html.DisplayNameFor(model => Model.MODIFY_DATE)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => Model.MODIFY_DATE)
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <partial name="_ObjectMetaTable" model="(SchemaNote.Models.DataTransferObject.DTO_Table)Model" />
         <div class="tabDetail_right">
             <div>
                 @Html.DisplayNameFor(model => Model.FLAGS)
@@ -116,16 +72,7 @@
                  data-column_id="0"
                  data-sortnum="0"
                  data-class="form-control">
-                @if (Model.REMARK == Common.DefaultValue)
-                {
-                    <code>
-                        @Html.DisplayFor(n => Model.REMARK)
-                    </code>
-                }
-                else
-                {
-                    @Html.DisplayFor(n => Model.REMARK)
-                }
+                <partial name="_ValueOrDefault" model="Model.REMARK" />
                 @Html.ValidationMessageFor(model => model.REMARK, null, new { data_valmsg_for = "[0].REMARK" })
             </div>
         </div>
