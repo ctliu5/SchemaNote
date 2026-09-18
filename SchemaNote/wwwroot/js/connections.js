@@ -146,8 +146,208 @@
         modal.show();
     }
 
+    // ===== 連線清單管理：匯出 / 匯入 / 移除 =====
+
+    // 將單一 CSV 欄位值加上必要的雙引號跳脫。
+    function csvEscape(value) {
+        var s = (value === null || value === undefined) ? '' : String(value);
+        if (/[",\r\n]/.test(s)) {
+            return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+    }
+
+    var CSV_HEADER = ['name', 'server', 'database', 'connectionString'];
+
+    // 將 localStorage 連線清單序列化為 CSV（含標題列）。
+    function toCsv(list) {
+        var lines = [CSV_HEADER.join(',')];
+        for (var i = 0; i < list.length; i++) {
+            var c = list[i];
+            lines.push([
+                csvEscape(c.name),
+                csvEscape(c.server),
+                csvEscape(c.database),
+                csvEscape(c.connectionString)
+            ].join(','));
+        }
+        return lines.join('\r\n');
+    }
+
+    // 解析一行 CSV（支援雙引號跳脫），回傳欄位陣列。
+    function parseCsvLine(line) {
+        var result = [];
+        var field = '';
+        var inQuotes = false;
+        for (var i = 0; i < line.length; i++) {
+            var ch = line[i];
+            if (inQuotes) {
+                if (ch === '"') {
+                    if (line[i + 1] === '"') { field += '"'; i++; }
+                    else { inQuotes = false; }
+                } else {
+                    field += ch;
+                }
+            } else {
+                if (ch === '"') { inQuotes = true; }
+                else if (ch === ',') { result.push(field); field = ''; }
+                else { field += ch; }
+            }
+        }
+        result.push(field);
+        return result;
+    }
+
+    // 解析整份 CSV 文字為連線物件陣列（自動略過標題列與空白列）。
+    function parseCsv(text) {
+        var rows = [];
+        var lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.trim() === '') continue;
+            var cols = parseCsvLine(line);
+            var name = (cols[0] || '').trim();
+            // 略過標題列
+            if (i === 0 && name.toLowerCase() === 'name') continue;
+            if (!name) continue;
+            rows.push({
+                name: name,
+                server: (cols[1] || '').trim(),
+                database: (cols[2] || '').trim(),
+                connectionString: (cols[3] || '').trim()
+            });
+        }
+        return rows;
+    }
+
+    // 匯出：顯示 CSV 內容並可複製到 Clipboard。
+    function setupExport() {
+        var btn = document.getElementById('exportConnBtn');
+        var modalEl = document.getElementById('exportConnModal');
+        if (!btn || !modalEl || typeof bootstrap === 'undefined') return;
+
+        var textArea = document.getElementById('exportConnText');
+        var copyBtn = document.getElementById('exportConnCopyBtn');
+        var copiedHint = document.getElementById('exportConnCopied');
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+            // 後備方案
+            textArea.removeAttribute('readonly');
+            textArea.select();
+            document.execCommand('copy');
+            textArea.setAttribute('readonly', 'readonly');
+            return Promise.resolve();
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var csv = toCsv(getSavedConnections());
+            textArea.value = csv;
+            copiedHint.classList.add('d-none');
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+            // 開啟時自動複製一次
+            copyToClipboard(csv).then(function () {
+                copiedHint.classList.remove('d-none');
+            }).catch(function () { });
+        });
+
+        copyBtn.addEventListener('click', function () {
+            copyToClipboard(textArea.value).then(function () {
+                copiedHint.classList.remove('d-none');
+            }).catch(function () {
+                alert('複製失敗，請手動選取並複製。');
+            });
+        });
+    }
+
+    // 匯入：以連線名稱為識別值，整併入現有清單（同名覆蓋）。
+    function setupImport() {
+        var btn = document.getElementById('importConnBtn');
+        var modalEl = document.getElementById('importConnModal');
+        if (!btn || !modalEl || typeof bootstrap === 'undefined') return;
+
+        var textArea = document.getElementById('importConnText');
+        var confirmBtn = document.getElementById('importConnConfirmBtn');
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            textArea.value = '';
+            textArea.classList.remove('is-invalid');
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            var incoming = parseCsv(textArea.value || '');
+            if (incoming.length === 0) {
+                textArea.classList.add('is-invalid');
+                textArea.focus();
+                return;
+            }
+            textArea.classList.remove('is-invalid');
+
+            var list = getSavedConnections();
+            var indexByName = {};
+            for (var i = 0; i < list.length; i++) {
+                indexByName[(list[i].name || '').toLowerCase()] = i;
+            }
+
+            var added = 0, updated = 0;
+            for (var j = 0; j < incoming.length; j++) {
+                var item = incoming[j];
+                var key = item.name.toLowerCase();
+                if (indexByName.hasOwnProperty(key)) {
+                    list[indexByName[key]] = item;
+                    updated++;
+                } else {
+                    indexByName[key] = list.length;
+                    list.push(item);
+                    added++;
+                }
+            }
+            setSavedConnections(list);
+            renderSavedConnections();
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            alert('匯入完成：新增 ' + added + ' 筆，更新 ' + updated + ' 筆。');
+        });
+    }
+
+    // 移除：清除 localStorage 中所有連線，需勾選確認。
+    function setupRemove() {
+        var btn = document.getElementById('removeConnBtn');
+        var modalEl = document.getElementById('removeConnModal');
+        if (!btn || !modalEl || typeof bootstrap === 'undefined') return;
+
+        var confirmCheck = document.getElementById('removeConnConfirmCheck');
+        var confirmBtn = document.getElementById('removeConnConfirmBtn');
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            confirmCheck.checked = false;
+            confirmBtn.disabled = true;
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        });
+
+        confirmCheck.addEventListener('change', function () {
+            confirmBtn.disabled = !confirmCheck.checked;
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            localStorage.removeItem(SAVED_CONN_KEY);
+            renderSavedConnections();
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            alert('已清除全部連線清單。');
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         renderSavedConnections();
         maybePromptRememberConnection();
+        setupExport();
+        setupImport();
+        setupRemove();
     });
 })();

@@ -1,0 +1,68 @@
+@* 連線清單管理：匯出 / 匯入 / 移除 三個 Modal *@
+
+@* 匯出連線清單 Modal *@
+<div class="modal fade" id="exportConnModal" tabindex="-1" aria-labelledby="exportConnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportConnModalLabel">📤 匯出連線清單</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-2">目前儲存於瀏覽器的連線清單（CSV 格式，逗號分隔，已加密）。</p>
+                <textarea id="exportConnText" class="form-control font-monospace" rows="8" readonly></textarea>
+                <div id="exportConnCopied" class="text-success small mt-2 d-none">✅ 內容已複製到 Clipboard。</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="exportConnCopyBtn">複製至 Clipboard</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* 匯入連線清單 Modal *@
+<div class="modal fade" id="importConnModal" tabindex="-1" aria-labelledby="importConnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importConnModalLabel">📥 匯入連線清單</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-2">請貼上 CSV 格式的連線清單。以「連線名稱」作為整併識別值，同名者將被覆蓋。</p>
+                <textarea id="importConnText" class="form-control font-monospace" rows="8" placeholder="name,server,database,connectionString"></textarea>
+                <div class="invalid-feedback">請貼上有效的 CSV 內容。</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="importConnConfirmBtn">確認匯入</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* 移除連線清單 Modal *@
+<div class="modal fade" id="removeConnModal" tabindex="-1" aria-labelledby="removeConnModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="removeConnModalLabel">🧹 移除連線清單</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger mb-3" role="alert">
+                    <strong>⚠️ 警告：</strong>此操作將清除瀏覽器中<strong>所有</strong>已儲存的連線清單，<strong>刪除後無法救回</strong>，請確認再三！
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="removeConnConfirmCheck" />
+                    <label class="form-check-label" for="removeConnConfirmCheck">
+                        我了解此操作無法復原，仍要刪除全部連線。
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="removeConnConfirmBtn" disabled>確認刪除</button>
+            </div>
+        </div>
+    </div>
+</div>
