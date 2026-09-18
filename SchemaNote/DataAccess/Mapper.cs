@@ -3,7 +3,7 @@ using System.Data;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace SchemaNote.Models
+namespace SchemaNote.DataAccess
 {
     class Mapper<T>
     {

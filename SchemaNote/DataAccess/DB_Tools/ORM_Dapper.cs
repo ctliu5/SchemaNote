@@ -1,10 +1,12 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using SchemaNote.Constants;
+using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.Data;
 using System.Reflection;
 
-namespace SchemaNote.Models.DB_Tools
+namespace SchemaNote.DataAccess.DB_Tools
 {
     public class ORM_Dapper(string _ConnectionString)
     {

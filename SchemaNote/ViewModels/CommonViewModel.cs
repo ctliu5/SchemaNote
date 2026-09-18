@@ -1,4 +1,5 @@
-﻿using SchemaNote.Models;
+﻿using SchemaNote.Constants;
+using SchemaNote.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SchemaNote.ViewModels

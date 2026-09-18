@@ -1,7 +1,7 @@
 using ClosedXML.Excel;
 using SchemaNote.ViewModels;
 using System.Text;
-using static SchemaNote.Models.Common;
+using static SchemaNote.Constants.Common;
 
 namespace SchemaNote.Services
 {

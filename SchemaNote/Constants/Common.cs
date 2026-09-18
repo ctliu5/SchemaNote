@@ -1,7 +1,7 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace SchemaNote.Models
+namespace SchemaNote.Constants
 {
     public static class Common
     {

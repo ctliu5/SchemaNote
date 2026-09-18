@@ -1,10 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
+using SchemaNote.Constants;
+using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.Extensions;
 using System.Reflection;
 using System.Transactions;
 
-namespace SchemaNote.Models.DB_Tools
+namespace SchemaNote.DataAccess.DB_Tools
 {
     /// <summary>
     /// <see cref="https://stackoverflow.com/questions/4439409/open-close-sqlconnection-or-keep-open"/>

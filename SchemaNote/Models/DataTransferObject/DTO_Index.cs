@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SchemaNote.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace SchemaNote.Models.DataTransferObject
 {

@@ -1,12 +1,14 @@
 ﻿//#define 測試效能
 using Microsoft.Data.SqlClient;
+using SchemaNote.Constants;
+using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
-using SchemaNote.Models.DB_Tools;
+using SchemaNote.DataAccess.DB_Tools;
 using SchemaNote.ViewModels;
 using System.Reflection;
 using System.Text;
 
-namespace SchemaNote.Models
+namespace SchemaNote.DataAccess
 {
     public static class DB_Access
     {

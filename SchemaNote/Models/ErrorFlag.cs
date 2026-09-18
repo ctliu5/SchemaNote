@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using SchemaNote.Constants;
 using System.Text;
 
 namespace SchemaNote.Models

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 
-namespace SchemaNote.Models
+namespace SchemaNote.DataAccess
 {
     /// <summary>
     /// SQL腳本文件

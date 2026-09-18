@@ -1,4 +1,6 @@
-﻿namespace SchemaNote.Models.DataTransferObject
+﻿using SchemaNote.Constants;
+
+namespace SchemaNote.Models.DataTransferObject
 {
     public class DTO_Extended_prop
     {

@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using SchemaNote.Constants;
+using SchemaNote.DataAccess;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Services;
 using SchemaNote.ViewModels;
 using System.Diagnostics;
-using static SchemaNote.Models.Common;
+using static SchemaNote.Constants.Common;
 
 namespace SchemaNote.Controllers
 {
