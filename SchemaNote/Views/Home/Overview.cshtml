@@ -23,7 +23,17 @@
      data-flags="@Model.FlagsJson"
      data-allflags="@Model.AllFlagsJson"></div>
 <div class="overview-sticky-header">
-    <h1>Overview</h1>
+    <div class="d-flex align-items-baseline gap-2 mb-3 flex-wrap">
+        <h2 class="mb-0">Overview</h2>
+        @{
+            string ovServer = ViewData["CurrentServer"] as string ?? string.Empty;
+            string ovDatabase = ViewData["CurrentDatabase"] as string ?? string.Empty;
+        }
+        @if (!string.IsNullOrEmpty(ovServer) || !string.IsNullOrEmpty(ovDatabase))
+        {
+            <span class="h4 mb-0 text-muted">（@ovServer／@ovDatabase）</span>
+        }
+    </div>
     @if (Model.ADO_dot_NET > 0)
     {
         <h2>ADO_dot_NET:@Model.ADO_dot_NET 毫秒</h2>

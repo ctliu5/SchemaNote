@@ -9,7 +9,17 @@
     {
     <script src="~/js/details.js" asp-append-version="true"></script>
 }
-<h1>Details</h1>
+<div class="d-flex align-items-baseline gap-2 mb-3 flex-wrap">
+    <h2 class="mb-0">Details</h2>
+    @{
+        string dtServer = ViewData["CurrentServer"] as string ?? string.Empty;
+        string dtDatabase = ViewData["CurrentDatabase"] as string ?? string.Empty;
+    }
+    @if (!string.IsNullOrEmpty(dtServer) || !string.IsNullOrEmpty(dtDatabase))
+    {
+        <span class="h4 mb-0 text-muted">（@dtServer／@dtDatabase）</span>
+    }
+</div>
 @if (TempData["ErrorMessage"] != null)
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>

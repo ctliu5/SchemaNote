@@ -197,6 +197,7 @@ namespace SchemaNote.Controllers
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
                 return RedirectToAction("Overview");
             }
+            SetCurrentConnectionViewData(ConnectionString);
             return View(Flag.OBJ);
         }
 
