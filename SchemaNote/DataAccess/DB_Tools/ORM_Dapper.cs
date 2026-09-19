@@ -250,5 +250,54 @@ namespace SchemaNote.DataAccess.DB_Tools
             conn.Open();
             object_props = [.. conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop_emptyValue)];
         }
+
+        internal DTO_Flag<int> DropAllProperties(List<DTO_Object_prop> object_props)
+        {
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+            using SqlTransaction transaction = conn.BeginTransaction();
+            try
+            {
+                foreach (DTO_Object_prop prop in object_props)
+                {
+                    // dropextendedproperty.sql 之 @level1type 需為 TABLE/VIEW。
+                    string type = prop.TYPE?.Trim() switch
+                    {
+                        "U" => "TABLE",
+                        "V" => "VIEW",
+                        _ => prop.TYPE?.Trim() ?? string.Empty
+                    };
+
+                    ObjFlag.OBJ += conn.Execute(SQLScripts.Dropextendedproperty, new
+                    {
+                        prop.OBJECT_ID,
+                        prop.COLUMN_ID,
+                        prop.PROP_NAME,
+                        prop.SCHEMA_NAME,
+                        TYPE = type,
+                        OBJECT_NAME = prop.NAME
+                    }, transaction, 3, CommandType.Text);
+                }
+                transaction.Commit();
+            }
+            catch (SqlException ex)
+            {
+                transaction.Rollback();
+                ObjFlag.SetError(ex);
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                ObjFlag.SetError(ex);
+            }
+            finally
+            {
+                conn.Close();
+                conn.Dispose();
+            }
+            return ObjFlag;
+        }
     }
 }

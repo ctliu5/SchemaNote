@@ -374,6 +374,92 @@ namespace SchemaNote.DataAccess.DB_Tools
             using SqlCommand comm = new(SQLScripts.GetObject_Extended_prop_emptyValue, conn);
             object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
         }
+
+        internal DTO_Flag<int> DropAllProperties(List<DTO_Object_prop> object_props)
+        {
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+
+            SqlConnection conn = new(ConnectionString);
+            SqlCommand comm = new()
+            {
+                Connection = conn,
+                CommandText = SQLScripts.Dropextendedproperty
+            };
+
+            try
+            {
+                conn.Open();
+                using TransactionScope transaction = new();
+                foreach (DTO_Object_prop prop in object_props)
+                {
+                    // dropextendedproperty.sql 之 @level1type 需為 TABLE/VIEW。
+                    string type = prop.TYPE?.Trim() switch
+                    {
+                        "U" => "TABLE",
+                        "V" => "VIEW",
+                        _ => prop.TYPE?.Trim() ?? string.Empty
+                    };
+
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddRange(
+                    [
+                        new SqlParameter
+                        {
+                            ParameterName = "OBJECT_ID",
+                            SqlDbType = System.Data.SqlDbType.Int,
+                            Value = prop.OBJECT_ID
+                        },
+                        new SqlParameter
+                        {
+                            ParameterName = "COLUMN_ID",
+                            SqlDbType = System.Data.SqlDbType.Int,
+                            Value = prop.COLUMN_ID
+                        },
+                        new SqlParameter
+                        {
+                            ParameterName = "PROP_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.PROP_NAME
+                        },
+                        new SqlParameter
+                        {
+                            ParameterName = "SCHEMA_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.SCHEMA_NAME
+                        },
+                        new SqlParameter
+                        {
+                            ParameterName = "TYPE",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = type
+                        },
+                        new SqlParameter
+                        {
+                            ParameterName = "OBJECT_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.NAME
+                        },
+                    ]);
+                    ObjFlag.OBJ += comm.ExecuteNonQuery();
+                }
+                transaction.Complete();
+            }
+            catch (SqlException ex)
+            {
+                ObjFlag.SetError(ex);
+            }
+            catch (Exception ex)
+            {
+                ObjFlag.SetError(ex);
+            }
+            finally
+            {
+                comm.Dispose();
+                conn.Close();
+                conn.Dispose();
+            }
+            return ObjFlag;
+        }
     }
     public class ADO_dot_NET2(string _ConnectionString) : ADO_dot_NET(_ConnectionString)
     {
