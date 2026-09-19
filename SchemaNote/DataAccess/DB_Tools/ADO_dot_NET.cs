@@ -357,6 +357,15 @@ namespace SchemaNote.DataAccess.DB_Tools
             object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
         }
 
+        internal void GetObjectExtendedProp_NotEmpty(ref List<DTO_Object_prop> object_props)
+        {
+            using SqlConnection conn = new(ConnectionString);
+            conn.Open();
+
+            using SqlCommand comm = new(SQLScripts.GetObject_Extended_prop_NotEmpty, conn);
+            object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
+        }
+
         internal void GetObjectExtendedProp_emptyValue(ref List<DTO_Object_prop> object_props)
         {
             using SqlConnection conn = new(ConnectionString);

@@ -1,9 +1,9 @@
 ﻿//#define 測試效能
 using Microsoft.Data.SqlClient;
 using SchemaNote.Constants;
+using SchemaNote.DataAccess.DB_Tools;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
-using SchemaNote.DataAccess.DB_Tools;
 using SchemaNote.ViewModels;
 using System.Reflection;
 using System.Text;
@@ -463,11 +463,11 @@ DECLARE @props TABLE
                     {
                         case DB_tool.Dapper:
                             ORM_Dapper dapper = new(ConnectionString);
-                            dapper.GetObjectExtendedProp(ref object_props);
+                            dapper.GetObjectExtendedProp_NotEmpty(ref object_props);
                             break;
                         default:
                             ADO_dot_NET ADO = new(ConnectionString);
-                            ADO.GetObjectExtendedProp(ref object_props);
+                            ADO.GetObjectExtendedProp_NotEmpty(ref object_props);
                             break;
                     }
                 }
