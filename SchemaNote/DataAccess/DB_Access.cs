@@ -525,7 +525,7 @@ DECLARE @props TABLE
 
         }
 
-        internal static DTO_Flag<int> DropAllProperties(string ConnectionString, DB_tool db_Tool, int[]? objectIds = null)
+        internal static DTO_Flag<int> DropAllProperties(string ConnectionString, DB_tool db_Tool, int[]? objectIds = null, string? propName = null)
         {
             var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
 
@@ -549,6 +549,12 @@ DECLARE @props TABLE
                 {
                     var idSet = new HashSet<int>(objectIds);
                     object_props = [.. object_props.Where(op => idSet.Contains(op.OBJECT_ID))];
+                }
+
+                // 若指定屬性名稱（例如僅刪除 FLAGS 標籤），僅保留該名稱的擴充屬性。
+                if (!string.IsNullOrEmpty(propName))
+                {
+                    object_props = [.. object_props.Where(op => string.Equals(op.PROP_NAME, propName, StringComparison.OrdinalIgnoreCase))];
                 }
 
                 if (object_props.Count < 1)

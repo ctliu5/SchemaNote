@@ -143,6 +143,28 @@ namespace SchemaNote.Controllers
         }
 
         [HttpPost]
+        public ActionResult DropAllFlags(int[]? objectIds = null)
+        {
+            #region check Connection
+            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                TempData["ErrorMessage"] = ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            #endregion
+
+            DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds, propName: Flags);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Overview");
+            }
+            TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆標籤";
+            return RedirectToAction("Overview");
+        }
+
+        [HttpPost]
         public ActionResult ExportMarkdown(int[]? objectIds = null)
         {
             #region check Connection

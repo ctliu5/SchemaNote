@@ -259,6 +259,14 @@
         postForm('/Home/DropAllExtendedProps');
     };
 
+    // 僅刪除目前畫面上（搜尋/標籤過濾後仍顯示）的物件之所有標籤（FLAGS）擴充屬性。破壞性操作，先確認。
+    window.DropAllFlags = function () {
+        if (!window.confirm('確定要刪除目前顯示的所有物件之全部標籤嗎？此動作無法復原。')) {
+            return;
+        }
+        postForm('/Home/DropAllFlags');
+    };
+
     window.addEventListener('load', function () {
         loadServerData();
         initialOption();
