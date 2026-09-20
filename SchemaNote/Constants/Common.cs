@@ -56,10 +56,11 @@ namespace SchemaNote.Constants
         public const string ConnString = "Connection String";
         public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
         public const string CountTip = "注意！此為參考值，非準確值。";
-        public const string ToolTip擴充屬性Excel = "會將相同標籤的 Table/View，會集中在同一個工作表（Sheet）內。不存在的擴充屬性呈現空白";
-        public const string ToolTip擴充屬性Markdown = "會將相同標籤的 Table/View，會集中在同一個區塊（Accordion）內。不存在的擴充屬性呈現 null";
-        public const string ToolTip擴充屬性SQL = "此SQL腳本寫入行為是「Upsert」；若物件不存在，採跳過不報錯策略。";
-        public const string ToolTip擴充屬性DropAll = "刪除所有本平台定義的所有擴充屬性";
+        public const string ToolTip匯出Excel = $"相同標籤（擴充屬性：FLAGS）的表格會集中在同個工作表（Sheet）內；沒有定義標籤的表格，皆則歸預設標籤“{NoneSheetName}”";
+        public const string ToolTip匯出Markdown = $"相同標籤（擴充屬性：FLAGS）的表格會集中在同個摺疊元件（Accordion）內；沒有定義標籤的表格，皆則歸預設標籤“{NoneSheetName}”";
+        public const string ToolTip匯出SQL擴充屬性 = $"將當前連線 DB 的所有表格下的擴充屬性：{MS_Desc}、{Remark}、{Flags}，同步（Upsert）到其他 DB 的 SQL 腳本。";
+        public const string ToolTip刪除擴充屬性DropAll = $"所有表格下的擴充屬性：{MS_Desc}、{Remark}、{Flags}";
+        public const string ToolTip刪除擴充屬性DropFLAGS = $"所有表格下的擴充屬性：{Flags}";
         #endregion
 
         public static string OBJ_TypeDesc(string? typeId)

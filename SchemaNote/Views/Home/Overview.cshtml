@@ -74,17 +74,18 @@
                     💾匯出
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonExport">
-                    <li><a class="dropdown-item" href="#" onclick="ExportExcel()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip擴充屬性Excel">匯出 Excel</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ExportMarkdown()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip擴充屬性Markdown">匯出 Markdown</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ExportExtendedPropScript()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip擴充屬性SQL">擴充屬性SQL</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportExcel()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Excel">匯出 Excel</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportMarkdown()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Markdown">匯出 Markdown</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportExtendedPropScript()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出SQL擴充屬性">匯出 SQL 擴充屬性</a></li>
                 </ul>
             </div>
             <div class="btn-group">
                 <button type="button" id="dropdownMenuButtonDrop" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    ⛔刪除
+                    ⛔刪除擴充屬性
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonDrop">
-                    <li><a class="dropdown-item" href="#" onclick="DropAllExtendedProps()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip擴充屬性DropAll">🧹Drop All 擴充屬性</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="DropAllExtendedProps()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip刪除擴充屬性DropAll">刪除全部</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="DropAllFlags()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip刪除擴充屬性DropFLAGS">刪除所有標籤</a></li>
                 </ul>
             </div>
         </div>
