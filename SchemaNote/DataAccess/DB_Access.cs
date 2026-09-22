@@ -1,9 +1,9 @@
 ﻿//#define 測試效能
 using Microsoft.Data.SqlClient;
 using SchemaNote.Constants;
+using SchemaNote.DataAccess.DB_Tools;
 using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
-using SchemaNote.DataAccess.DB_Tools;
 using SchemaNote.ViewModels;
 using System.Reflection;
 using System.Text;
@@ -463,11 +463,11 @@ DECLARE @props TABLE
                     {
                         case DB_tool.Dapper:
                             ORM_Dapper dapper = new(ConnectionString);
-                            dapper.GetObjectExtendedProp(ref object_props);
+                            dapper.GetObjectExtendedProp_NotEmpty(ref object_props);
                             break;
                         default:
                             ADO_dot_NET ADO = new(ConnectionString);
-                            ADO.GetObjectExtendedProp(ref object_props);
+                            ADO.GetObjectExtendedProp_NotEmpty(ref object_props);
                             break;
                     }
                 }
@@ -523,6 +523,67 @@ DECLARE @props TABLE
             return ObjFlag;
             #endregion
 
+        }
+
+        internal static DTO_Flag<int> DropAllProperties(string ConnectionString, DB_tool db_Tool, int[]? objectIds = null, string? propName = null)
+        {
+            var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+
+            List<DTO_Object_prop> object_props = [];
+            try
+            {
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new(ConnectionString);
+                        dapper.GetObjectExtendedProp(ref object_props);
+                        break;
+                    default:
+                        ADO_dot_NET ADO = new(ConnectionString);
+                        ADO.GetObjectExtendedProp(ref object_props);
+                        break;
+                }
+
+                // 依前端傳入的 OBJECT_ID 清單（搜尋/標籤過濾後仍顯示的項目）僅刪除對應物件的擴充屬性。
+                if (objectIds is not null && objectIds.Length > 0)
+                {
+                    var idSet = new HashSet<int>(objectIds);
+                    object_props = [.. object_props.Where(op => idSet.Contains(op.OBJECT_ID))];
+                }
+
+                // 若指定屬性名稱（例如僅刪除 FLAGS 標籤），僅保留該名稱的擴充屬性。
+                if (!string.IsNullOrEmpty(propName))
+                {
+                    object_props = [.. object_props.Where(op => string.Equals(op.PROP_NAME, propName, StringComparison.OrdinalIgnoreCase))];
+                }
+
+                if (object_props.Count < 1)
+                {
+                    ObjFlag.ErrorMessages.Append("找不到擴充屬性");
+                    ObjFlag.ResultType |= ExceResultType.Failed;
+                    return ObjFlag;
+                }
+
+                switch (db_Tool)
+                {
+                    case DB_tool.Dapper:
+                        ORM_Dapper dapper = new(ConnectionString);
+                        return dapper.DropAllProperties(object_props);
+                    default:
+                        ADO_dot_NET ADO = new(ConnectionString);
+                        return ADO.DropAllProperties(object_props);
+                }
+            }
+            catch (SqlException ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
+            catch (Exception ex)
+            {
+                ObjFlag.SetError(ex);
+                return ObjFlag;
+            }
         }
     }
 }

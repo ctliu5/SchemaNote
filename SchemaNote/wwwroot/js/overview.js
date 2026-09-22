@@ -205,12 +205,17 @@
     // 透過動態建立 form 送出 POST，讓瀏覽器原生處理檔案下載。
     // 後端以檔案（FileResult）回傳並帶 Content-Disposition，可正確處理文字與二進位檔案。
     function postDownload(url) {
+        postForm(url);
+    }
+
+    // 動態建立 form 並以 POST 送出，帶上目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID。
+    function postForm(url) {
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = url;
         form.style.display = 'none';
 
-        // 收集目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID，僅匯出這些項目。
+        // 收集目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID，僅處理這些項目。
         var objectIds = getVisibleObjectIds();
         for (var i = 0; i < objectIds.length; i++) {
             var input = document.createElement('input');
@@ -245,6 +250,22 @@
     window.ExportExtendedPropScript = function () { postDownload('/Home/ExportExtendedPropScript'); };
     window.ExportMarkdown = function () { postDownload('/Home/ExportMarkdown'); };
     window.ExportExcel = function () { postDownload('/Home/ExportExcel'); };
+
+    // 刪除目前畫面上（搜尋/標籤過濾後仍顯示）的物件之所有擴充屬性。破壞性操作，先確認。
+    window.DropAllExtendedProps = function () {
+        if (!window.confirm('確定要刪除目前顯示的所有物件之全部擴充屬性嗎？此動作無法復原。')) {
+            return;
+        }
+        postForm('/Home/DropAllExtendedProps');
+    };
+
+    // 僅刪除目前畫面上（搜尋/標籤過濾後仍顯示）的物件之所有標籤（FLAGS）擴充屬性。破壞性操作，先確認。
+    window.DropAllFlags = function () {
+        if (!window.confirm('確定要刪除目前顯示的所有物件之全部標籤嗎？此動作無法復原。')) {
+            return;
+        }
+        postForm('/Home/DropAllFlags');
+    };
 
     window.addEventListener('load', function () {
         loadServerData();

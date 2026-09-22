@@ -109,6 +109,13 @@ namespace SchemaNote.DataAccess
                 return GetScript("SchemaNote.sql.getObject_Extended_prop.sql");
             }
         }
+        public static string GetObject_Extended_prop_NotEmpty
+        {
+            get
+            {
+                return GetScript("SchemaNote.sql.getObject_Extended_prop_notEmpty.sql");
+            }
+        }
         public static string GetObject_Extended_prop_emptyValue
         {
             get
