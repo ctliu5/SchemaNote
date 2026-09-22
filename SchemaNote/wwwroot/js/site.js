@@ -27,3 +27,18 @@ function download(filename, text) {
     element.click();
     document.body.removeChild(element);
 }
+
+// 關閉連線：確認後以 POST 方式送出，後端清除 Session 並導回首頁。
+// Overview 與 Details 兩頁的「關閉連線」按鈕皆以 onclick="CloseConnection()" 呼叫。
+window.CloseConnection = function () {
+    if (!window.confirm('確定要關閉目前的連線嗎？')) {
+        return;
+    }
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/Home/CloseConnection';
+    form.style.display = 'none';
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+};

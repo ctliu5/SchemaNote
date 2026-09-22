@@ -222,6 +222,14 @@ namespace SchemaNote.Controllers
         }
         #endregion
 
+        // 關閉連線：清除 Session 中的連線資訊，導回首頁。
+        [HttpPost]
+        public ActionResult CloseConnection()
+        {
+            _sessionWapper.Clear();
+            return RedirectToAction("Index");
+        }
+
         [HttpGet]
         public ActionResult Details(int? id)
         {
