@@ -108,6 +108,7 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Index");
             }
             #endregion
+            var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
             DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
             if (Flag.ResultType != ExceResultType.Success)
@@ -116,7 +117,7 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Overview");
             }
             byte[] content = _exportService.Utf8WithBom(Flag.OBJ.ToString());
-            string fileName = $"ExtendedPropScript_urlencoded_{DateTime.Now:yyyyMMddHHmmss}.sql";
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.sql";
             return File(content, "text/plain; charset=utf-8", fileName);
         }
 
@@ -131,6 +132,7 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Index");
             }
             #endregion
+            var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
             DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
             if (Flag.ResultType != ExceResultType.Success)
@@ -143,7 +145,7 @@ namespace SchemaNote.Controllers
 
             string markdown = _exportService.BuildMarkdown(Flag.OBJ);
             byte[] content = _exportService.Utf8WithBom(markdown);
-            string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.md";
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.md";
             return File(content, "text/markdown; charset=utf-8", fileName);
         }
 
@@ -158,6 +160,7 @@ namespace SchemaNote.Controllers
                 return RedirectToAction("Index");
             }
             #endregion
+            var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
             DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
             if (Flag.ResultType != ExceResultType.Success)
@@ -170,7 +173,7 @@ namespace SchemaNote.Controllers
 
             byte[] content = _exportService.BuildExcel(Flag.OBJ);
             const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            string fileName = $"Overview_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.xlsx";
             return File(content, contentType, fileName);
         }
         #endregion
