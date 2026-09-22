@@ -6,7 +6,7 @@
 }
 
 @section Scripts
-    {
+{
     <script src="~/js/details.js" asp-append-version="true"></script>
 }
 <div class="d-flex align-items-baseline gap-2 mb-2 mt-3 flex-wrap">
@@ -24,11 +24,17 @@
 {
     <h4 class="bg-danger">@Html.Raw(TempData["ErrorMessage"])</h4>
 }
-<div>
-    <a asp-action="Overview" class="btn btn-outline-dark"><strong>&lt; </strong>Overview</a>
-    <button id="EditAll" type="button" class="btn btn-info" onclick="EditAll();">編輯全部</button>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2 search">
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Overview" class="btn btn-outline-secondary"><strong>👈🏻</strong>&nbsp;Overview</a>
+        <button id="EditAll" type="button" class="btn btn-info" onclick="EditAll();">編輯全部</button>
+    </div>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+        <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="@Common.closeConn">
+            <input type="button" class="btn btn-secondary" onclick="CloseConnection()" value="關閉連線" />
+        </span>
+    </div>
 </div>
-<br />
 <form asp-action="Details" onsubmit="EmptyString('@Common.DefaultValue')" method="post" class="card">
     <input name="[0].COLUMN_ID" value="0" style="display:none;" />
     <div class="card-header">

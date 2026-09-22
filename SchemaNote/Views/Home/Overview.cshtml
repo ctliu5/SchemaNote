@@ -70,8 +70,8 @@
         </div>
         <div class="d-flex align-items-center gap-2 ms-auto">
             <div class="dropdown">
-                <button type="button" id="dropdownMenuButtonExport" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    💾匯出
+                <button type="button" id="dropdownMenuButtonExport" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    📋匯出
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonExport">
                     <li><a class="dropdown-item" href="#" onclick="ExportExcel()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Excel">匯出 Excel</a></li>
@@ -80,14 +80,17 @@
                 </ul>
             </div>
             <div class="btn-group">
-                <button type="button" id="dropdownMenuButtonDrop" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    ⛔刪除擴充屬性
+                <button type="button" id="dropdownMenuButtonDrop" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    ⚠️刪除擴充屬性
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonDrop">
                     <li><a class="dropdown-item" href="#" onclick="DropAllExtendedProps()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip刪除擴充屬性DropAll">刪除全部</a></li>
                     <li><a class="dropdown-item" href="#" onclick="DropAllFlags()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip刪除擴充屬性DropFLAGS">刪除所有標籤</a></li>
                 </ul>
             </div>
+            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="@Common.closeConn">
+                <input type="button" class="btn btn-secondary" onclick="CloseConnection()" value="關閉連線" />
+            </span>
         </div>
     </div>
 </div>

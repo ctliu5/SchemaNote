@@ -61,6 +61,7 @@ namespace SchemaNote.Constants
         public const string ToolTip匯出SQL擴充屬性 = $"將當前連線 DB 的所有表格下的擴充屬性：{MS_Desc}、{Remark}、{Flags}，同步（Upsert）到其他 DB 的 SQL 腳本。";
         public const string ToolTip刪除擴充屬性DropAll = $"所有表格下的擴充屬性：{MS_Desc}、{Remark}、{Flags}";
         public const string ToolTip刪除擴充屬性DropFLAGS = $"所有表格下的擴充屬性：{Flags}";
+        public const string closeConn = "關閉當前 SQL Server 連線";
         #endregion
 
         public static string OBJ_TypeDesc(string? typeId)

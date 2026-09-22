@@ -19,15 +19,15 @@
         <div class="card-body">
             <form asp-controller="Home" asp-action="Overview" method="post">
                 <div class="input-group mb-3">
-                    <input asp-for="ConnectionString" class="form-control" required placeholder="請輸入連線字串" />
+                    <input asp-for="ConnectionString" class="form-control" required placeholder="請輸入 SQL Server 連線字串" />
                     <span asp-validation-for="ConnectionString" class="text-danger"></span>
-                    <button class="btn btn-outline-secondary" type="submit"> &nbsp; Let's Connect &nbsp;</button>
+                    <button class="btn btn-outline-secondary" type="submit">🔌&nbsp; Let's Connect &nbsp;</button>
                     <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"></button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" id="exportConnBtn">📤匯出連線清單</a></li>
-                        <li><a class="dropdown-item" href="#" id="importConnBtn">📥匯入連線清單</a></li>
+                        <li><a class="dropdown-item" href="#" id="exportConnBtn">↪️ 匯出連線清單</a></li>
+                        <li><a class="dropdown-item" href="#" id="importConnBtn">↩️ 匯入連線清單</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="removeConnBtn">🧹移除連線清單</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="removeConnBtn">🗑移除連線清單</a></li>
                     </ul>
                 </div>
                 @* 已儲存的連線（來自 localStorage），由 site.js 動態渲染；點按鈕直接連線，右上 x 可刪除 *@
