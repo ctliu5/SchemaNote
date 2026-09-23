@@ -37,7 +37,17 @@ namespace SchemaNote
             services.AddSingleton<IExportService, ExportService>();
             services.AddSingleton<IConnectionInfoService, ConnectionInfoService>();
 
-            services.AddControllersWithViews();
+            #region CSRF 防護
+            services.AddControllersWithViews(options =>
+            {
+                // 全站啟用 CSRF 防護，所有 POST/PUT/PATCH/DELETE 都會自動驗證 AntiForgeryToken
+                options.Filters.Add<Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute>();
+            });
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "RequestVerificationToken";
+            });
+            #endregion
 
             var app = builder.Build();
 

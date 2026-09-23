@@ -2,6 +2,33 @@
    site.js — 全站共用工具函式
    ========================================================= */
 
+// 取得防偽權杖（由 _Layout.cshtml 的 <meta name="request-verification-token"> 提供）。
+function getAntiforgeryToken() {
+    var meta = document.querySelector('meta[name="request-verification-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
+// 取得防偽權杖的 form 欄位名稱（由 AntiforgeryOptions.FormFieldName 設定，透過 meta 提供）。
+function getAntiforgeryFieldName() {
+    var meta = document.querySelector('meta[name="csrf-form-field-name"]');
+    return (meta && meta.getAttribute('content')) || '__RequestVerificationToken';
+}
+
+// 取得防偽權杖的 request header 名稱（由 AntiforgeryOptions.HeaderName 設定，供 ajax/fetch 使用）。
+function getAntiforgeryHeaderName() {
+    var meta = document.querySelector('meta[name="csrf-header-name"]');
+    return (meta && meta.getAttribute('content')) || 'RequestVerificationToken';
+}
+
+// 在動態建立的 form 中補上防偽權杖的 hidden 欄位，供 AutoValidateAntiforgeryToken 全域驗證。
+function appendAntiforgeryToken(form) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = getAntiforgeryFieldName();
+    input.value = getAntiforgeryToken();
+    form.appendChild(input);
+}
+
 // 走訪物件/陣列的每個自有屬性（for...in 支援 break 與物件，forEach 不支援）。
 function ForeachObj(obj, func) {
     for (var key in obj) {
@@ -38,6 +65,7 @@ window.CloseConnection = function () {
     form.method = 'POST';
     form.action = '/Home/CloseConnection';
     form.style.display = 'none';
+    appendAntiforgeryToken(form);
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);

@@ -215,6 +215,9 @@
         form.action = url;
         form.style.display = 'none';
 
+        // 帶上防偽權杖，供後端 AutoValidateAntiforgeryToken 全域驗證。
+        appendAntiforgeryToken(form);
+
         // 收集目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID，僅處理這些項目。
         var objectIds = getVisibleObjectIds();
         for (var i = 0; i < objectIds.length; i++) {

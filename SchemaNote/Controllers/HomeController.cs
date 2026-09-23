@@ -25,7 +25,6 @@ namespace SchemaNote.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Overview(string ConnectionString, bool encrypted = false)
         {
             if (ModelState.IsValid)
@@ -257,7 +256,6 @@ namespace SchemaNote.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
         {
             #region check Connection
