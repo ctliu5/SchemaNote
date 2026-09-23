@@ -45,6 +45,9 @@ namespace SchemaNote
             });
             builder.Services.AddAntiforgery(options =>
             {
+                // 自訂驗證用的表單欄位名稱（前端 site.js 會透過 <meta name="csrf-form-field-name"> 動態讀取此值）
+                options.FormFieldName = "__RequestVerificationToken";
+                // 自訂驗證用的標頭名稱（前端 site.js 會透過 <meta name="csrf-header-name"> 動態讀取此值）
                 options.HeaderName = "RequestVerificationToken";
             });
             #endregion
