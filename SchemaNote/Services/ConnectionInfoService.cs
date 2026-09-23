@@ -22,6 +22,10 @@ namespace SchemaNote.Services
                 SqlConnectionStringBuilder builder = new(connectionString);
                 server = builder.DataSource ?? string.Empty;
                 database = builder.InitialCatalog ?? string.Empty;
+#if DEBUG
+                _ = builder.UserID;
+                _ = builder.Password;
+#endif
             }
             catch
             {
