@@ -17,6 +17,9 @@ namespace SchemaNote.Services
     {
         // 存放連線字串的 Claim 型別名稱。
         private static readonly string _connectionStringClaim = "SchemaNote.ConnectionString";
+        // 固定的使用者識別值。antiforgery 會依身分的識別 Claim 計算權杖綁定值，
+        // 已驗證身分若缺少識別 Claim，會導致防偽權杖驗證不一致（首次 POST 失敗）。
+        private static readonly string _userId = "SchemaNote.User";
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public UserModel User
@@ -37,7 +40,12 @@ namespace SchemaNote.Services
                 HttpContext? httpContext = _httpContextAccessor.HttpContext;
                 if (httpContext is null) return;
 
-                List<Claim> claims = [];
+                // 提供穩定的識別 Claim，讓 antiforgery 綁定的身分保持一致。
+                List<Claim> claims =
+                [
+                    new Claim(ClaimTypes.NameIdentifier, _userId),
+                    new Claim(ClaimTypes.Name, _userId),
+                ];
                 if (!string.IsNullOrEmpty(value.ConnectionString))
                 {
                     claims.Add(new Claim(_connectionStringClaim, value.ConnectionString));
