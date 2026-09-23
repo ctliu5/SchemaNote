@@ -48,6 +48,7 @@ namespace SchemaNote.Controllers
             }
             else
             {
+                TempData["ErrorMessage"] = ConnStringNoData;
                 return RedirectToAction("Index");
             }
         }
@@ -75,6 +76,7 @@ namespace SchemaNote.Controllers
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = ConnStringNoData;
                 return RedirectToAction("Index");
             }
             if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)

@@ -52,6 +52,7 @@ namespace SchemaNote.Constants
         public const string accordion = "accordion";
         #endregion
         #region 文字訊息
+        public const string ConnStringNoData = "連線資訊是必填欄位，請提供完整的連線資訊。";
         public const string ConnStringMissing = "Your connection string is missing!";
         public const string ConnString = "Connection String";
         public const string ValidationMsg = "欄位驗證錯誤! 允許最多4000個字。";
