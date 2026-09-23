@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using Newtonsoft.Json;
 using SchemaNote.DataAccess;
 using System.Data;
 using System.Reflection;
@@ -296,17 +295,6 @@ namespace SchemaNote.Models.Extensions
                 DTOs.Add(dto);
             }
             return DTOs;
-        }
-
-        public static void SetObject<T>(this ISession session, string key, T value)
-        {
-            session.SetString(key, JsonConvert.SerializeObject(value));
-        }
-
-        public static T? GetObject<T>(this ISession session, string key)
-        {
-            var value = session.GetString(key);
-            return value == null ? default : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }

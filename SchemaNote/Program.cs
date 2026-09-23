@@ -1,4 +1,5 @@
-﻿using SchemaNote.Services;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using SchemaNote.Services;
 
 namespace SchemaNote
 {
@@ -16,23 +17,24 @@ namespace SchemaNote
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            // 將 Session 存在 ASP.NET Core 記憶體中
-            services.AddDistributedMemoryCache();
+            // 改用 Cookie-Authentication，連線資訊（ConnectionString）以 Claims 形式存放在加密的登入 Cookie 中。
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    //允許在 HTTP 連線的情況下，也使用 Cookie。建議只在受保護的網路內使用
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 
-            services.AddSession(options =>
-            {
-                //允許在 HTTP 連線的情況下，也使用 Session。建議只在受保護的網路內使用
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    //沒必要將 Server 或網站技術的資訊爆露在外面，所以自訂 Cookie 名稱。
+                    options.Cookie.Name = "SchemaNote";
 
-                //沒必要將 Server 或網站技術的資訊爆露在外面，所以預設 Session 名稱 .AspNetCore.Session 可以改掉。
-                options.Cookie.Name = "SchemaNote";
-                //修改合理的 Session 到期時間。預設是 20 分鐘沒有跟 Server 互動的 Request，就會將 Session 變成過期狀態。
-                options.IdleTimeout = TimeSpan.FromMinutes(5);
-            });
+                    //修改合理的到期時間。滑動到期：只要在時間內有互動就會自動延長。
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                    options.SlidingExpiration = true;
+                });
 
             //採Singleton模式，使用強型別
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<ISessionWrapper, SessionWrapper>();
+            services.AddSingleton<IUserContext, CookieUserContext>();
             services.AddSingleton<ICryptoService, AesCryptoService>();
             services.AddSingleton<IExportService, ExportService>();
             services.AddSingleton<IConnectionInfoService, ConnectionInfoService>();
@@ -65,8 +67,8 @@ namespace SchemaNote
 
             app.UseRouting();
             app.UseCookiePolicy();
-            app.UseSession();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

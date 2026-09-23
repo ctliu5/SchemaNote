@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace SchemaNote.Models.DataTransferObject
+﻿namespace SchemaNote.Models.DataTransferObject
 {
     public class UserModel
     {
-        [JsonProperty]
         public string? ConnectionString { get; private set; }
 
         public void SetConnectionString(string _value)

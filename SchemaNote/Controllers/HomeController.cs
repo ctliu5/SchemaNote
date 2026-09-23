@@ -10,9 +10,9 @@ using static SchemaNote.Constants.Common;
 
 namespace SchemaNote.Controllers
 {
-    public class HomeController(ISessionWrapper sessionWapper, ICryptoService cryptoService, IExportService exportService, IConnectionInfoService connectionInfoService) : Controller
+    public class HomeController(IUserContext userContext, ICryptoService cryptoService, IExportService exportService, IConnectionInfoService connectionInfoService) : Controller
     {
-        private readonly ISessionWrapper _sessionWapper = sessionWapper;
+        private readonly IUserContext _userContext = userContext;
         private readonly ICryptoService _cryptoService = cryptoService;
         private readonly IExportService _exportService = exportService;
         private readonly IConnectionInfoService _connectionInfoService = connectionInfoService;
@@ -58,8 +58,8 @@ namespace SchemaNote.Controllers
         {
             UserModel userModel = new();
             userModel.SetConnectionString(ConnectionString);
-            _sessionWapper.User = userModel;
-            if (_sessionWapper.User.ConnectionString is not null) ConnectionString = _sessionWapper.User.ConnectionString;
+            _userContext.User = userModel;
+            if (_userContext.User.ConnectionString is not null) ConnectionString = _userContext.User.ConnectionString;
             DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
             if (Flag.ResultType != ExceResultType.Success)
             {
@@ -99,7 +99,7 @@ namespace SchemaNote.Controllers
         public ActionResult Overview()
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -132,7 +132,7 @@ namespace SchemaNote.Controllers
         public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -156,7 +156,7 @@ namespace SchemaNote.Controllers
         public ActionResult DropAllExtendedProps(int[]? objectIds = null)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -178,7 +178,7 @@ namespace SchemaNote.Controllers
         public ActionResult DropAllFlags(int[]? objectIds = null)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -200,7 +200,7 @@ namespace SchemaNote.Controllers
         public ActionResult ExportMarkdown(int[]? objectIds = null)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -228,7 +228,7 @@ namespace SchemaNote.Controllers
         public ActionResult ExportExcel(int[]? objectIds = null)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -257,7 +257,7 @@ namespace SchemaNote.Controllers
         [HttpPost]
         public ActionResult CloseConnection()
         {
-            _sessionWapper.Clear();
+            _userContext.Clear();
             return RedirectToAction("Index");
         }
 
@@ -265,7 +265,7 @@ namespace SchemaNote.Controllers
         public ActionResult Details(int? id)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
@@ -291,7 +291,7 @@ namespace SchemaNote.Controllers
         public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
         {
             #region check Connection
-            string? ConnectionString = _sessionWapper.User.ConnectionString;
+            string? ConnectionString = _userContext.User.ConnectionString;
             if (string.IsNullOrEmpty(ConnectionString))
             {
                 TempData["ErrorMessage"] = ConnStringMissing;
