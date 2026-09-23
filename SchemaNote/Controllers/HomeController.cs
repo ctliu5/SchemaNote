@@ -44,23 +44,53 @@ namespace SchemaNote.Controllers
                     }
                     ConnectionString = decrypted;
                 }
-                UserModel userModel = new();
-                userModel.SetConnectionString(ConnectionString);
-                _sessionWapper.User = userModel;
-                if (_sessionWapper.User.ConnectionString is not null) ConnectionString = _sessionWapper.User.ConnectionString;
-                DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-                if (Flag.ResultType != ExceResultType.Success)
-                {
-                    TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                    return RedirectToAction("Index");
-                }
-                // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
-                return RedirectToAction("Overview");
+                return ConnectAndRedirect(ConnectionString);
             }
             else
             {
                 return RedirectToAction("Index");
             }
+        }
+
+        // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
+        private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
+        {
+            UserModel userModel = new();
+            userModel.SetConnectionString(ConnectionString);
+            _sessionWapper.User = userModel;
+            if (_sessionWapper.User.ConnectionString is not null) ConnectionString = _sessionWapper.User.ConnectionString;
+            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            if (Flag.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+                return RedirectToAction("Index");
+            }
+            // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
+            return RedirectToAction("Overview");
+        }
+
+        // 讓使用者只需填 server / database / uid / pwd 四個欄位，後端組回 SQL Server 連線字串。
+        [HttpPost]
+        public ActionResult OverviewByFields(string Server, string Database, string Uid, string Pwd)
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction("Index");
+            }
+            if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)
+                || string.IsNullOrWhiteSpace(Uid) || string.IsNullOrWhiteSpace(Pwd))
+            {
+                TempData["ErrorMessage"] = ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            Microsoft.Data.SqlClient.SqlConnectionStringBuilder builder = new()
+            {
+                DataSource = Server,
+                InitialCatalog = Database,
+                UserID = Uid,
+                Password = Pwd
+            };
+            return ConnectAndRedirect(builder.ConnectionString);
         }
 
         [HttpGet]

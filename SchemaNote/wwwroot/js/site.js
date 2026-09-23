@@ -70,3 +70,35 @@ window.CloseConnection = function () {
     form.submit();
     document.body.removeChild(form);
 };
+
+// 連線方式切換：在「填寫欄位」與「連線字串」兩種表單間切換顯示。
+document.addEventListener('DOMContentLoaded', function () {
+    var fieldsForm = document.getElementById('connFieldsForm');
+    var stringForm = document.getElementById('connStringForm');
+    var radios = document.querySelectorAll('input[name="connMode"]');
+    if (!fieldsForm || !stringForm || radios.length === 0) {
+        return;
+    }
+
+    function applyMode(mode) {
+        if (mode === 'string') {
+            stringForm.classList.remove('d-none');
+            fieldsForm.classList.add('d-none');
+        } else {
+            fieldsForm.classList.remove('d-none');
+            stringForm.classList.add('d-none');
+        }
+    }
+
+    radios.forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (radio.checked) {
+                applyMode(radio.value);
+            }
+        });
+    });
+
+    var checked = document.querySelector('input[name="connMode"]:checked');
+    applyMode(checked ? checked.value : 'fields');
+});
+
