@@ -50,6 +50,12 @@ public static class Common
     public const string DefaultValue = "null";
     public const string NoneSheetName = "-none-"; // 沒有設定標籤（或標籤值即為此字串）的 Table/View 集中放置的工作表名稱。
     public const string accordion = "accordion";
+    /// <summary>存放連線字串的 Claim 型別名稱。</summary>
+    public const string ConnectionStringClaim = "SchemaNote.ConnectionString";
+    /// <summary>存放使用者識別的 Claim 型別名稱。</summary>
+    public const string UserIdClaim = "SchemaNote.User";
+    // 登入 Cookie 的有效時間（與 Program.cs 的 ExpireTimeSpan 一致）。
+    public static readonly TimeSpan SessionLifetime = TimeSpan.FromMinutes(5);
     #endregion
     #region 文字訊息
     public const string ConnStringNoData = "連線資訊是必填欄位，請提供完整的連線資訊。";

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using SchemaNote.Constants;
 using SchemaNote.Services;
 
 namespace SchemaNote;
@@ -28,7 +29,7 @@ public class Program
                 options.Cookie.Name = "SchemaNote";
 
                 //修改合理的到期時間。滑動到期：只要在時間內有互動就會自動延長。
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.ExpireTimeSpan = Common.SessionLifetime;
                 options.SlidingExpiration = true;
             });
 
