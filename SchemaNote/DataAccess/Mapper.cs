@@ -1,331 +1,330 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace SchemaNote.DataAccess
+namespace SchemaNote.DataAccess;
+
+class Mapper<T>
 {
-    class Mapper<T>
+    internal Mapper(PropertyInfo propInfo, Type dataType, int index)
     {
-        internal Mapper(PropertyInfo propInfo, Type dataType, int index)
+        PropInfo = propInfo;
+        PropType = PropInfo.PropertyType;
+        DataType = dataType;
+        Index = index;
+        Assign = (dto, dr) => { };//do nothing.
+        if (PropType == DataType)
         {
-            PropInfo = propInfo;
-            PropType = PropInfo.PropertyType;
-            DataType = dataType;
-            Index = index;
-            Assign = (dto, dr) => { };//do nothing.
-            if (PropType == DataType)
+            switch (Type.GetTypeCode(DataType))
             {
-                switch (Type.GetTypeCode(DataType))
-                {
-                    case TypeCode.Boolean:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetBoolean(Index));
-                        }; break;
-                    case TypeCode.Char:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetChar(Index));
-                        }; break;
-                    case TypeCode.Byte:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetByte(Index));
-                        }; break;
-                    //case TypeCode.SByte: break;
-                    //case TypeCode.UInt16: break;
-                    case TypeCode.Int16:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt16(Index));
-                        }; break;
-                    //case TypeCode.UInt32: break;
-                    case TypeCode.Int32:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt32(Index));
-                        }; break;
-                    //case TypeCode.UInt64: break;
-                    case TypeCode.Int64:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt64(Index));
-                        }; break;
-                    case TypeCode.Single:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetFloat(Index));
-                        }; break;
-                    case TypeCode.Double:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDouble(Index));
-                        }; break;
-                    case TypeCode.Decimal:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDecimal(Index));
-                        }; break;
-                    case TypeCode.String:
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetString(Index).Trim());
-                        }; break;
-                    case TypeCode.DateTime:
+                case TypeCode.Boolean:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetBoolean(Index));
+                    }; break;
+                case TypeCode.Char:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetChar(Index));
+                    }; break;
+                case TypeCode.Byte:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetByte(Index));
+                    }; break;
+                //case TypeCode.SByte: break;
+                //case TypeCode.UInt16: break;
+                case TypeCode.Int16:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt16(Index));
+                    }; break;
+                //case TypeCode.UInt32: break;
+                case TypeCode.Int32:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt32(Index));
+                    }; break;
+                //case TypeCode.UInt64: break;
+                case TypeCode.Int64:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetInt64(Index));
+                    }; break;
+                case TypeCode.Single:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetFloat(Index));
+                    }; break;
+                case TypeCode.Double:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDouble(Index));
+                    }; break;
+                case TypeCode.Decimal:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetDecimal(Index));
+                    }; break;
+                case TypeCode.String:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, dr.GetString(Index).Trim());
+                    }; break;
+                case TypeCode.DateTime:
+                    Assign = (dto, dr) =>
+                    {
+                        if (!dr.IsDBNull(Index))
+                            PropInfo.SetValue(dto, dr.GetDateTime(Index));
+                    }; break;
+                default:
+                    if (PropType == typeof(DateTimeOffset))
+                    {
                         Assign = (dto, dr) =>
                         {
                             if (!dr.IsDBNull(Index))
-                                PropInfo.SetValue(dto, dr.GetDateTime(Index));
-                        }; break;
-                    default:
-                        if (PropType == typeof(DateTimeOffset))
-                        {
-                            Assign = (dto, dr) =>
-                            {
-                                if (!dr.IsDBNull(Index))
-                                    PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
-                            };
-                        }
-                        else if (PropType == typeof(TimeSpan))
-                        {
-                            Assign = (dto, dr) =>
-                            {
-                                if (!dr.IsDBNull(Index))
-                                    PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
-                            };
-                        }
-                        else
-                        {
-                            Assign = (dto, dr) =>
-                            {
-                                if (!dr.IsDBNull(Index))
-                                    PropInfo.SetValue(dto, dr[Index]);
-                            };
-                        }
-                        break;
-                }
-            }
-            else if (DataType.IsValueType)
-            {
-                if (PropType.IsEnum)
-                {
-                    Assign = (dto, dr) =>
-                    {
-                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
-                    };
-                }
-                else if (PropType.IsValueType)
-                {
-                    bool CanAccommodate;
-                    unsafe
-                    {
-                        CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
-                    }
-                    if (CanAccommodate)
-                    {
-                        Assign = (dto, dr) =>
-                        {
-                            if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
+                                PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
                         };
-                    }
-                    else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
-                }
-            }
-        }
-        readonly PropertyInfo PropInfo;
-        readonly Type PropType;
-        readonly Type DataType;
-        readonly int Index;
-        internal Action<T, SqlDataReader> Assign { get; set; }
-    }
-    class MappingSetting<T>
-    {
-        internal MappingSetting(PropertyInfo propInfo, Type dataType, int index)
-        {
-            PropInfo = propInfo;
-            PropType = PropInfo.PropertyType;
-            DataType = dataType;
-            Index = index;
-            Assign = GetAction(PropType, DataType);
-        }
-        readonly PropertyInfo PropInfo;
-        readonly Type PropType;
-        readonly Type DataType;
-        readonly int Index;
-        internal Action<T, SqlDataReader> Assign { get; set; }
-        internal Action<T, SqlDataReader> GetAction(Type PropType, Type DataType)
-        {
-            if (PropType == DataType)
-            {
-                if (DataType.IsValueType)
-                {
-                    if (PropType == typeof(bool))
-                    {
-                        return Assign_bool;
-                    }
-                    else if (PropType == typeof(char))
-                    {
-                        return Assign_char;
-                    }
-                    else if (PropType == typeof(byte))
-                    {
-                        return Assign_byte;
-                    }
-                    else if (PropType == typeof(short))
-                    {
-                        return Assign_short;
-                    }
-                    else if (PropType == typeof(int))
-                    {
-                        return Assign_int;
-                    }
-                    else if (PropType == typeof(long))
-                    {
-                        return Assign_long;
-                    }
-                    else if (PropType == typeof(float))
-                    {
-                        return Assign_float;
-                    }
-                    else if (PropType == typeof(double))
-                    {
-                        return Assign_double;
-                    }
-                    else if (PropType == typeof(decimal))
-                    {
-                        return Assign_decimal;
-                    }
-                    else if (PropType == typeof(DateTime))
-                    {
-                        return Assign_DateTime;
-                    }
-                    else if (PropType == typeof(DateTimeOffset))
-                    {
-                        return Assign_DateTimeOffset;
                     }
                     else if (PropType == typeof(TimeSpan))
                     {
-                        return Assign_TimeSpan;
-                    }
-                }
-                else
-                {
-                    if (PropType == typeof(string))
-                    {
-                        return Assign_String;
+                        Assign = (dto, dr) =>
+                        {
+                            if (!dr.IsDBNull(Index))
+                                PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
+                        };
                     }
                     else
                     {
-                        return Assign_SameType;
+                        Assign = (dto, dr) =>
+                        {
+                            if (!dr.IsDBNull(Index))
+                                PropInfo.SetValue(dto, dr[Index]);
+                        };
                     }
-                }
+                    break;
             }
-            else if (DataType.IsValueType)
+        }
+        else if (DataType.IsValueType)
+        {
+            if (PropType.IsEnum)
             {
-                if (PropType.IsEnum)
+                Assign = (dto, dr) =>
                 {
-                    return Assign_forEnum;
+                    if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
+                };
+            }
+            else if (PropType.IsValueType)
+            {
+                bool CanAccommodate;
+                unsafe
+                {
+                    CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
                 }
-                else if (PropType.IsValueType)
+                if (CanAccommodate)
                 {
-                    bool CanAccommodate;
-                    unsafe
+                    Assign = (dto, dr) =>
                     {
-                        CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
-                    }
-                    if (CanAccommodate)
-                    {
-                        return Assign_ValueType;
-                    }
-                    else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                        if (!dr.IsDBNull(Index)) PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
+                    };
+                }
+                else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+            }
+        }
+    }
+    readonly PropertyInfo PropInfo;
+    readonly Type PropType;
+    readonly Type DataType;
+    readonly int Index;
+    internal Action<T, SqlDataReader> Assign { get; set; }
+}
+class MappingSetting<T>
+{
+    internal MappingSetting(PropertyInfo propInfo, Type dataType, int index)
+    {
+        PropInfo = propInfo;
+        PropType = PropInfo.PropertyType;
+        DataType = dataType;
+        Index = index;
+        Assign = GetAction(PropType, DataType);
+    }
+    readonly PropertyInfo PropInfo;
+    readonly Type PropType;
+    readonly Type DataType;
+    readonly int Index;
+    internal Action<T, SqlDataReader> Assign { get; set; }
+    internal Action<T, SqlDataReader> GetAction(Type PropType, Type DataType)
+    {
+        if (PropType == DataType)
+        {
+            if (DataType.IsValueType)
+            {
+                if (PropType == typeof(bool))
+                {
+                    return Assign_bool;
+                }
+                else if (PropType == typeof(char))
+                {
+                    return Assign_char;
+                }
+                else if (PropType == typeof(byte))
+                {
+                    return Assign_byte;
+                }
+                else if (PropType == typeof(short))
+                {
+                    return Assign_short;
+                }
+                else if (PropType == typeof(int))
+                {
+                    return Assign_int;
+                }
+                else if (PropType == typeof(long))
+                {
+                    return Assign_long;
+                }
+                else if (PropType == typeof(float))
+                {
+                    return Assign_float;
+                }
+                else if (PropType == typeof(double))
+                {
+                    return Assign_double;
+                }
+                else if (PropType == typeof(decimal))
+                {
+                    return Assign_decimal;
+                }
+                else if (PropType == typeof(DateTime))
+                {
+                    return Assign_DateTime;
+                }
+                else if (PropType == typeof(DateTimeOffset))
+                {
+                    return Assign_DateTimeOffset;
+                }
+                else if (PropType == typeof(TimeSpan))
+                {
+                    return Assign_TimeSpan;
                 }
             }
-            return Assign_DifferentType;
+            else
+            {
+                if (PropType == typeof(string))
+                {
+                    return Assign_String;
+                }
+                else
+                {
+                    return Assign_SameType;
+                }
+            }
         }
-        void Assign_bool(T dto, SqlDataReader dr)
+        else if (DataType.IsValueType)
         {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetBoolean(Index));
+            if (PropType.IsEnum)
+            {
+                return Assign_forEnum;
+            }
+            else if (PropType.IsValueType)
+            {
+                bool CanAccommodate;
+                unsafe
+                {
+                    CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
+                }
+                if (CanAccommodate)
+                {
+                    return Assign_ValueType;
+                }
+                else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+            }
         }
-        void Assign_char(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetChar(Index));
-        }
-        void Assign_byte(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetByte(Index));
-        }
-        void Assign_short(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetInt16(Index));
-        }
-        void Assign_int(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetInt32(Index));
-        }
-        void Assign_long(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetInt64(Index));
-        }
-        void Assign_float(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetFloat(Index));
-        }
-        void Assign_double(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetDouble(Index));
-        }
-        void Assign_decimal(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetDecimal(Index));
-        }
-        void Assign_String(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetString(Index).Trim());
-        }
-        void Assign_DateTime(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetDateTime(Index));
-        }
-        void Assign_DateTimeOffset(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
-        }
-        void Assign_TimeSpan(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
-        }
-        void Assign_SameType(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, dr[Index]);
-        }
-        void Assign_forEnum(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
-        }
-        void Assign_ValueType(T dto, SqlDataReader dr)
-        {
-            if (!dr.IsDBNull(Index))
-                PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
-        }
-        void Assign_DifferentType(T dto, SqlDataReader dr)
-        {
-            //do nothing.
-        }
+        return Assign_DifferentType;
+    }
+    void Assign_bool(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetBoolean(Index));
+    }
+    void Assign_char(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetChar(Index));
+    }
+    void Assign_byte(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetByte(Index));
+    }
+    void Assign_short(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetInt16(Index));
+    }
+    void Assign_int(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetInt32(Index));
+    }
+    void Assign_long(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetInt64(Index));
+    }
+    void Assign_float(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetFloat(Index));
+    }
+    void Assign_double(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetDouble(Index));
+    }
+    void Assign_decimal(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetDecimal(Index));
+    }
+    void Assign_String(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetString(Index).Trim());
+    }
+    void Assign_DateTime(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetDateTime(Index));
+    }
+    void Assign_DateTimeOffset(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetDateTimeOffset(Index));
+    }
+    void Assign_TimeSpan(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr.GetTimeSpan(Index));
+    }
+    void Assign_SameType(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, dr[Index]);
+    }
+    void Assign_forEnum(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[Index]));
+    }
+    void Assign_ValueType(T dto, SqlDataReader dr)
+    {
+        if (!dr.IsDBNull(Index))
+            PropInfo.SetValue(dto, Convert.ChangeType(dr[Index], PropType));
+    }
+    void Assign_DifferentType(T dto, SqlDataReader dr)
+    {
+        //do nothing.
     }
 }

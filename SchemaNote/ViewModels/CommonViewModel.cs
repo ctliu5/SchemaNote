@@ -1,18 +1,16 @@
-﻿using SchemaNote.Constants;
-using SchemaNote.Models;
+using SchemaNote.Constants;
 using System.ComponentModel.DataAnnotations;
 
-namespace SchemaNote.ViewModels
-{
-    public interface IProperties
-    {
-        string MS_Description { get; set; }
-        string REMARK { get; set; }
-    }
+namespace SchemaNote.ViewModels;
 
-    public interface IConnString
-    {
-        [Display(Name = Common.ConnString), Required]
-        string ConnectionString { get; set; }
-    }
+public interface IProperties
+{
+    string MS_Description { get; set; }
+    string REMARK { get; set; }
+}
+
+public interface IConnString
+{
+    [Display(Name = Common.ConnString), Required]
+    string ConnectionString { get; set; }
 }

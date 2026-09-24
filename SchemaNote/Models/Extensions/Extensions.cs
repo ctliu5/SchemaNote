@@ -1,300 +1,299 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using SchemaNote.DataAccess;
 using System.Data;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace SchemaNote.Models.Extensions
+namespace SchemaNote.Models.Extensions;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static List<T> ReadAll<T>(this SqlDataReader dr) where T : new()
     {
-        public static List<T> ReadAll<T>(this SqlDataReader dr) where T : new()
+        PropertyInfo[] propInfos = typeof(T).GetProperties();
+        List<T> DTOs = [];
+        int FieldCount = dr.FieldCount;
+        List<Mapper<T>> MappingRules = [];
+        for (int i = 0; i < FieldCount; i++)
         {
-            PropertyInfo[] propInfos = typeof(T).GetProperties();
-            List<T> DTOs = [];
-            int FieldCount = dr.FieldCount;
-            List<Mapper<T>> MappingRules = [];
-            for (int i = 0; i < FieldCount; i++)
+            foreach (PropertyInfo propInfo in propInfos)
             {
-                foreach (PropertyInfo propInfo in propInfos)
+                if (propInfo.Name == dr.GetName(i))
                 {
-                    if (propInfo.Name == dr.GetName(i))
-                    {
-                        MappingRules.Add(new Mapper<T>(propInfo, dr.GetFieldType(i), i));
-                        break;
-                    }
+                    MappingRules.Add(new Mapper<T>(propInfo, dr.GetFieldType(i), i));
+                    break;
                 }
             }
-
-            while (dr.Read())
-            {
-                var DTO = new T();
-
-                //有對應到的欄位，嘗試指派
-                foreach (Mapper<T> mapRule in MappingRules)
-                {
-                    mapRule.Assign(DTO, dr);
-                }
-                //沒對應到的欄位，自然略過，使用預設值
-
-                DTOs.Add(DTO);
-            }
-            return DTOs;
         }
 
-        public static List<T> ReadAll2<T>(this SqlDataReader dr) where T : new()
+        while (dr.Read())
         {
-            PropertyInfo[] propInfos = typeof(T).GetProperties();
-            List<T> DTOs = [];
-            int FieldCount = dr.FieldCount;
-            List<MappingSetting<T>> MappingRules = [];
-            for (int i = 0; i < FieldCount; i++)
+            var DTO = new T();
+
+            //有對應到的欄位，嘗試指派
+            foreach (Mapper<T> mapRule in MappingRules)
             {
-                foreach (PropertyInfo propInfo in propInfos)
+                mapRule.Assign(DTO, dr);
+            }
+            //沒對應到的欄位，自然略過，使用預設值
+
+            DTOs.Add(DTO);
+        }
+        return DTOs;
+    }
+
+    public static List<T> ReadAll2<T>(this SqlDataReader dr) where T : new()
+    {
+        PropertyInfo[] propInfos = typeof(T).GetProperties();
+        List<T> DTOs = [];
+        int FieldCount = dr.FieldCount;
+        List<MappingSetting<T>> MappingRules = [];
+        for (int i = 0; i < FieldCount; i++)
+        {
+            foreach (PropertyInfo propInfo in propInfos)
+            {
+                if (propInfo.Name == dr.GetName(i))
                 {
-                    if (propInfo.Name == dr.GetName(i))
-                    {
-                        MappingRules.Add(new MappingSetting<T>(propInfo, dr.GetFieldType(i), i));
-                        break;
-                    }
+                    MappingRules.Add(new MappingSetting<T>(propInfo, dr.GetFieldType(i), i));
+                    break;
                 }
             }
-
-            while (dr.Read())
-            {
-                var DTO = new T();
-
-                //有對應到的欄位，嘗試指派
-                foreach (MappingSetting<T> mapRule in MappingRules)
-                {
-                    mapRule.Assign(DTO, dr);
-                }
-                //沒對應到的欄位，自然略過，使用預設值
-                DTOs.Add(DTO);
-            }
-            return DTOs;
         }
 
-        public static List<T> ReadAll3<T>(this SqlDataReader dr) where T : new()
+        while (dr.Read())
         {
-            List<T> DTOs = [];
-            PropertyInfo[] propInfos = typeof(T).GetProperties();
-            int FieldCount = dr.FieldCount;
-            string[] Fields = new string[FieldCount];
-            for (int i = 0; i < FieldCount; i++) { Fields[i] = dr.GetName(i); }
+            var DTO = new T();
 
-            while (dr.Read())
+            //有對應到的欄位，嘗試指派
+            foreach (MappingSetting<T> mapRule in MappingRules)
             {
-                var dto = new T();
-                foreach (PropertyInfo PropInfo in propInfos)
+                mapRule.Assign(DTO, dr);
+            }
+            //沒對應到的欄位，自然略過，使用預設值
+            DTOs.Add(DTO);
+        }
+        return DTOs;
+    }
+
+    public static List<T> ReadAll3<T>(this SqlDataReader dr) where T : new()
+    {
+        List<T> DTOs = [];
+        PropertyInfo[] propInfos = typeof(T).GetProperties();
+        int FieldCount = dr.FieldCount;
+        string[] Fields = new string[FieldCount];
+        for (int i = 0; i < FieldCount; i++) { Fields[i] = dr.GetName(i); }
+
+        while (dr.Read())
+        {
+            var dto = new T();
+            foreach (PropertyInfo PropInfo in propInfos)
+            {
+                if (Fields.Contains(PropInfo.Name))
                 {
-                    if (Fields.Contains(PropInfo.Name))
+                    string field = PropInfo.Name;
+                    Type PropType = PropInfo.PropertyType;
+                    Type DataType = dr.GetFieldType(field);
+                    if (PropType == DataType)
                     {
-                        string field = PropInfo.Name;
-                        Type PropType = PropInfo.PropertyType;
-                        Type DataType = dr.GetFieldType(field);
-                        if (PropType == DataType)
+                        switch (Type.GetTypeCode(DataType))
                         {
-                            switch (Type.GetTypeCode(DataType))
-                            {
-                                case TypeCode.Boolean:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetBoolean(field));
-                                    break;
-                                case TypeCode.Char:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetChar(field));
-                                    break;
-                                case TypeCode.Byte:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetByte(field));
-                                    break;
-                                //case TypeCode.SByte: break;
-                                //case TypeCode.UInt16: break;
-                                case TypeCode.Int16:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt16(field));
-                                    break;
-                                //case TypeCode.UInt32: break;
-                                case TypeCode.Int32:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt32(field));
-                                    break;
-                                //case TypeCode.UInt64: break;
-                                case TypeCode.Int64:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt64(field));
-                                    break;
-                                case TypeCode.Single:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetFloat(field));
-                                    break;
-                                case TypeCode.Double:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDouble(field));
-                                    break;
-                                case TypeCode.Decimal:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDecimal(field));
-                                    break;
-                                case TypeCode.String:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetString(field).Trim());
-                                    break;
-                                case TypeCode.DateTime:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDateTime(field));
-                                    break;
-                                default:
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr[field]);
-                                    break;
-                            }
+                            case TypeCode.Boolean:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetBoolean(field));
+                                break;
+                            case TypeCode.Char:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetChar(field));
+                                break;
+                            case TypeCode.Byte:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetByte(field));
+                                break;
+                            //case TypeCode.SByte: break;
+                            //case TypeCode.UInt16: break;
+                            case TypeCode.Int16:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt16(field));
+                                break;
+                            //case TypeCode.UInt32: break;
+                            case TypeCode.Int32:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt32(field));
+                                break;
+                            //case TypeCode.UInt64: break;
+                            case TypeCode.Int64:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt64(field));
+                                break;
+                            case TypeCode.Single:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetFloat(field));
+                                break;
+                            case TypeCode.Double:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDouble(field));
+                                break;
+                            case TypeCode.Decimal:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDecimal(field));
+                                break;
+                            case TypeCode.String:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetString(field).Trim());
+                                break;
+                            case TypeCode.DateTime:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDateTime(field));
+                                break;
+                            default:
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr[field]);
+                                break;
                         }
-                        else if (DataType.IsValueType)
+                    }
+                    else if (DataType.IsValueType)
+                    {
+                        if (PropType.IsEnum)
                         {
-                            if (PropType.IsEnum)
+                            if (!dr.IsDBNull(field))
+                                PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[field]));
+                        }
+                        else if (PropType.IsValueType)
+                        {
+                            bool CanAccommodate;
+                            unsafe
+                            {
+                                CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
+                            }
+                            if (CanAccommodate)
                             {
                                 if (!dr.IsDBNull(field))
-                                    PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[field]));
+                                    PropInfo.SetValue(dto, Convert.ChangeType(dr[field], PropType));
                             }
-                            else if (PropType.IsValueType)
+                            else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                        }
+                    }
+
+                }
+            }
+            DTOs.Add(dto);
+        }
+        return DTOs;
+    }
+
+    public static List<T> ReadAll4<T>(this SqlDataReader dr) where T : new()
+    {
+        List<T> DTOs = [];
+        PropertyInfo[] propInfos = typeof(T).GetProperties();
+        int FieldCount = dr.FieldCount;
+        string[] Fields = new string[FieldCount];
+        for (int i = 0; i < FieldCount; i++) { Fields[i] = dr.GetName(i); }
+
+        while (dr.Read())
+        {
+            var dto = new T();
+            foreach (PropertyInfo PropInfo in propInfos)
+            {
+                if (Fields.Contains(PropInfo.Name))
+                {
+                    string field = PropInfo.Name;
+                    Type PropType = PropInfo.PropertyType;
+                    Type DataType = dr.GetFieldType(field);
+                    if (PropType == DataType)
+                    {
+                        if (DataType.IsValueType)
+                        {
+                            if (PropType == typeof(bool))
                             {
-                                bool CanAccommodate;
-                                unsafe
-                                {
-                                    CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
-                                }
-                                if (CanAccommodate)
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, Convert.ChangeType(dr[field], PropType));
-                                }
-                                else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetBoolean(field));
+                            }
+                            else if (PropType == typeof(char))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetChar(field));
+                            }
+                            else if (PropType == typeof(byte))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetByte(field));
+                            }
+                            else if (PropType == typeof(short))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt16(field));
+                            }
+                            else if (PropType == typeof(int))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt32(field));
+                            }
+                            else if (PropType == typeof(long))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetInt64(field));
+                            }
+                            else if (PropType == typeof(float))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetFloat(field));
+                            }
+                            else if (PropType == typeof(double))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDouble(field));
+                            }
+                            else if (PropType == typeof(decimal))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDecimal(field));
+                            }
+                            else if (PropType == typeof(DateTime))
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetDateTime(field));
                             }
                         }
-
-                    }
-                }
-                DTOs.Add(dto);
-            }
-            return DTOs;
-        }
-
-        public static List<T> ReadAll4<T>(this SqlDataReader dr) where T : new()
-        {
-            List<T> DTOs = [];
-            PropertyInfo[] propInfos = typeof(T).GetProperties();
-            int FieldCount = dr.FieldCount;
-            string[] Fields = new string[FieldCount];
-            for (int i = 0; i < FieldCount; i++) { Fields[i] = dr.GetName(i); }
-
-            while (dr.Read())
-            {
-                var dto = new T();
-                foreach (PropertyInfo PropInfo in propInfos)
-                {
-                    if (Fields.Contains(PropInfo.Name))
-                    {
-                        string field = PropInfo.Name;
-                        Type PropType = PropInfo.PropertyType;
-                        Type DataType = dr.GetFieldType(field);
-                        if (PropType == DataType)
+                        else
                         {
-                            if (DataType.IsValueType)
+                            if (PropType == typeof(string))
                             {
-                                if (PropType == typeof(bool))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetBoolean(field));
-                                }
-                                else if (PropType == typeof(char))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetChar(field));
-                                }
-                                else if (PropType == typeof(byte))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetByte(field));
-                                }
-                                else if (PropType == typeof(short))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt16(field));
-                                }
-                                else if (PropType == typeof(int))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt32(field));
-                                }
-                                else if (PropType == typeof(long))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetInt64(field));
-                                }
-                                else if (PropType == typeof(float))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetFloat(field));
-                                }
-                                else if (PropType == typeof(double))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDouble(field));
-                                }
-                                else if (PropType == typeof(decimal))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDecimal(field));
-                                }
-                                else if (PropType == typeof(DateTime))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetDateTime(field));
-                                }
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, dr.GetString(field).Trim());
                             }
                             else
                             {
-                                if (PropType == typeof(string))
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr.GetString(field).Trim());
-                                }
-                                else
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, dr[field]);
-                                }
-                            }
-                        }
-                        else if (DataType.IsValueType)
-                        {
-                            if (PropType.IsEnum)
-                            {
                                 if (!dr.IsDBNull(field))
-                                    PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[field]));
-                            }
-                            else if (PropType.IsValueType)
-                            {
-                                bool CanAccommodate;
-                                unsafe
-                                {
-                                    CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
-                                }
-                                if (CanAccommodate)
-                                {
-                                    if (!dr.IsDBNull(field))
-                                        PropInfo.SetValue(dto, Convert.ChangeType(dr[field], PropType));
-                                }
-                                else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                                    PropInfo.SetValue(dto, dr[field]);
                             }
                         }
                     }
+                    else if (DataType.IsValueType)
+                    {
+                        if (PropType.IsEnum)
+                        {
+                            if (!dr.IsDBNull(field))
+                                PropInfo.SetValue(dto, Enum.ToObject(PropType, dr[field]));
+                        }
+                        else if (PropType.IsValueType)
+                        {
+                            bool CanAccommodate;
+                            unsafe
+                            {
+                                CanAccommodate = Marshal.SizeOf(PropType) <= Marshal.SizeOf(DataType);
+                            }
+                            if (CanAccommodate)
+                            {
+                                if (!dr.IsDBNull(field))
+                                    PropInfo.SetValue(dto, Convert.ChangeType(dr[field], PropType));
+                            }
+                            else throw new EvaluateException("實值型別[" + PropType.ToString() + "]的大小，小於資料庫欄位轉換後型別[" + DataType + "]的大小。");
+                        }
+                    }
                 }
-                DTOs.Add(dto);
             }
-            return DTOs;
+            DTOs.Add(dto);
         }
+        return DTOs;
     }
 }

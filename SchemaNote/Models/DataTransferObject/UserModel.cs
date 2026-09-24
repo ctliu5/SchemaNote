@@ -1,22 +1,21 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
-namespace SchemaNote.Models.DataTransferObject
+namespace SchemaNote.Models.DataTransferObject;
+
+public class UserModel
 {
-    public class UserModel
-    {
-        public string? ConnectionString { get; private set; }
+    public string? ConnectionString { get; private set; }
 
-        public void SetConnectionString(string _value)
+    public void SetConnectionString(string _value)
+    {
+        if (!string.IsNullOrEmpty(_value))
         {
-            if (!string.IsNullOrEmpty(_value))
+            var builder = new SqlConnectionStringBuilder(_value)
             {
-                var builder = new SqlConnectionStringBuilder(_value)
-                {
-                    TrustServerCertificate = true
-                };
-                _value = builder.ConnectionString;
-            }
-            ConnectionString = _value;
+                TrustServerCertificate = true
+            };
+            _value = builder.ConnectionString;
         }
+        ConnectionString = _value;
     }
 }

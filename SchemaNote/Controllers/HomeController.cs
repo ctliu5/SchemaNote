@@ -8,338 +8,337 @@ using SchemaNote.ViewModels;
 using System.Diagnostics;
 using static SchemaNote.Constants.Common;
 
-namespace SchemaNote.Controllers
+namespace SchemaNote.Controllers;
+
+public class HomeController(IUserContext userContext, ICryptoService cryptoService, IExportService exportService, IConnectionInfoService connectionInfoService) : Controller
 {
-    public class HomeController(IUserContext userContext, ICryptoService cryptoService, IExportService exportService, IConnectionInfoService connectionInfoService) : Controller
+    private readonly IUserContext _userContext = userContext;
+    private readonly ICryptoService _cryptoService = cryptoService;
+    private readonly IExportService _exportService = exportService;
+    private readonly IConnectionInfoService _connectionInfoService = connectionInfoService;
+    private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
+
+    [HttpGet]
+    public IActionResult Index()
     {
-        private readonly IUserContext _userContext = userContext;
-        private readonly ICryptoService _cryptoService = cryptoService;
-        private readonly IExportService _exportService = exportService;
-        private readonly IConnectionInfoService _connectionInfoService = connectionInfoService;
-        private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
+        return View();
+    }
 
-        [HttpGet]
-        public IActionResult Index()
+    [HttpPost]
+    public ActionResult Overview(string ConnectionString, bool encrypted = false)
+    {
+        if (ModelState.IsValid)
         {
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult Overview(string ConnectionString, bool encrypted = false)
-        {
-            if (ModelState.IsValid)
+            if (string.IsNullOrEmpty(ConnectionString))
             {
-                if (string.IsNullOrEmpty(ConnectionString))
+                TempData["ErrorMessage"] = ConnStringMissing;
+                return RedirectToAction("Index");
+            }
+            // 由已儲存連線（localStorage）送來的字串為 AES 密文，需先在後端解密。
+            if (encrypted)
+            {
+                if (!_cryptoService.TryDecrypt(ConnectionString, out string decrypted) || string.IsNullOrEmpty(decrypted))
                 {
                     TempData["ErrorMessage"] = ConnStringMissing;
                     return RedirectToAction("Index");
                 }
-                // 由已儲存連線（localStorage）送來的字串為 AES 密文，需先在後端解密。
-                if (encrypted)
-                {
-                    if (!_cryptoService.TryDecrypt(ConnectionString, out string decrypted) || string.IsNullOrEmpty(decrypted))
-                    {
-                        TempData["ErrorMessage"] = ConnStringMissing;
-                        return RedirectToAction("Index");
-                    }
-                    ConnectionString = decrypted;
-                }
-                return ConnectAndRedirect(ConnectionString);
+                ConnectionString = decrypted;
             }
-            else
-            {
-                TempData["ErrorMessage"] = ConnStringNoData;
-                return RedirectToAction("Index");
-            }
+            return ConnectAndRedirect(ConnectionString);
         }
-
-        // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
-        private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
+        else
         {
-            UserModel userModel = new();
-            userModel.SetConnectionString(ConnectionString);
-            _userContext.User = userModel;
-            if (_userContext.User.ConnectionString is not null) ConnectionString = _userContext.User.ConnectionString;
-            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Index");
-            }
-            // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
-            return RedirectToAction("Overview");
+            TempData["ErrorMessage"] = ConnStringNoData;
+            return RedirectToAction("Index");
         }
+    }
 
-        // 讓使用者只需填 server / database / uid / pwd 四個欄位，後端組回 SQL Server 連線字串。
-        [HttpPost]
-        public ActionResult OverviewByFields(string Server, string Database, string Uid, string Pwd)
+    // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
+    private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
+    {
+        UserModel userModel = new();
+        userModel.SetConnectionString(ConnectionString);
+        _userContext.User = userModel;
+        if (_userContext.User.ConnectionString is not null) ConnectionString = _userContext.User.ConnectionString;
+        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+        if (Flag.ResultType != ExceResultType.Success)
         {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = ConnStringNoData;
-                return RedirectToAction("Index");
-            }
-            if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)
-                || string.IsNullOrWhiteSpace(Uid) || string.IsNullOrWhiteSpace(Pwd))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            Microsoft.Data.SqlClient.SqlConnectionStringBuilder builder = new()
-            {
-                DataSource = Server,
-                InitialCatalog = Database,
-                UserID = Uid,
-                Password = Pwd
-            };
-            return ConnectAndRedirect(builder.ConnectionString);
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Index");
         }
+        // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
+        return RedirectToAction("Overview");
+    }
 
-        [HttpGet]
-        public ActionResult Overview()
+    // 讓使用者只需填 server / database / uid / pwd 四個欄位，後端組回 SQL Server 連線字串。
+    [HttpPost]
+    public ActionResult OverviewByFields(string Server, string Database, string Uid, string Pwd)
+    {
+        if (!ModelState.IsValid)
         {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-
-            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return View();
-            }
-            SetCurrentConnectionViewData(ConnectionString);
-            return View(Flag.OBJ);
+            TempData["ErrorMessage"] = ConnStringNoData;
+            return RedirectToAction("Index");
         }
-
-        // 從連線字串解析出 Server Address 與 Database Name（供前端比對 localStorage），
-        // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
-        private void SetCurrentConnectionViewData(string connectionString)
+        if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)
+            || string.IsNullOrWhiteSpace(Uid) || string.IsNullOrWhiteSpace(Pwd))
         {
-            var (server, database) = _connectionInfoService.Parse(connectionString);
-            ViewData["CurrentServer"] = server;
-            ViewData["CurrentDatabase"] = database;
-            ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
         }
-
-        #region 匯出相關
-        [HttpPost]
-        public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
+        Microsoft.Data.SqlClient.SqlConnectionStringBuilder builder = new()
         {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-            var (server, database) = _connectionInfoService.Parse(ConnectionString);
+            DataSource = Server,
+            InitialCatalog = Database,
+            UserID = Uid,
+            Password = Pwd
+        };
+        return ConnectAndRedirect(builder.ConnectionString);
+    }
 
-            DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
-            }
-            byte[] content = _exportService.Utf8WithBom(Flag.OBJ.ToString());
-            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.sql";
-            return File(content, "text/plain; charset=utf-8", fileName);
-        }
-
-        [HttpPost]
-        public ActionResult DropAllExtendedProps(int[]? objectIds = null)
+    [HttpGet]
+    public ActionResult Overview()
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
         {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-
-            DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
-            }
-            TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆擴充屬性";
-            return RedirectToAction("Overview");
-        }
-
-        [HttpPost]
-        public ActionResult DropAllFlags(int[]? objectIds = null)
-        {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-
-            DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds, propName: Flags);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
-            }
-            TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆標籤";
-            return RedirectToAction("Overview");
-        }
-
-        [HttpPost]
-        public ActionResult ExportMarkdown(int[]? objectIds = null)
-        {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-            var (server, database) = _connectionInfoService.Parse(ConnectionString);
-
-            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
-            }
-
-            _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
-
-            string markdown = _exportService.BuildMarkdown(Flag.OBJ);
-            byte[] content = _exportService.Utf8WithBom(markdown);
-            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.md";
-            return File(content, "text/markdown; charset=utf-8", fileName);
-        }
-
-        [HttpPost]
-        public ActionResult ExportExcel(int[]? objectIds = null)
-        {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-            var (server, database) = _connectionInfoService.Parse(ConnectionString);
-
-            DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
-            }
-
-            _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
-
-            byte[] content = _exportService.BuildExcel(Flag.OBJ);
-            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-            return File(content, contentType, fileName);
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
         }
         #endregion
 
-        // 關閉連線：清除 Session 中的連線資訊，導回首頁。
-        [HttpPost]
-        public ActionResult CloseConnection()
+        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+        if (Flag.ResultType != ExceResultType.Success)
         {
-            _userContext.Clear();
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return View();
+        }
+        SetCurrentConnectionViewData(ConnectionString);
+        return View(Flag.OBJ);
+    }
+
+    // 從連線字串解析出 Server Address 與 Database Name（供前端比對 localStorage），
+    // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
+    private void SetCurrentConnectionViewData(string connectionString)
+    {
+        var (server, database) = _connectionInfoService.Parse(connectionString);
+        ViewData["CurrentServer"] = server;
+        ViewData["CurrentDatabase"] = database;
+        ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
+    }
+
+    #region 匯出相關
+    [HttpPost]
+    public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+        var (server, database) = _connectionInfoService.Parse(ConnectionString);
+
+        DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+        byte[] content = _exportService.Utf8WithBom(Flag.OBJ.ToString());
+        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.sql";
+        return File(content, "text/plain; charset=utf-8", fileName);
+    }
+
+    [HttpPost]
+    public ActionResult DropAllExtendedProps(int[]? objectIds = null)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+
+        DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds);
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+        TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆擴充屬性";
+        return RedirectToAction("Overview");
+    }
+
+    [HttpPost]
+    public ActionResult DropAllFlags(int[]? objectIds = null)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+
+        DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds, propName: Flags);
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+        TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆標籤";
+        return RedirectToAction("Overview");
+    }
+
+    [HttpPost]
+    public ActionResult ExportMarkdown(int[]? objectIds = null)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+        var (server, database) = _connectionInfoService.Parse(ConnectionString);
+
+        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+
+        _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
+
+        string markdown = _exportService.BuildMarkdown(Flag.OBJ);
+        byte[] content = _exportService.Utf8WithBom(markdown);
+        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.md";
+        return File(content, "text/markdown; charset=utf-8", fileName);
+    }
+
+    [HttpPost]
+    public ActionResult ExportExcel(int[]? objectIds = null)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+        var (server, database) = _connectionInfoService.Parse(ConnectionString);
+
+        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+
+        _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
+
+        byte[] content = _exportService.BuildExcel(Flag.OBJ);
+        const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+        return File(content, contentType, fileName);
+    }
+    #endregion
+
+    // 關閉連線：清除 Session 中的連線資訊，導回首頁。
+    [HttpPost]
+    public ActionResult CloseConnection()
+    {
+        _userContext.Clear();
+        return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public ActionResult Details(int? id)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+        else if (id == null)
+        {
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public ActionResult Details(int? id)
+        DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, (int)id, _db_tool);
+        if (Flag.ResultType != ExceResultType.Success)
         {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-            else if (id == null)
-            {
-                return RedirectToAction("Index");
-            }
+            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            return RedirectToAction("Overview");
+        }
+        SetCurrentConnectionViewData(ConnectionString);
+        return View(Flag.OBJ);
+    }
 
-            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, (int)id, _db_tool);
-            if (Flag.ResultType != ExceResultType.Success)
+    [HttpPost]
+    public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
+    {
+        #region check Connection
+        string? ConnectionString = _userContext.User.ConnectionString;
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            TempData["ErrorMessage"] = ConnStringMissing;
+            return RedirectToAction("Index");
+        }
+        #endregion
+        else if (model.Count == 0)
+        {
+            //沒有要新刪修的項目
+            return Details(id);
+        }
+        else if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = ValidationMsg;
+            return Details(id);
+        }
+
+        DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
+        DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id, _db_tool);
+
+        if (Flag.ResultType != ExceResultType.Success)
+        {
+            if (Flag_prop.ResultType != ExceResultType.Success)
+            {
+                TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString() + "<br />" + Flag.ErrorMessagesHtmlString();
+            }
+            else
             {
                 TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                return RedirectToAction("Overview");
             }
-            SetCurrentConnectionViewData(ConnectionString);
-            return View(Flag.OBJ);
+            return RedirectToAction("Overview");
         }
-
-        [HttpPost]
-        public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
+        else if (Flag_prop.ResultType != ExceResultType.Success)
         {
-            #region check Connection
-            string? ConnectionString = _userContext.User.ConnectionString;
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                TempData["ErrorMessage"] = ConnStringMissing;
-                return RedirectToAction("Index");
-            }
-            #endregion
-            else if (model.Count == 0)
-            {
-                //沒有要新刪修的項目
-                return Details(id);
-            }
-            else if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = ValidationMsg;
-                return Details(id);
-            }
-
-            DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
-            DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id, _db_tool);
-
-            if (Flag.ResultType != ExceResultType.Success)
-            {
-                if (Flag_prop.ResultType != ExceResultType.Success)
-                {
-                    TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString() + "<br />" + Flag.ErrorMessagesHtmlString();
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-                }
-                return RedirectToAction("Overview");
-            }
-            else if (Flag_prop.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
-            }
-            return View(Flag.OBJ);
+            TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
         }
+        return View(Flag.OBJ);
+    }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
