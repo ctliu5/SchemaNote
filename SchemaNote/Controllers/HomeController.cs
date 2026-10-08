@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using SchemaNote.Constants;
 using SchemaNote.DataAccess;
 using SchemaNote.Models;
-using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Services;
 using SchemaNote.ViewModels;
 using System.Diagnostics;
@@ -56,10 +55,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
     private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
     {
-        UserModel userModel = new();
-        userModel.SetConnectionString(ConnectionString);
-        _userContext.User = userModel;
-        if (_userContext.User.ConnectionString is not null) ConnectionString = _userContext.User.ConnectionString;
+        _userContext.Init(ConnectionString);
+        if (_userContext.GetConnectionString() is string connectionString) ConnectionString = connectionString;
         DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
         if (Flag.ResultType != ExceResultType.Success)
         {
@@ -99,7 +96,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Overview()
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -132,7 +129,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -156,7 +153,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult DropAllExtendedProps(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -178,7 +175,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult DropAllFlags(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -200,7 +197,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportMarkdown(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -228,7 +225,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportExcel(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -265,7 +262,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Details(int? id)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;
@@ -291,7 +288,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
     {
         #region check Connection
-        string? ConnectionString = _userContext.User.ConnectionString;
+        string? ConnectionString = _userContext.GetConnectionString();
         if (string.IsNullOrEmpty(ConnectionString))
         {
             TempData["ErrorMessage"] = ConnStringMissing;

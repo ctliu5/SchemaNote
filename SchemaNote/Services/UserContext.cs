@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Data.SqlClient;
 using SchemaNote.Constants;
-using SchemaNote.Models.DataTransferObject;
 using System.Security.Claims;
 
 namespace SchemaNote.Services;
 
 public interface IUserContext
 {
-    UserModel User { get; set; }
+    public void Init(string connectionString);
+
+    public string GetConnectionString();
 
     // 清除整個登入 Cookie（含連線資訊）。
     void Clear();
@@ -23,42 +25,44 @@ public class CookieUserContext(IHttpContextAccessor httpContextAccessor) : IUser
     private static readonly string _userIdClaim = Common.UserIdClaim;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-    public UserModel User
+    public void Init(string connectionString)
     {
-        get
+        if (!string.IsNullOrEmpty(connectionString))
         {
-            UserModel userModel = new();
-            string? connectionString = _httpContextAccessor.HttpContext?.User?
-                .FindFirst(_connectionStringClaim)?.Value;
-            if (!string.IsNullOrEmpty(connectionString))
+            var builder = new SqlConnectionStringBuilder(connectionString)
             {
-                userModel.SetConnectionString(connectionString);
-            }
-            return userModel;
+                TrustServerCertificate = true
+            };
+            connectionString = builder.ConnectionString;
         }
-        set
-        {
-            HttpContext? httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext is null) return;
 
-            // 提供穩定的識別 Claim，讓 antiforgery 綁定的身分保持一致。
-            List<Claim> claims =
-            [
-                new Claim(ClaimTypes.NameIdentifier, _userIdClaim),
+        HttpContext? httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext is null) return;
+
+        // 提供穩定的識別 Claim，讓 antiforgery 綁定的身分保持一致。
+        List<Claim> claims =
+        [
+            new Claim(ClaimTypes.NameIdentifier, _userIdClaim),
                 new Claim(ClaimTypes.Name, _userIdClaim),
             ];
-            if (!string.IsNullOrEmpty(value.ConnectionString))
-            {
-                claims.Add(new Claim(_connectionStringClaim, value.ConnectionString));
-            }
-
-            ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            ClaimsPrincipal principal = new(identity);
-
-            // 以 Cookie-Authentication 發出登入 Cookie，將連線資訊存放在 Claims 中。
-            httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal)
-                .GetAwaiter().GetResult();
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            claims.Add(new Claim(_connectionStringClaim, connectionString));
         }
+
+        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        ClaimsPrincipal principal = new(identity);
+
+        // 以 Cookie-Authentication 發出登入 Cookie，將連線資訊存放在 Claims 中。
+        httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal)
+            .GetAwaiter().GetResult();
+    }
+
+    public string GetConnectionString()
+    {
+        string? connectionString = _httpContextAccessor.HttpContext?.User?
+            .FindFirst(_connectionStringClaim)?.Value;
+        return connectionString ?? string.Empty;
     }
 
     public void Clear()
