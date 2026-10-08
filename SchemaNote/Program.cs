@@ -35,10 +35,12 @@ public class Program
 
         //採Singleton模式，使用強型別
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        services.AddSingleton<IUserContext, CookieUserContext>();
         services.AddSingleton<ICryptoService, AesCryptoService>();
         services.AddSingleton<IExportService, ExportService>();
         services.AddSingleton<IConnectionInfoService, ConnectionInfoService>();
+
+        // 身分驗證的使用者資訊（ConnectionString）會以 Claim 形式存放在登入 Cookie 中，透過 IUserContext 介面提供存取。
+        services.AddScoped<IUserContext, CookieUserContext>();
 
         #region CSRF 防護
         services.AddControllersWithViews(options =>

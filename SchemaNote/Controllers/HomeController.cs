@@ -23,6 +23,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         return View();
     }
 
+    // 由前端送來的連線字串，嘗試連線並導向 Overview。
     [HttpPost]
     public ActionResult Overview(string ConnectionString, bool encrypted = false)
     {
@@ -55,8 +56,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
     private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
     {
-        _userContext.Init(ConnectionString);
-        if (_userContext.GetConnectionString() is string connectionString) ConnectionString = connectionString;
+        if (_userContext.Init(ConnectionString) is string connectionString) ConnectionString = connectionString;
         DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
         if (Flag.ResultType != ExceResultType.Success)
         {
@@ -71,15 +71,13 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     [HttpPost]
     public ActionResult OverviewByFields(string Server, string Database, string Uid, string Pwd)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid
+            || string.IsNullOrWhiteSpace(Server)
+            || string.IsNullOrWhiteSpace(Database)
+            || string.IsNullOrWhiteSpace(Uid)
+            || string.IsNullOrWhiteSpace(Pwd))
         {
             TempData["ErrorMessage"] = ConnStringNoData;
-            return RedirectToAction("Index");
-        }
-        if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)
-            || string.IsNullOrWhiteSpace(Uid) || string.IsNullOrWhiteSpace(Pwd))
-        {
-            TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
         }
         Microsoft.Data.SqlClient.SqlConnectionStringBuilder builder = new()
@@ -96,8 +94,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Overview()
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -129,8 +127,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportExtendedPropScript(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -153,8 +151,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult DropAllExtendedProps(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -175,8 +173,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult DropAllFlags(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -197,8 +195,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportMarkdown(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -225,8 +223,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult ExportExcel(int[]? objectIds = null)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -262,8 +260,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Details(int? id)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
@@ -288,8 +286,8 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult Details([FromRoute] int id, [FromForm] ICollection<VM_Property> model)
     {
         #region check Connection
-        string? ConnectionString = _userContext.GetConnectionString();
-        if (string.IsNullOrEmpty(ConnectionString))
+        string ConnectionString = _userContext.GetConnectionString(out bool found);
+        if (!found)
         {
             TempData["ErrorMessage"] = ConnStringMissing;
             return RedirectToAction("Index");
