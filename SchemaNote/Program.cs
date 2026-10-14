@@ -47,6 +47,8 @@ public class Program
         {
             // 全站啟用 CSRF 防護，所有 POST/PUT/PATCH/DELETE 都會自動驗證 AntiForgeryToken
             options.Filters.Add<Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute>();
+            // 防偽驗證失敗（如登入 Cookie 到期）時改為導回首頁，而非直接回傳 400
+            options.Filters.Add<SchemaNote.Filters.AntiforgeryRedirectFilter>();
         });
         builder.Services.AddAntiforgery(options =>
         {
