@@ -253,6 +253,7 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     public ActionResult CloseConnection()
     {
         _userContext.Clear();
+        // Post/Redirect/Get：清除連線後導向 GET Index。
         return RedirectToAction("Index");
     }
 
@@ -296,34 +297,21 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         else if (model.Count == 0)
         {
             //沒有要新刪修的項目
-            return Details(id);
+            return RedirectToAction("Details", new { id });
         }
         else if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = ValidationMsg;
-            return Details(id);
+            return RedirectToAction("Details", new { id });
         }
 
         DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
-        DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, id, _db_tool);
-
-        if (Flag.ResultType != ExceResultType.Success)
-        {
-            if (Flag_prop.ResultType != ExceResultType.Success)
-            {
-                TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString() + "<br />" + Flag.ErrorMessagesHtmlString();
-            }
-            else
-            {
-                TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-            }
-            return RedirectToAction("Overview");
-        }
-        else if (Flag_prop.ResultType != ExceResultType.Success)
+        if (Flag_prop.ResultType != ExceResultType.Success)
         {
             TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
         }
-        return View(Flag.OBJ);
+        // Post/Redirect/Get：儲存後導向 GET Details，避免重新整理時重複送出表單。
+        return RedirectToAction("Details", new { id });
     }
 
     public IActionResult Privacy()
