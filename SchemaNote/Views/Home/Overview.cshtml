@@ -21,7 +21,8 @@
      data-remark-label="@Common.OBJ_COL_Remark"
      data-remark-json="@Model.RemarkJson"
      data-flags="@Model.FlagsJson"
-     data-allflags="@Model.AllFlagsJson"></div>
+     data-allflags="@Model.AllFlagsJson"
+     data-none-flag="@Common.NoneSheetName"></div>
 <div class="overview-sticky-header mb-2">
     <div class="d-flex align-items-baseline gap-2 mb-2 mt-3 flex-wrap">
         <h2 class="mb-0">Overview</h2>
@@ -74,9 +75,9 @@
                     📋匯出
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonExport">
-                    <li><a class="dropdown-item" href="#" onclick="ExportExcel()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Excel">匯出 Excel</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ExportMarkdown()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Markdown">匯出 Markdown</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ExportExtendedPropScript()" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出SQL擴充屬性">匯出 SQL 擴充屬性</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportExcel(); return false;" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Excel">匯出 Excel</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportMarkdown(); return false;" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出Markdown">匯出 Markdown</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="ExportExtendedPropScript(); return false;" data-bs-toggle="tooltip" data-bs-placement="left" title="@Common.ToolTip匯出SQL擴充屬性">匯出 SQL 擴充屬性</a></li>
                 </ul>
             </div>
             <div class="btn-group">
@@ -97,7 +98,7 @@
 @foreach (var item in Model.Tables)
 {
     i++;
-    <div class="card accordion mb-2" id="@Html.Raw(Common.accordion + i)" data-object-id="@item.OBJECT_ID" role="tablist" aria-multiselectable="true">
+    <div class="card accordion mb-2" id="@Html.Raw(Common.accordion + i)" data-object-id="@item.OBJECT_ID" data-object-schema="@item.SCHEMA_NAME" data-object-type="@item.TYPE_NAME" role="tablist" aria-multiselectable="true">
         <div class="card">
             <div class="card-header cus_panel-heading" role="tab">
                 <span class="panel-title" role="button" data-bs-toggle="collapse" data-bs-target="#@Html.Raw("collapse" + i)" aria-expanded="false" aria-controls="@Html.Raw("collapse" + i)">
@@ -135,3 +136,39 @@
         </div>
     </div>
 }
+
+<div class="modal fade" id="exportFilterModal" tabindex="-1" aria-labelledby="exportFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportFilterModalLabel">匯出選項</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="exportModeStep">
+                    <p>請選擇匯出範圍</p>
+                    <div class="list-group">
+                        <button type="button" class="list-group-item list-group-item-action" id="exportDownloadAll">下載全部</button>
+                        <button type="button" class="list-group-item list-group-item-action" id="exportExcludeSelected">排除所選</button>
+                        <button type="button" class="list-group-item list-group-item-action" id="exportIncludeSelected">包含所選</button>
+                    </div>
+                </div>
+                <div id="exportFlagsStep" class="d-none">
+                    <h6 id="exportFlagsStepTitle">步驟 1/2：選擇標籤</h6>
+                    <div id="exportFlagsOptions" class="border rounded p-2" style="max-height:300px;overflow-y:auto;"></div>
+                </div>
+                <div id="exportTablesStep" class="d-none">
+                    <h6 id="exportTablesStepTitle">步驟 2/2：選擇資料表格</h6>
+                    <div id="exportTablesOptions" class="border rounded p-2" style="max-height:300px;overflow-y:auto;"></div>
+                    <p id="exportNoTablesMessage" class="text-muted mt-2 mb-0 d-none">沒有符合條件的資料表格。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary me-auto d-none" id="exportStepBack">上一步</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary d-none" id="exportStepNext">下一步</button>
+                <button type="button" class="btn btn-primary d-none" id="exportStepConfirm">確認匯出</button>
+            </div>
+        </div>
+    </div>
+</div>

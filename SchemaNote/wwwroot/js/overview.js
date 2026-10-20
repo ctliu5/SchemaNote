@@ -20,6 +20,12 @@
     var OverviewFlags = { byAccordion: {}, all: [] };
     var SelectedFlags = [];
     var FlagUpperByAccordion = {};
+    var NoneFlagLabel = '';
+    var ExportModal;
+    var CurrentExportUrl = '';
+    var CurrentExportMode = '';
+    var ExportBaseItems = [];
+    var ExportTableCandidates = [];
 
     function SetIndex() {
         CurrentIndex = this.value; Iterator();
@@ -47,6 +53,7 @@
             'byAccordion': JSON.parse(el.getAttribute('data-flags')),
             'all': JSON.parse(el.getAttribute('data-allflags'))
         };
+        NoneFlagLabel = el.getAttribute('data-none-flag') || '';
     }
 
     function initialOption() {
@@ -209,7 +216,7 @@
     }
 
     // 動態建立 form 並以 POST 送出，帶上目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID。
-    function postForm(url) {
+    function postForm(url, selectedObjectIds) {
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = url;
@@ -219,7 +226,8 @@
         appendAntiforgeryToken(form);
 
         // 收集目前搜尋/過濾後仍顯示的 Table/View 之 OBJECT_ID，僅處理這些項目。
-        var objectIds = getVisibleObjectIds();
+        var objectIds = selectedObjectIds === undefined ? getVisibleObjectIds() : selectedObjectIds;
+        if (selectedObjectIds !== undefined && objectIds.length === 0) return;
         for (var i = 0; i < objectIds.length; i++) {
             var input = document.createElement('input');
             input.type = 'hidden';
@@ -249,10 +257,222 @@
         return ids;
     }
 
+    function getVisibleObjectItems() {
+        var items = [];
+        var accordions = document.querySelectorAll('.accordion[data-object-id]');
+        for (var i = 0; i < accordions.length; i++) {
+            var element = accordions[i];
+            if (element.style.display === 'none') continue;
+            var nameElement = element.querySelector('.objName');
+            var name = nameElement ? nameElement.textContent.trim() : '';
+            var schema = element.getAttribute('data-object-schema') || '';
+            var flags = OverviewFlags.byAccordion[element.id] || [];
+            items.push({
+                id: element.getAttribute('data-object-id'),
+                name: schema ? schema + '.' + name : name,
+                type: element.getAttribute('data-object-type') || '',
+                flags: flags
+            });
+        }
+        return items;
+    }
+
+    function initialExportModal() {
+        var modalElement = document.getElementById('exportFilterModal');
+        if (!modalElement || !window.bootstrap || !bootstrap.Modal) return;
+        ExportModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+        document.getElementById('exportDownloadAll').addEventListener('click', function () {
+            ExportModal.hide();
+            postDownload(CurrentExportUrl);
+        });
+        document.getElementById('exportExcludeSelected').addEventListener('click', function () {
+            beginExportFiltering('exclude');
+        });
+        document.getElementById('exportIncludeSelected').addEventListener('click', function () {
+            beginExportFiltering('include');
+        });
+        document.getElementById('exportStepBack').addEventListener('click', function () {
+            if (!document.getElementById('exportTablesStep').classList.contains('d-none')) {
+                showExportStep('flags');
+            } else {
+                showExportStep('mode');
+            }
+        });
+        document.getElementById('exportStepNext').addEventListener('click', moveToExportTablesStep);
+        document.getElementById('exportStepConfirm').addEventListener('click', confirmFilteredExport);
+    }
+
+    function beginExportFiltering(mode) {
+        CurrentExportMode = mode;
+        ExportBaseItems = getVisibleObjectItems();
+        document.getElementById('exportFlagsStepTitle').textContent = mode === 'include'
+            ? '步驟 1/2：選擇要包含的標籤'
+            : '步驟 1/2：選擇要排除的標籤';
+        renderExportFlags();
+        showExportStep('flags');
+    }
+
+    function showExportStep(step) {
+        document.getElementById('exportModeStep').classList.toggle('d-none', step !== 'mode');
+        document.getElementById('exportFlagsStep').classList.toggle('d-none', step !== 'flags');
+        document.getElementById('exportTablesStep').classList.toggle('d-none', step !== 'tables');
+        document.getElementById('exportStepBack').classList.toggle('d-none', step === 'mode');
+        document.getElementById('exportStepNext').classList.toggle('d-none', step !== 'flags');
+        document.getElementById('exportStepConfirm').classList.toggle('d-none', step !== 'tables');
+
+        var title = document.getElementById('exportFilterModalLabel');
+        if (step === 'mode') {
+            title.textContent = '匯出選項';
+        } else if (step === 'flags') {
+            title.textContent = '選擇標籤';
+        } else {
+            title.textContent = '選擇資料表格';
+        }
+    }
+
+    function renderExportFlags() {
+        var container = document.getElementById('exportFlagsOptions');
+        container.innerHTML = '';
+        var flags = [];
+        var seenFlags = [];
+        var noneUpper = NoneFlagLabel.toUpperCase();
+
+        ExportBaseItems.forEach(function (item) {
+            item.flags.forEach(function (flag) {
+                var upper = flag.toUpperCase();
+                if (upper !== noneUpper && seenFlags.indexOf(upper) === -1) {
+                    seenFlags.push(upper);
+                    flags.push(flag);
+                }
+            });
+        });
+        flags.sort(function (a, b) { return a.localeCompare(b); });
+        flags.unshift(NoneFlagLabel);
+
+        flags.forEach(function (flag, index) {
+            appendExportCheckbox(container, 'export-flag-' + index, flag, flag, flag.toUpperCase() === noneUpper);
+        });
+    }
+
+    function appendExportCheckbox(container, id, value, labelText, isNoneFlag) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'form-check';
+        var checkbox = document.createElement('input');
+        checkbox.className = 'form-check-input';
+        checkbox.type = 'checkbox';
+        checkbox.id = id;
+        checkbox.value = value;
+        if (isNoneFlag) checkbox.dataset.noneFlag = 'true';
+        var label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.setAttribute('for', id);
+        label.textContent = labelText;
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+        container.appendChild(wrapper);
+    }
+
+    function getSelectedExportFlags() {
+        var checks = document.querySelectorAll('#exportFlagsOptions input[type="checkbox"]:checked');
+        var selected = [];
+        for (var i = 0; i < checks.length; i++) {
+            selected.push({
+                value: checks[i].value.toUpperCase(),
+                isNone: checks[i].dataset.noneFlag === 'true'
+            });
+        }
+        return selected;
+    }
+
+    function matchesExportFlags(item, selectedFlags) {
+        for (var i = 0; i < selectedFlags.length; i++) {
+            if (selectedFlags[i].isNone) {
+                if (item.flags.length === 0 || item.flags.some(function (flag) {
+                    return flag.toUpperCase() === NoneFlagLabel.toUpperCase();
+                })) return true;
+            } else if (item.flags.some(function (flag) {
+                return flag.toUpperCase() === selectedFlags[i].value;
+            })) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function moveToExportTablesStep() {
+        var selectedFlags = getSelectedExportFlags();
+        if (selectedFlags.length === 0) {
+            window.alert('請至少選擇一個標籤。');
+            return;
+        }
+
+        ExportTableCandidates = ExportBaseItems.filter(function (item) {
+            var matches = matchesExportFlags(item, selectedFlags);
+            return !matches;
+        });
+        renderExportTables();
+        document.getElementById('exportTablesStepTitle').textContent = CurrentExportMode === 'include'
+            ? '步驟 2/2：選擇要額外包含的資料表格'
+            : '步驟 2/2：選擇要排除的資料表格';
+        showExportStep('tables');
+    }
+
+    function renderExportTables() {
+        var container = document.getElementById('exportTablesOptions');
+        var emptyMessage = document.getElementById('exportNoTablesMessage');
+        container.innerHTML = '';
+        emptyMessage.textContent = CurrentExportMode === 'include'
+            ? '沒有未選標籤下的資料表格；仍會匯出已選標籤下的資料表格。'
+            : '排除所選標籤後，沒有剩餘的資料表格。';
+        emptyMessage.classList.toggle('d-none', ExportTableCandidates.length !== 0);
+
+        ExportTableCandidates.forEach(function (item, index) {
+            var label = item.name;
+            if (item.type) label += '（' + item.type + '）';
+            appendExportCheckbox(container, 'export-table-' + index, item.id, label, false);
+        });
+    }
+
+    function confirmFilteredExport() {
+        var checks = document.querySelectorAll('#exportTablesOptions input[type="checkbox"]:checked');
+        var selectedIds = [];
+        for (var i = 0; i < checks.length; i++) {
+            selectedIds.push(checks[i].value);
+        }
+
+        var candidateIds = ExportTableCandidates.map(function (item) { return item.id; });
+        var objectIds;
+        if (CurrentExportMode === 'include') {
+            var selectedFlags = getSelectedExportFlags();
+            var selectedFlagIds = ExportBaseItems
+                .filter(function (item) { return matchesExportFlags(item, selectedFlags); })
+                .map(function (item) { return item.id; });
+            objectIds = selectedFlagIds.concat(selectedIds);
+        } else {
+            objectIds = candidateIds.filter(function (id) { return selectedIds.indexOf(id) === -1; });
+        }
+        if (objectIds.length === 0) {
+            window.alert('目前條件沒有可匯出的資料表格。');
+            return;
+        }
+
+        ExportModal.hide();
+        postForm(CurrentExportUrl, objectIds);
+    }
+
+    function openExportOptions(url) {
+        if (!ExportModal) return;
+        CurrentExportUrl = url;
+        CurrentExportMode = '';
+        showExportStep('mode');
+        ExportModal.show();
+    }
+
     // View 中以 onclick 呼叫，需掛在全域。
-    window.ExportExtendedPropScript = function () { postDownload('/Home/ExportExtendedPropScript'); };
-    window.ExportMarkdown = function () { postDownload('/Home/ExportMarkdown'); };
-    window.ExportExcel = function () { postDownload('/Home/ExportExcel'); };
+    window.ExportExtendedPropScript = function () { openExportOptions('/Home/ExportExtendedPropScript'); };
+    window.ExportMarkdown = function () { openExportOptions('/Home/ExportMarkdown'); };
+    window.ExportExcel = function () { openExportOptions('/Home/ExportExcel'); };
 
     // 刪除目前畫面上（搜尋/標籤過濾後仍顯示）的物件之所有擴充屬性。破壞性操作，先確認。
     window.DropAllExtendedProps = function () {
@@ -274,5 +494,6 @@
         loadServerData();
         initialOption();
         initialFlagsFilter();
+        initialExportModal();
     });
 })();
