@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SchemaNote.Constants;
 using SchemaNote.DataAccess;
-using SchemaNote.Models;
 using SchemaNote.Services;
 using SchemaNote.ViewModels;
 using System.Diagnostics;
@@ -16,6 +15,38 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
     private readonly IExportService _exportService = exportService;
     private readonly IConnectionInfoService _connectionInfoService = connectionInfoService;
     private readonly DB_tool _db_tool = DB_tool.ADO_dot_NET;
+
+    // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
+    private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
+    {
+        try
+        {
+            if (_userContext.Init(ConnectionString) is string connectionString) ConnectionString = connectionString;
+            DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
+            return RedirectToAction("Overview");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
+            return RedirectToAction("Index");
+        }
+    }
+
+    // 從連線字串解析出 Server Address 與 Database Name（供前端比對 localStorage），
+    // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
+    private void SetCurrentConnectionViewData(string connectionString)
+    {
+        var (server, database) = _connectionInfoService.Parse(connectionString);
+        ViewData["CurrentServer"] = server;
+        ViewData["CurrentDatabase"] = database;
+        ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
+    }
+
+    private static string FormatErrorMessage(Exception ex)
+    {
+        return ex.Message.Replace(Environment.NewLine, "<br />");
+    }
 
     [HttpGet]
     public IActionResult Index()
@@ -53,20 +84,6 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         }
     }
 
-    // 共用的連線處理：儲存 Session、嘗試連線，成功則導向 GET Overview（PRG 模式）。
-    private RedirectToActionResult ConnectAndRedirect(string ConnectionString)
-    {
-        if (_userContext.Init(ConnectionString) is string connectionString) ConnectionString = connectionString;
-        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-        if (Flag.ResultType != ExceResultType.Success)
-        {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
-            return RedirectToAction("Index");
-        }
-        // Post/Redirect/Get：連線成功後導向 GET Overview，避免重新整理時重複送出表單。
-        return RedirectToAction("Overview");
-    }
-
     // 讓使用者只需填 server / database / uid / pwd 四個欄位，後端組回 SQL Server 連線字串。
     [HttpPost]
     public ActionResult OverviewByFields(string Server, string Database, string Uid, string Pwd)
@@ -102,24 +119,17 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         }
         #endregion
 
-        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            OverviewViewModel model = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            SetCurrentConnectionViewData(ConnectionString);
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
             return View();
         }
-        SetCurrentConnectionViewData(ConnectionString);
-        return View(Flag.OBJ);
-    }
-
-    // 從連線字串解析出 Server Address 與 Database Name（供前端比對 localStorage），
-    // 並提供 AES 加密後的連線字串（前端只儲存密文，明文不外洩）。
-    private void SetCurrentConnectionViewData(string connectionString)
-    {
-        var (server, database) = _connectionInfoService.Parse(connectionString);
-        ViewData["CurrentServer"] = server;
-        ViewData["CurrentDatabase"] = database;
-        ViewData["CurrentConnectionString"] = _cryptoService.Encrypt(connectionString);
     }
 
     #region 匯出相關
@@ -136,15 +146,18 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         #endregion
         var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
-        DTO_Flag<System.Text.StringBuilder> Flag = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            System.Text.StringBuilder script = DB_Access.ExportPropertiesScript(ConnectionString, _db_tool, objectIds: objectIds);
+            byte[] content = _exportService.Utf8WithBom(script.ToString());
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.sql";
+            return File(content, "text/plain; charset=utf-8", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
             return RedirectToAction("Overview");
         }
-        byte[] content = _exportService.Utf8WithBom(Flag.OBJ.ToString());
-        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.sql";
-        return File(content, "text/plain; charset=utf-8", fileName);
     }
 
     [HttpPost]
@@ -159,14 +172,17 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         }
         #endregion
 
-        DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            int deletedCount = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds);
+            TempData["ErrorMessage"] = $"已刪除 {deletedCount} 筆擴充屬性";
             return RedirectToAction("Overview");
         }
-        TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆擴充屬性";
-        return RedirectToAction("Overview");
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
+            return RedirectToAction("Overview");
+        }
     }
 
     [HttpPost]
@@ -181,14 +197,17 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         }
         #endregion
 
-        DTO_Flag<int> Flag = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds, propName: Flags);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            int deletedCount = DB_Access.DropAllProperties(ConnectionString, _db_tool, objectIds: objectIds, propName: Flags);
+            TempData["ErrorMessage"] = $"已刪除 {deletedCount} 筆標籤";
             return RedirectToAction("Overview");
         }
-        TempData["ErrorMessage"] = $"已刪除 {Flag.OBJ} 筆標籤";
-        return RedirectToAction("Overview");
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
+            return RedirectToAction("Overview");
+        }
     }
 
     [HttpPost]
@@ -204,19 +223,21 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         #endregion
         var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
-        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            OverviewViewModel model = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            _exportService.FilterTablesByObjectIds(model, objectIds);
+
+            string markdown = _exportService.BuildMarkdown(model);
+            byte[] content = _exportService.Utf8WithBom(markdown);
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.md";
+            return File(content, "text/markdown; charset=utf-8", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
             return RedirectToAction("Overview");
         }
-
-        _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
-
-        string markdown = _exportService.BuildMarkdown(Flag.OBJ);
-        byte[] content = _exportService.Utf8WithBom(markdown);
-        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.md";
-        return File(content, "text/markdown; charset=utf-8", fileName);
     }
 
     [HttpPost]
@@ -232,19 +253,21 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
         #endregion
         var (server, database) = _connectionInfoService.Parse(ConnectionString);
 
-        DTO_Flag<OverviewViewModel> Flag = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            OverviewViewModel model = DB_Access.GetTables_Columns(ConnectionString, _db_tool);
+            _exportService.FilterTablesByObjectIds(model, objectIds);
+
+            byte[] content = _exportService.BuildExcel(model);
+            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(content, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
             return RedirectToAction("Overview");
         }
-
-        _exportService.FilterTablesByObjectIds(Flag.OBJ, objectIds);
-
-        byte[] content = _exportService.BuildExcel(Flag.OBJ);
-        const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        string fileName = $"{server}[{database}]{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-        return File(content, contentType, fileName);
     }
     #endregion
 
@@ -273,14 +296,17 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
             return RedirectToAction("Index");
         }
 
-        DTO_Flag<DetailsViewModel> Flag = DB_Access.GetTable_Columns(ConnectionString, (int)id, _db_tool);
-        if (Flag.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag.ErrorMessagesHtmlString();
+            DetailsViewModel model = DB_Access.GetTable_Columns(ConnectionString, (int)id, _db_tool);
+            SetCurrentConnectionViewData(ConnectionString);
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
             return RedirectToAction("Overview");
         }
-        SetCurrentConnectionViewData(ConnectionString);
-        return View(Flag.OBJ);
     }
 
     [HttpPost]
@@ -305,10 +331,13 @@ public class HomeController(IUserContext userContext, ICryptoService cryptoServi
             return RedirectToAction("Details", new { id });
         }
 
-        DTO_Flag<int> Flag_prop = DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
-        if (Flag_prop.ResultType != ExceResultType.Success)
+        try
         {
-            TempData["ErrorMessage"] = Flag_prop.ErrorMessagesHtmlString();
+            DB_Access.SaveProperties(ConnectionString, id, model, _db_tool);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = FormatErrorMessage(ex);
         }
         // Post/Redirect/Get：儲存後導向 GET Details，避免重新整理時重複送出表單。
         return RedirectToAction("Details", new { id });

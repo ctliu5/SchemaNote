@@ -1,9 +1,7 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using SchemaNote.Constants;
-using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using SchemaNote.Models.Extensions;
-using System.Reflection;
 using System.Transactions;
 
 namespace SchemaNote.DataAccess.DB_Tools;
@@ -59,9 +57,8 @@ public class ADO_dot_NET(string _ConnectionString)
         indexes = ExecSqlDataReader<DTO_Index>(comm);
     }
 
-    internal DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
+    internal List<DTO_Column> GetColumnsByOBJECT_ID(int _OBJECT_ID)
     {
-        var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
         SqlParameter para = new()
         {
             ParameterName = "OBJECT_ID",
@@ -69,42 +66,23 @@ public class ADO_dot_NET(string _ConnectionString)
             Value = _OBJECT_ID
         };
 
-        SqlConnection conn = new(ConnectionString);
-        try
-        {
-            conn.Open();
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
 
-            using (SqlCommand comm = new(SQLScripts.GetColumnsByObject_id, conn))
+        using (SqlCommand comm = new(SQLScripts.GetColumnsByObject_id, conn))
+        {
+            comm.Parameters.Add(para);
+            List<DTO_Column> result = ExecSqlDataReader<DTO_Column>(comm);
+            if (result.Count < 1)
             {
-                comm.Parameters.Add(para);
-                ObjFlag.OBJ = ExecSqlDataReader<DTO_Column>(comm);
+                throw new InvalidOperationException("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
             }
-            if (ObjFlag.OBJ.Count < 1)
-            {
-                ObjFlag.ErrorMessages.Append("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
-            }
+            return result;
         }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
     }
 
-    internal DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
+    internal List<DTO_Table> GetTablesByOBJECT_ID(int _OBJECT_ID)
     {
-        var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
         SqlParameter para = new()
         {
             ParameterName = "OBJECT_ID",
@@ -112,42 +90,23 @@ public class ADO_dot_NET(string _ConnectionString)
             Value = _OBJECT_ID
         };
 
-        SqlConnection conn = new(ConnectionString);
-        try
-        {
-            conn.Open();
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
 
-            using (SqlCommand comm = new(SQLScripts.GetTablesByObject_id, conn))
+        using (SqlCommand comm = new(SQLScripts.GetTablesByObject_id, conn))
+        {
+            comm.Parameters.Add(para);
+            List<DTO_Table> result = ExecSqlDataReader<DTO_Table>(comm);
+            if (result.Count < 1)
             {
-                comm.Parameters.Add(para);
-                ObjFlag.OBJ = ExecSqlDataReader<DTO_Table>(comm);
+                throw new InvalidOperationException("找不到資料表，（OBJECT_ID為：" + _OBJECT_ID + "）");
             }
-            if (ObjFlag.OBJ.Count < 1)
-            {
-                ObjFlag.ErrorMessages.Append("找不到資料表，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
-            }
+            return result;
         }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
     }
 
-    internal DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
+    internal int SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
     {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
         SqlParameter para_OBJECT_ID = new()
         {
             ParameterName = "OBJECT_ID",
@@ -155,196 +114,171 @@ public class ADO_dot_NET(string _ConnectionString)
             Value = _OBJECT_ID
         };
 
-        string
-            SCHEMA_NAME = "",
-            OBJECT_NAME = "",
-            TYPE = "",
-            NewLine = Environment.NewLine;
+        string SCHEMA_NAME = "", OBJECT_NAME = "", TYPE = "", NewLine = Environment.NewLine;
 
-        SqlConnection conn = new(ConnectionString);
-        SqlCommand comm = new();
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
 
-        try
+        using SqlCommand comm = new()
         {
-            comm.Connection = conn;
-            comm.Parameters.Add(para_OBJECT_ID);
-            conn.Open();
+            Connection = conn
+        };
 
-            #region GetSchema By OBJECT_ID
-            comm.CommandText = SQLScripts.GetSchema_ByObject_id;
-            using (SqlDataReader dr = comm.ExecuteReader())
-            {
-                while (dr.Read())
-                {
-                    OBJECT_NAME = dr["OBJECT_NAME"]?.ToString() ?? string.Empty;
-                    SCHEMA_NAME = dr["SCHEMA_NAME"]?.ToString() ?? string.Empty;
-                    TYPE = dr["TYPE"]?.ToString()?.Trim() ?? string.Empty;
-                }
-            }
+        comm.Parameters.Add(para_OBJECT_ID);
 
-            if (string.IsNullOrEmpty(OBJECT_NAME))
+        #region GetSchema By OBJECT_ID
+        comm.CommandText = SQLScripts.GetSchema_ByObject_id;
+        using (SqlDataReader dr = comm.ExecuteReader())
+        {
+            while (dr.Read())
             {
-                ObjFlag.ErrorMessages.Append("找不到OBJECT_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
+                OBJECT_NAME = dr["OBJECT_NAME"]?.ToString() ?? string.Empty;
+                SCHEMA_NAME = dr["SCHEMA_NAME"]?.ToString() ?? string.Empty;
+                TYPE = dr["TYPE"]?.ToString()?.Trim() ?? string.Empty;
             }
-            if (string.IsNullOrEmpty(SCHEMA_NAME))
+        }
+
+        if (string.IsNullOrEmpty(OBJECT_NAME))
+        {
+            throw new InvalidOperationException("找不到OBJECT_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
+        }
+        if (string.IsNullOrEmpty(SCHEMA_NAME))
+        {
+            throw new InvalidOperationException("找不到SCHEMA_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
+        }
+        switch (TYPE)
+        {
+            case "U":
+                TYPE = "TABLE";
+                break;
+            case "V":
+                TYPE = "VIEW";
+                break;
+            default:
+                throw new InvalidOperationException("找不到TYPE，（OBJECT_ID為：" + _OBJECT_ID + "）");
+        }
+        #endregion
+
+        #region Add/Update/Drop Prop
+        SqlParameter[] paras =
+        [
+            new()
             {
-                ObjFlag.ErrorMessages.Append("找不到SCHEMA_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
-            }
-            switch (TYPE)
+                ParameterName = "SCHEMA_NAME",
+                SqlDbType = System.Data.SqlDbType.NVarChar,
+                Value = SCHEMA_NAME
+            },
+            new()
             {
-                case "U":
-                    TYPE = "TABLE";
+                ParameterName = "OBJECT_NAME",
+                SqlDbType = System.Data.SqlDbType.NVarChar,
+                Value = OBJECT_NAME
+            },
+            new()
+            {
+                ParameterName = "TYPE",
+                SqlDbType = System.Data.SqlDbType.Char,
+                Value = TYPE
+            },
+            para_OBJECT_ID
+        ];
+
+        using TransactionScope transaction = new();
+        int affectedRows = 0;
+        foreach (DTO_prop prop in props)
+        {
+            comm.Parameters.Clear();
+            comm.Parameters.AddRange(paras);
+            switch (prop.Verb)
+            {
+                case PropVerb.add:
+                    comm.Parameters.AddRange(
+                    [
+                        new()
+                        {
+                            ParameterName = "COLUMN_ID",
+                            SqlDbType = System.Data.SqlDbType.Int,
+                            Value = prop.COLUMN_ID
+                        },
+                        new()
+                        {
+                            ParameterName = "PROP_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.NAME
+                        },
+                        new()
+                        {
+                            ParameterName = "PROP_VALUE",
+                            SqlDbType = System.Data.SqlDbType.Variant,
+                            Value = prop.VALUE
+                        },
+                    ]);
+                    comm.CommandText = SQLScripts.Addextendedproperty;
+                    affectedRows += comm.ExecuteNonQuery();
+                    if (affectedRows == 0)
+                    {
+                        throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
+                            "內容為：\"" + prop.VALUE + "\"");
+                    }
                     break;
-                case "V":
-                    TYPE = "VIEW";
+                case PropVerb.update:
+                    comm.Parameters.AddRange(
+                    [
+                        new()
+                        {
+                            ParameterName = "COLUMN_ID",
+                            SqlDbType = System.Data.SqlDbType.Int,
+                            Value = prop.COLUMN_ID
+                        },
+                        new()
+                        {
+                            ParameterName = "PROP_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.NAME
+                        },
+                        new()
+                        {
+                            ParameterName = "PROP_VALUE",
+                            SqlDbType = System.Data.SqlDbType.Variant,
+                            Value = prop.VALUE
+                        },
+                    ]);
+                    comm.CommandText = SQLScripts.Updateextendedproperty;
+                    affectedRows += comm.ExecuteNonQuery();
+                    if (affectedRows == 0)
+                    {
+                        throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
+                            "內容為：\"" + prop.VALUE + "\"");
+                    }
                     break;
-                default:
-                    ObjFlag.ErrorMessages.Append("找不到TYPE，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                    ObjFlag.ResultType |= ExceResultType.Failed;
-                    return ObjFlag;
+                case PropVerb.drop:
+                    comm.Parameters.AddRange(
+                    [
+                        new()
+                        {
+                            ParameterName = "COLUMN_ID",
+                            SqlDbType = System.Data.SqlDbType.Int,
+                            Value = prop.COLUMN_ID
+                        },
+                        new()
+                        {
+                            ParameterName = "PROP_NAME",
+                            SqlDbType = System.Data.SqlDbType.NVarChar,
+                            Value = prop.NAME
+                        },
+                    ]);
+                    comm.CommandText = SQLScripts.Dropextendedproperty;
+                    affectedRows += comm.ExecuteNonQuery();
+                    if (affectedRows == 0)
+                    {
+                        throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗");
+                    }
+                    break;
             }
-            #endregion
-
-            #region Add/Update/Drop Prop
-            SqlParameter[] paras =
-            [
-                new()
-                {
-                    ParameterName = "SCHEMA_NAME",
-                    SqlDbType = System.Data.SqlDbType.NVarChar,
-                    Value = SCHEMA_NAME
-                },
-                new()
-                {
-                    ParameterName = "OBJECT_NAME",
-                    SqlDbType = System.Data.SqlDbType.NVarChar,
-                    Value = OBJECT_NAME
-                },
-                new()
-                {
-                    ParameterName = "TYPE",
-                    SqlDbType = System.Data.SqlDbType.Char,
-                    Value = TYPE
-                },
-                para_OBJECT_ID
-            ];
-            using TransactionScope transaction = new();
-            foreach (DTO_prop prop in props)
-            {
-                comm.Parameters.Clear();
-                comm.Parameters.AddRange(paras);
-                switch (prop.Verb)
-                {
-                    case PropVerb.add:
-                        comm.Parameters.AddRange(
-                        [
-                            new()
-                            {
-                                ParameterName = "COLUMN_ID",
-                                SqlDbType = System.Data.SqlDbType.Int,
-                                Value = prop.COLUMN_ID
-                            },
-                            new()
-                            {
-                                ParameterName = "PROP_NAME",
-                                SqlDbType = System.Data.SqlDbType.NVarChar,
-                                Value = prop.NAME
-                            },
-                            new()
-                            {
-                                ParameterName = "PROP_VALUE",
-                                SqlDbType = System.Data.SqlDbType.Variant,
-                                Value = prop.VALUE
-                            },
-                        ]);
-                        comm.CommandText = SQLScripts.Addextendedproperty;
-                        ObjFlag.OBJ += comm.ExecuteNonQuery();
-                        if (ObjFlag.OBJ == 0)
-                        {
-                            ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
-                                "內容為：\"" + prop.VALUE + "\"");
-                            return ObjFlag;
-                        }
-                        break;
-                    case PropVerb.update:
-                        comm.Parameters.AddRange(
-                        [
-                            new()
-                            {
-                                ParameterName = "COLUMN_ID",
-                                SqlDbType = System.Data.SqlDbType.Int,
-                                Value = prop.COLUMN_ID
-                            },
-                            new()
-                            {
-                                ParameterName = "PROP_NAME",
-                                SqlDbType = System.Data.SqlDbType.NVarChar,
-                                Value = prop.NAME
-                            },
-                            new()
-                            {
-                                ParameterName = "PROP_VALUE",
-                                SqlDbType = System.Data.SqlDbType.Variant,
-                                Value = prop.VALUE
-                            },
-                        ]);
-                        comm.CommandText = SQLScripts.Updateextendedproperty;
-                        ObjFlag.OBJ += comm.ExecuteNonQuery();
-                        if (ObjFlag.OBJ == 0)
-                        {
-                            ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
-                                "內容為：\"" + prop.VALUE + "\"");
-                            return ObjFlag;
-                        }
-                        break;
-                    case PropVerb.drop:
-                        comm.Parameters.AddRange(
-                        [
-                            new()
-                            {
-                                ParameterName = "COLUMN_ID",
-                                SqlDbType = System.Data.SqlDbType.Int,
-                                Value = prop.COLUMN_ID
-                            },
-                            new()
-                            {
-                                ParameterName = "PROP_NAME",
-                                SqlDbType = System.Data.SqlDbType.NVarChar,
-                                Value = prop.NAME
-                            },
-                        ]);
-                        comm.CommandText = SQLScripts.Dropextendedproperty;
-                        ObjFlag.OBJ += comm.ExecuteNonQuery();
-                        if (ObjFlag.OBJ == 0)
-                        {
-                            ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗");
-                            return ObjFlag;
-                        }
-                        break;
-                }
-            }
-            transaction.Complete();
-            #endregion
         }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            comm.Dispose();
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
+        transaction.Complete();
+        #endregion
+        return affectedRows;
     }
 
     internal void GetObjectExtendedProp(ref List<DTO_Object_prop> object_props)
@@ -374,92 +308,75 @@ public class ADO_dot_NET(string _ConnectionString)
         object_props = ExecSqlDataReader<DTO_Object_prop>(comm);
     }
 
-    internal DTO_Flag<int> DropAllProperties(List<DTO_Object_prop> object_props)
+    internal int DropAllProperties(List<DTO_Object_prop> object_props)
     {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
 
-        SqlConnection conn = new(ConnectionString);
-        SqlCommand comm = new()
+        using SqlCommand comm = new()
         {
             Connection = conn,
             CommandText = SQLScripts.Dropextendedproperty
         };
 
-        try
+        using TransactionScope transaction = new();
+        int affectedRows = 0;
+        foreach (DTO_Object_prop prop in object_props)
         {
-            conn.Open();
-            using TransactionScope transaction = new();
-            foreach (DTO_Object_prop prop in object_props)
+            string type = prop.TYPE?.Trim() switch
             {
-                // dropextendedproperty.sql 之 @level1type 需為 TABLE/VIEW。
-                string type = prop.TYPE?.Trim() switch
-                {
-                    "U" => "TABLE",
-                    "V" => "VIEW",
-                    _ => prop.TYPE?.Trim() ?? string.Empty
-                };
+                "U" => "TABLE",
+                "V" => "VIEW",
+                _ => prop.TYPE?.Trim() ?? string.Empty
+            };
 
-                comm.Parameters.Clear();
-                comm.Parameters.AddRange(
-                [
-                    new SqlParameter
-                    {
-                        ParameterName = "OBJECT_ID",
-                        SqlDbType = System.Data.SqlDbType.Int,
-                        Value = prop.OBJECT_ID
-                    },
-                    new SqlParameter
-                    {
-                        ParameterName = "COLUMN_ID",
-                        SqlDbType = System.Data.SqlDbType.Int,
-                        Value = prop.COLUMN_ID
-                    },
-                    new SqlParameter
-                    {
-                        ParameterName = "PROP_NAME",
-                        SqlDbType = System.Data.SqlDbType.NVarChar,
-                        Value = prop.PROP_NAME
-                    },
-                    new SqlParameter
-                    {
-                        ParameterName = "SCHEMA_NAME",
-                        SqlDbType = System.Data.SqlDbType.NVarChar,
-                        Value = prop.SCHEMA_NAME
-                    },
-                    new SqlParameter
-                    {
-                        ParameterName = "TYPE",
-                        SqlDbType = System.Data.SqlDbType.NVarChar,
-                        Value = type
-                    },
-                    new SqlParameter
-                    {
-                        ParameterName = "OBJECT_NAME",
-                        SqlDbType = System.Data.SqlDbType.NVarChar,
-                        Value = prop.NAME
-                    },
-                ]);
-                ObjFlag.OBJ += comm.ExecuteNonQuery();
-            }
-            transaction.Complete();
+            comm.Parameters.Clear();
+            comm.Parameters.AddRange(
+            [
+                new SqlParameter
+                {
+                    ParameterName = "OBJECT_ID",
+                    SqlDbType = System.Data.SqlDbType.Int,
+                    Value = prop.OBJECT_ID
+                },
+                new SqlParameter
+                {
+                    ParameterName = "COLUMN_ID",
+                    SqlDbType = System.Data.SqlDbType.Int,
+                    Value = prop.COLUMN_ID
+                },
+                new SqlParameter
+                {
+                    ParameterName = "PROP_NAME",
+                    SqlDbType = System.Data.SqlDbType.NVarChar,
+                    Value = prop.PROP_NAME
+                },
+                new SqlParameter
+                {
+                    ParameterName = "SCHEMA_NAME",
+                    SqlDbType = System.Data.SqlDbType.NVarChar,
+                    Value = prop.SCHEMA_NAME
+                },
+                new SqlParameter
+                {
+                    ParameterName = "TYPE",
+                    SqlDbType = System.Data.SqlDbType.NVarChar,
+                    Value = type
+                },
+                new SqlParameter
+                {
+                    ParameterName = "OBJECT_NAME",
+                    SqlDbType = System.Data.SqlDbType.NVarChar,
+                    Value = prop.NAME
+                },
+            ]);
+            affectedRows += comm.ExecuteNonQuery();
         }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            comm.Dispose();
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
+        transaction.Complete();
+        return affectedRows;
     }
 }
+
 public class ADO_dot_NET2(string _ConnectionString) : ADO_dot_NET(_ConnectionString)
 {
     public override List<T> ExecSqlDataReader<T>(SqlCommand comm)

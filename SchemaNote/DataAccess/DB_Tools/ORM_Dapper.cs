@@ -1,10 +1,8 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
 using SchemaNote.Constants;
-using SchemaNote.Models;
 using SchemaNote.Models.DataTransferObject;
 using System.Data;
-using System.Reflection;
 
 namespace SchemaNote.DataAccess.DB_Tools;
 
@@ -40,194 +38,134 @@ public class ORM_Dapper(string _ConnectionString)
         indexes = [.. conn.Query<DTO_Index>(SQLScripts.GetIndexes)];
     }
 
-    internal DTO_Flag<List<DTO_Column>> GetColumnsByOBJECT_ID(int _OBJECT_ID)
+    internal List<DTO_Column> GetColumnsByOBJECT_ID(int _OBJECT_ID)
     {
-        var ObjFlag = new DTO_Flag<List<DTO_Column>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-        SqlConnection conn = new(ConnectionString);
-        try
-        {
-            conn.Open();
-
-            ObjFlag.OBJ = [.. conn.Query<DTO_Column>(SQLScripts.GetColumnsByObject_id, new { OBJECT_ID = _OBJECT_ID })];
-            if (ObjFlag.OBJ.Count < 1)
-            {
-                ObjFlag.ErrorMessages.Append("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
-            }
-        }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
-    }
-
-    internal DTO_Flag<List<DTO_Table>> GetTablesByOBJECT_ID(int _OBJECT_ID)
-    {
-        var ObjFlag = new DTO_Flag<List<DTO_Table>>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-        SqlConnection conn = new(ConnectionString);
-        try
-        {
-            conn.Open();
-
-            ObjFlag.OBJ = [.. conn.Query<DTO_Table>(SQLScripts.GetTablesByObject_id, new { OBJECT_ID = _OBJECT_ID })];
-            if (ObjFlag.OBJ.Count < 1)
-            {
-                ObjFlag.ErrorMessages.Append("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
-            }
-        }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        catch (Exception ex)
-        {
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
-    }
-
-    internal DTO_Flag<int> SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
-    {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
-        string TYPE, NewLine = Environment.NewLine;
-
-        SqlConnection conn = new(ConnectionString);
+        using SqlConnection conn = new(ConnectionString);
         conn.Open();
-        using (SqlTransaction transaction = conn.BeginTransaction())
-        {
-            try
-            {
-                #region GetSchema By OBJECT_ID
-                var schemaInfo = conn.QueryFirst<dynamic>(SQLScripts.GetSchema_ByObject_id, new { OBJECT_ID = _OBJECT_ID }, transaction, 3, CommandType.Text);
-                if (schemaInfo.OBJECT_NAME is not string OBJECT_NAME || string.IsNullOrEmpty(OBJECT_NAME))
-                {
-                    ObjFlag.ErrorMessages.Append("找不到OBJECT_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                    ObjFlag.ResultType |= ExceResultType.Failed;
-                    return ObjFlag;
-                }
-                if (schemaInfo.SCHEMA_NAME is not string SCHEMA_NAME || string.IsNullOrEmpty(SCHEMA_NAME))
-                {
-                    ObjFlag.ErrorMessages.Append("找不到SCHEMA_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                    ObjFlag.ResultType |= ExceResultType.Failed;
-                    return ObjFlag;
-                }
-                switch ((schemaInfo.TYPE as string)?.Trim())
-                {
-                    case "U":
-                        TYPE = "TABLE";
-                        break;
-                    case "V":
-                        TYPE = "VIEW";
-                        break;
-                    default:
-                        ObjFlag.ErrorMessages.Append("找不到TYPE，（OBJECT_ID為：" + _OBJECT_ID + "）");
-                        ObjFlag.ResultType |= ExceResultType.Failed;
-                        return ObjFlag;
-                }
-                #endregion
 
-                #region  Add/Update/Drop Prop
-                foreach (DTO_prop prop in props)
-                {
-                    switch (prop.Verb)
-                    {
-                        case PropVerb.add:
-                            ObjFlag.OBJ += conn.Execute(SQLScripts.Addextendedproperty, new
-                            {
-                                OBJECT_ID = _OBJECT_ID,
-                                SCHEMA_NAME,
-                                OBJECT_NAME,
-                                TYPE,
-                                prop.COLUMN_ID,
-                                PROP_NAME = prop.NAME,
-                                PROP_VALUE = prop.VALUE
-                            }, transaction, 3, CommandType.Text);
-                            if (ObjFlag.OBJ == 0)
-                            {
-                                transaction.Rollback();
-                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
-                                    "內容為：\"" + prop.VALUE + "\"");
-                                return ObjFlag;
-                            }
-                            break;
-                        case PropVerb.update:
-                            ObjFlag.OBJ += conn.Execute(SQLScripts.Updateextendedproperty, new
-                            {
-                                OBJECT_ID = _OBJECT_ID,
-                                SCHEMA_NAME,
-                                OBJECT_NAME,
-                                TYPE,
-                                prop.COLUMN_ID,
-                                PROP_NAME = prop.NAME,
-                                PROP_VALUE = prop.VALUE
-                            }, transaction, 3, CommandType.Text);
-                            if (ObjFlag.OBJ == 0)
-                            {
-                                transaction.Rollback();
-                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
-                                    "內容為：\"" + prop.VALUE + "\"");
-                                return ObjFlag;
-                            }
-                            break;
-                        case PropVerb.drop:
-                            ObjFlag.OBJ += conn.Execute(SQLScripts.Dropextendedproperty, new
-                            {
-                                OBJECT_ID = _OBJECT_ID,
-                                SCHEMA_NAME,
-                                OBJECT_NAME,
-                                TYPE,
-                                prop.COLUMN_ID,
-                                PROP_NAME = prop.NAME,
-                            }, transaction, 3, CommandType.Text);
-                            if (ObjFlag.OBJ == 0)
-                            {
-                                transaction.Rollback();
-                                ObjFlag.SetError("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗" + NewLine +
-                                    "內容為：\"" + prop.VALUE + "\"");
-                                return ObjFlag;
-                            }
-                            break;
-                    }
-                }
-                #endregion
-                transaction.Commit();
-            }
-            catch (SqlException ex)
-            {
-                transaction.Rollback();
-                ObjFlag.SetError(ex);
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                ObjFlag.SetError(ex);
-            }
-            finally
-            {
-                conn.Close();
-                conn.Dispose();
-            }
+        List<DTO_Column> result = [.. conn.Query<DTO_Column>(SQLScripts.GetColumnsByObject_id, new { OBJECT_ID = _OBJECT_ID })];
+        if (result.Count < 1)
+        {
+            throw new InvalidOperationException("找不到資料欄位，（OBJECT_ID為：" + _OBJECT_ID + "）");
         }
-        return ObjFlag;
+        return result;
+    }
+
+    internal List<DTO_Table> GetTablesByOBJECT_ID(int _OBJECT_ID)
+    {
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
+
+        List<DTO_Table> result = [.. conn.Query<DTO_Table>(SQLScripts.GetTablesByObject_id, new { OBJECT_ID = _OBJECT_ID })];
+        if (result.Count < 1)
+        {
+            throw new InvalidOperationException("找不到資料表，（OBJECT_ID為：" + _OBJECT_ID + "）");
+        }
+        return result;
+    }
+
+    internal int SaveProperties(int _OBJECT_ID, List<DTO_prop> props)
+    {
+        string TYPE, NewLine = Environment.NewLine;
+        int affectedRows = 0;
+
+        using SqlConnection conn = new(ConnectionString);
+        conn.Open();
+        using SqlTransaction transaction = conn.BeginTransaction();
+        try
+        {
+            #region GetSchema By OBJECT_ID
+            var schemaInfo = conn.QueryFirst<dynamic>(SQLScripts.GetSchema_ByObject_id, new { OBJECT_ID = _OBJECT_ID }, transaction, 3, CommandType.Text);
+            if (schemaInfo.OBJECT_NAME is not string OBJECT_NAME || string.IsNullOrEmpty(OBJECT_NAME))
+            {
+                throw new InvalidOperationException("找不到OBJECT_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
+            }
+            if (schemaInfo.SCHEMA_NAME is not string SCHEMA_NAME || string.IsNullOrEmpty(SCHEMA_NAME))
+            {
+                throw new InvalidOperationException("找不到SCHEMA_NAME，（OBJECT_ID為：" + _OBJECT_ID + "）");
+            }
+            switch ((schemaInfo.TYPE as string)?.Trim())
+            {
+                case "U":
+                    TYPE = "TABLE";
+                    break;
+                case "V":
+                    TYPE = "VIEW";
+                    break;
+                default:
+                    throw new InvalidOperationException("找不到TYPE，（OBJECT_ID為：" + _OBJECT_ID + "）");
+            }
+            #endregion
+
+            #region  Add/Update/Drop Prop
+            foreach (DTO_prop prop in props)
+            {
+                switch (prop.Verb)
+                {
+                    case PropVerb.add:
+                        affectedRows += conn.Execute(SQLScripts.Addextendedproperty, new
+                        {
+                            OBJECT_ID = _OBJECT_ID,
+                            SCHEMA_NAME,
+                            OBJECT_NAME,
+                            TYPE,
+                            prop.COLUMN_ID,
+                            PROP_NAME = prop.NAME,
+                            PROP_VALUE = prop.VALUE
+                        }, transaction, 3, CommandType.Text);
+                        if (affectedRows == 0)
+                        {
+                            transaction.Rollback();
+                            throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性新增失敗" + NewLine +
+                                "內容為：\"" + prop.VALUE + "\"");
+                        }
+                        break;
+                    case PropVerb.update:
+                        affectedRows += conn.Execute(SQLScripts.Updateextendedproperty, new
+                        {
+                            OBJECT_ID = _OBJECT_ID,
+                            SCHEMA_NAME,
+                            OBJECT_NAME,
+                            TYPE,
+                            prop.COLUMN_ID,
+                            PROP_NAME = prop.NAME,
+                            PROP_VALUE = prop.VALUE
+                        }, transaction, 3, CommandType.Text);
+                        if (affectedRows == 0)
+                        {
+                            transaction.Rollback();
+                            throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性更新失敗" + NewLine +
+                                "內容為：\"" + prop.VALUE + "\"");
+                        }
+                        break;
+                    case PropVerb.drop:
+                        affectedRows += conn.Execute(SQLScripts.Dropextendedproperty, new
+                        {
+                            OBJECT_ID = _OBJECT_ID,
+                            SCHEMA_NAME,
+                            OBJECT_NAME,
+                            TYPE,
+                            prop.COLUMN_ID,
+                            PROP_NAME = prop.NAME,
+                        }, transaction, 3, CommandType.Text);
+                        if (affectedRows == 0)
+                        {
+                            transaction.Rollback();
+                            throw new InvalidOperationException("第" + prop.COLUMN_ID + "欄，擴充屬性移除失敗" + NewLine +
+                                "內容為：\"" + prop.VALUE + "\"");
+                        }
+                        break;
+                }
+            }
+            #endregion
+            transaction.Commit();
+            return affectedRows;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     internal void GetObjectExtendedProp(ref List<DTO_Object_prop> object_props)
@@ -251,18 +189,16 @@ public class ORM_Dapper(string _ConnectionString)
         object_props = [.. conn.Query<DTO_Object_prop>(SQLScripts.GetObject_Extended_prop_emptyValue)];
     }
 
-    internal DTO_Flag<int> DropAllProperties(List<DTO_Object_prop> object_props)
+    internal int DropAllProperties(List<DTO_Object_prop> object_props)
     {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         using SqlConnection conn = new(ConnectionString);
         conn.Open();
         using SqlTransaction transaction = conn.BeginTransaction();
         try
         {
+            int affectedRows = 0;
             foreach (DTO_Object_prop prop in object_props)
             {
-                // dropextendedproperty.sql 之 @level1type 需為 TABLE/VIEW。
                 string type = prop.TYPE?.Trim() switch
                 {
                     "U" => "TABLE",
@@ -270,7 +206,7 @@ public class ORM_Dapper(string _ConnectionString)
                     _ => prop.TYPE?.Trim() ?? string.Empty
                 };
 
-                ObjFlag.OBJ += conn.Execute(SQLScripts.Dropextendedproperty, new
+                affectedRows += conn.Execute(SQLScripts.Dropextendedproperty, new
                 {
                     prop.OBJECT_ID,
                     prop.COLUMN_ID,
@@ -281,22 +217,12 @@ public class ORM_Dapper(string _ConnectionString)
                 }, transaction, 3, CommandType.Text);
             }
             transaction.Commit();
+            return affectedRows;
         }
-        catch (SqlException ex)
+        catch
         {
             transaction.Rollback();
-            ObjFlag.SetError(ex);
+            throw;
         }
-        catch (Exception ex)
-        {
-            transaction.Rollback();
-            ObjFlag.SetError(ex);
-        }
-        finally
-        {
-            conn.Close();
-            conn.Dispose();
-        }
-        return ObjFlag;
     }
 }

@@ -12,10 +12,8 @@ namespace SchemaNote.DataAccess;
 
 public static class DB_Access
 {
-    internal static DTO_Flag<OverviewViewModel> GetTables_Columns(string ConnectionString, DB_tool db_Tool)
+    internal static OverviewViewModel GetTables_Columns(string ConnectionString, DB_tool db_Tool)
     {
-        var Flag = new DTO_Flag<OverviewViewModel>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         List<DTO_Column> cols = [];
         List<DTO_Table> tbls = [];
         List<DTO_Extended_prop> props = [];
@@ -91,19 +89,12 @@ public static class DB_Access
             }
 #endif
         }
-        catch (SqlException ex)
-        {
-            Flag.SetError(ex);
-            return Flag;
-        }
         catch (Exception ex)
         {
-            Flag.SetError(ex);
-            return Flag;
+            throw new InvalidOperationException(ex.Message, ex);
         }
 
-
-        Flag.OBJ = new OverviewViewModel
+        OverviewViewModel result = new()
         {
             Tables = [.. tbls.Select(t =>
             {
@@ -142,19 +133,17 @@ public static class DB_Access
             })]
         };
 #if 測試效能
-        Flag.OBJ.ADO_dot_NET = ADO_dot_NET;
-        Flag.OBJ.Dapper = Dapper;
-        Flag.OBJ.ADO_dot_NET2 = ADO_dot_NET2;
-        Flag.OBJ.ADO_dot_NET3 = ADO_dot_NET3;
-        Flag.OBJ.ADO_dot_NET4 = ADO_dot_NET4;
+        result.ADO_dot_NET = ADO_dot_NET;
+        result.Dapper = Dapper;
+        result.ADO_dot_NET2 = ADO_dot_NET2;
+        result.ADO_dot_NET3 = ADO_dot_NET3;
+        result.ADO_dot_NET4 = ADO_dot_NET4;
 #endif
-        return Flag;
+        return result;
     }
 
-    internal static DTO_Flag<DetailsViewModel> GetTable_Columns(string ConnectionString, int _OBJECT_ID, DB_tool db_Tool)
+    internal static DetailsViewModel GetTable_Columns(string ConnectionString, int _OBJECT_ID, DB_tool db_Tool)
     {
-        var Flag = new DTO_Flag<DetailsViewModel>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         List<DTO_Extended_prop> props = [];
         List<DTO_Index> indexes = [];
         DTO_Table tbl = new();
@@ -166,64 +155,40 @@ public static class DB_Access
             {
                 case DB_tool.Dapper:
                     ORM_Dapper dapper = new(ConnectionString);
-                    var Flag_a_col = dapper.GetColumnsByOBJECT_ID(_OBJECT_ID);
-                    if (Flag_a_col.ResultType != ExceResultType.Success)
+                    cols = dapper.GetColumnsByOBJECT_ID(_OBJECT_ID);
+                    var table1 = dapper.GetTablesByOBJECT_ID(_OBJECT_ID);
+                    if (table1.Count < 1)
                     {
-                        Flag_a_col.Transfer(ref Flag);
-                        return Flag;
+                        throw new InvalidOperationException("找不到資料表，（OBJECT_ID為：" + _OBJECT_ID + "）");
                     }
-
-                    var Flag_a_tbl = dapper.GetTablesByOBJECT_ID(_OBJECT_ID);
-                    if (Flag_a_tbl.ResultType != ExceResultType.Success)
-                    {
-                        Flag_a_tbl.Transfer(ref Flag);
-                        return Flag;
-                    }
-
+                    tbl = table1.First();
                     dapper.GetExtended_prop(ref props);
                     dapper.GetIndexes(ref indexes);
-                    if (Flag_a_tbl.OBJ.FirstOrDefault() is DTO_Table table1) tbl = table1;
-                    cols = Flag_a_col.OBJ;
                     break;
                 default:
                     ADO_dot_NET ADO = new(ConnectionString);
-                    var Flag_b_col = ADO.GetColumnsByOBJECT_ID(_OBJECT_ID);
-                    if (Flag_b_col.ResultType != ExceResultType.Success)
+                    cols = ADO.GetColumnsByOBJECT_ID(_OBJECT_ID);
+                    var table2 = ADO.GetTablesByOBJECT_ID(_OBJECT_ID);
+                    if (table2.Count < 1)
                     {
-                        Flag_b_col.Transfer(ref Flag);
-                        return Flag;
+                        throw new InvalidOperationException("找不到資料表，（OBJECT_ID為：" + _OBJECT_ID + "）");
                     }
-
-                    var Flag_b_tbl = ADO.GetTablesByOBJECT_ID(_OBJECT_ID);
-                    if (Flag_b_tbl.ResultType != ExceResultType.Success)
-                    {
-                        Flag_b_tbl.Transfer(ref Flag);
-                        return Flag;
-                    }
-
+                    tbl = table2.First();
                     ADO.GetExtended_prop(ref props);
                     ADO.GetIndexes(ref indexes);
-                    if (Flag_b_tbl.OBJ.FirstOrDefault() is DTO_Table table2) tbl = table2;
-                    cols = Flag_b_col.OBJ;
                     break;
             }
         }
-        catch (SqlException ex)
-        {
-            Flag.SetError(ex);
-            return Flag;
-        }
         catch (Exception ex)
         {
-            Flag.SetError(ex);
-            return Flag;
+            throw new InvalidOperationException(ex.Message, ex);
         }
 
         var pObj = props.Where(p => p.MAJOR_ID == tbl.OBJECT_ID);
         var pT = pObj.Where(p => p.MINOR_ID == 0);
         var iObj = indexes.Where(i => i.OBJECT_ID == tbl.OBJECT_ID);
         int SortNum = 0;
-        Flag.OBJ = new DetailsViewModel
+        return new DetailsViewModel
         {
             OBJECT_ID = tbl.OBJECT_ID,
             NAME = tbl.NAME,
@@ -276,14 +241,10 @@ public static class DB_Access
                 .Distinct()
                 .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)]
         };
-
-        return Flag;
     }
 
-    internal static DTO_Flag<int> SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model, DB_tool db_Tool)
+    internal static int SaveProperties(string ConnectionString, int id, ICollection<VM_Property> model, DB_tool db_Tool)
     {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         #region 取得物件的所有自訂屬性
         var props = new List<DTO_Extended_prop>();
         try
@@ -299,21 +260,12 @@ public static class DB_Access
                     ADO.GetExtended_prop(ref props);
                     return ADO.SaveProperties(id, Categorized(model, [.. props.Where(p => p.MAJOR_ID == id)]));
             }
-
-        }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
         }
         catch (Exception ex)
         {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
+            throw new InvalidOperationException(ex.Message, ex);
         }
-
         #endregion
-
     }
 
     /// <summary>
@@ -403,40 +355,38 @@ public static class DB_Access
         return Properties;
     }
 
-    internal static DTO_Flag<StringBuilder> ExportPropertiesScript(string ConnectionString, DB_tool db_Tool, bool ForDeleteEmptyData = false, int[]? objectIds = null)
+    internal static StringBuilder ExportPropertiesScript(string ConnectionString, DB_tool db_Tool, bool ForDeleteEmptyData = false, int[]? objectIds = null)
     {
-        var ObjFlag = new DTO_Flag<StringBuilder>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         List<DTO_Object_prop> object_props = [];
         string scriptTemp = string.Empty;
         StringBuilder stringBuilder = new(
-"""
------- 變數宣告 BEGIN ------
-DECLARE
-@id int,
-@col_id int,
-@name sysname,
-@value sql_variant,
-@level0name sysname,
-@level1type sysname,
-@level1name sysname,
-@level2name sysname,
-@propQty int;
+        """
+        ------ 變數宣告 BEGIN ------
+        DECLARE
+        @id int,
+        @col_id int,
+        @name sysname,
+        @value sql_variant,
+        @level0name sysname,
+        @level1type sysname,
+        @level1name sysname,
+        @level2name sysname,
+        @propQty int;
 
-DECLARE @props TABLE
-(
-[name] sysname,
-[value] sql_variant,
-[level0name] sysname,
-[level1type] sysname,
-[level1name] sysname,
-[level2name] sysname
-);
------- 變數宣告 END ------
+        DECLARE @props TABLE
+        (
+        [name] sysname,
+        [value] sql_variant,
+        [level0name] sysname,
+        [level1type] sysname,
+        [level1name] sysname,
+        [level2name] sysname
+        );
+        ------ 變數宣告 END ------
 
------- 擴充屬性資料 BEGIN ------
+        ------ 擴充屬性資料 BEGIN ------
 
-""");
+        """);
 
         #region 匯出擴充屬性資料
         try
@@ -473,9 +423,7 @@ DECLARE @props TABLE
             }
             if (object_props.Count < 1)
             {
-                ObjFlag.ErrorMessages.Append("找不到擴充屬性");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
+                throw new InvalidOperationException("找不到擴充屬性");
             }
 
             // 依前端傳入的 OBJECT_ID 清單（搜尋/標籤過濾後仍顯示的項目）僅匯出對應物件的擴充屬性。
@@ -485,9 +433,7 @@ DECLARE @props TABLE
                 object_props = [.. object_props.Where(op => idSet.Contains(op.OBJECT_ID))];
                 if (object_props.Count < 1)
                 {
-                    ObjFlag.ErrorMessages.Append("找不到擴充屬性");
-                    ObjFlag.ResultType |= ExceResultType.Failed;
-                    return ObjFlag;
+                    throw new InvalidOperationException("找不到擴充屬性");
                 }
             }
 
@@ -508,27 +454,17 @@ DECLARE @props TABLE
             stringBuilder.AppendLine("------ 擴充屬性資料 END ------");
             stringBuilder.AppendLine();
             stringBuilder.Append(scriptTemp);
-            ObjFlag.OBJ = stringBuilder;
-        }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
+            return stringBuilder;
         }
         catch (Exception ex)
         {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
+            throw new InvalidOperationException(ex.Message, ex);
         }
-        return ObjFlag;
         #endregion
-
     }
 
-    internal static DTO_Flag<int> DropAllProperties(string ConnectionString, DB_tool db_Tool, int[]? objectIds = null, string? propName = null)
+    internal static int DropAllProperties(string ConnectionString, DB_tool db_Tool, int[]? objectIds = null, string? propName = null)
     {
-        var ObjFlag = new DTO_Flag<int>(MethodBase.GetCurrentMethod()?.Name ?? string.Empty);
-
         List<DTO_Object_prop> object_props = [];
         try
         {
@@ -559,9 +495,7 @@ DECLARE @props TABLE
 
             if (object_props.Count < 1)
             {
-                ObjFlag.ErrorMessages.Append("找不到擴充屬性");
-                ObjFlag.ResultType |= ExceResultType.Failed;
-                return ObjFlag;
+                throw new InvalidOperationException("找不到擴充屬性");
             }
 
             switch (db_Tool)
@@ -574,15 +508,9 @@ DECLARE @props TABLE
                     return ADO.DropAllProperties(object_props);
             }
         }
-        catch (SqlException ex)
-        {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
-        }
         catch (Exception ex)
         {
-            ObjFlag.SetError(ex);
-            return ObjFlag;
+            throw new InvalidOperationException(ex.Message, ex);
         }
     }
 }

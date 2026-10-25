@@ -94,15 +94,6 @@ public enum IndexType
     非叢集雜湊索引,
 }
 
-[Flags]
-public enum ExceResultType
-{
-    Success = 0x0,
-    Failed = 0x1,
-    NoData = 0x2,
-    Exception = 0x4,
-}
-
 public enum PropVerb
 {
     undefined,
